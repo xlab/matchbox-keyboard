@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<options>
+<!--
+   <font prefered-size=''>
+   <size fixed='100x100'>
+   <padding>
+-->
+</options>
+
+<layout id="name">
+  <row>
+    <key obey-caps='true'>
+	  <defualt display="a" />                
+	  <shifted display="A" />
+    </key>
+    <key obey-caps='true'>
+	  <defualt display="b" />                
+	  <shifted display="B" />
+    </key>
+    <key obey-caps='true'>
+	  <defualt display="c" />                
+	  <shifted display="C" />
+    </key>
+  </row>
+  <row>
+    <key obey-caps='true'>
+	  <defualt display="d" />                
+	  <shifted display="D" />
+    </key>
+    <key obey-caps='true'>
+	  <defualt display="f" />                
+	  <shifted display="F" />
+    </key>
+    <key obey-caps='true'>
+	  <defualt display="g" />                
+	  <shifted display="G" />
+    </key>
+  </row>
+
+</layout>
+
+
+</keyboard>
