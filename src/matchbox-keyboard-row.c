@@ -19,11 +19,22 @@ mb_kbd_row_new(MBKeyboard *kbd)
 void
 mb_kbd_row_append_key(MBKeyboardRow *row, MBKeyboardKey *key)
 {
+  List* l;
+
   row->keys = util_list_append(row->keys, (pointer)key);
+
+  l = row->keys;
+
+  while (l)
+    {
+      DBG("got list item %p", l);
+
+      l = util_list_next(l);
+    }
 }
 
 List*
 mb_kdb_row_keys(MBKeyboardRow *row)
 {
-  return row->keys;
+  return util_list_get_first(row->keys);
 }

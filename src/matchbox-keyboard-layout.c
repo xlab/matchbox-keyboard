@@ -4,7 +4,6 @@ struct MBKeyboardLayout
 {
   MBKeyboard       *kbd;  
   char             *id;
-
   List             *rows;
 };
 
@@ -27,12 +26,11 @@ mb_kbd_layout_append_row(MBKeyboardLayout *layout,
 			 MBKeyboardRow    *row)
 {
   layout->rows = util_list_append(layout->rows, (pointer)row);
-
 }
 
 List*
 mb_kbd_layout_rows(MBKeyboardLayout *layout)
 {
-  return layout->rows;
+  return util_list_get_first(layout->rows);
 }
 

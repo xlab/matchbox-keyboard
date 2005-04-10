@@ -28,6 +28,8 @@ typedef void*  pointer ;
 
 typedef struct List List;
 
+typedef void (*ListForEachCB) (void *data, void *userdata);
+
 struct List 
 {
   List *next, *prev;
@@ -42,6 +44,7 @@ typedef struct MBKeyboardUI     MBKeyboardUI;
 
 typedef enum 
 {
+  MBKeyboardKeyActionNone  = 0,
   MBKeyboardKeyActionGlyph,
   MBKeyboardKeyActionXKeySym, 	/* 'specials' be converted into this */
   MBKeyboardKeyActionModifier,
@@ -50,7 +53,8 @@ typedef enum
 
 typedef enum 
 {
-  MBKeyboardKeyFaceGlyph,
+  MBKeyboardKeyFaceNone  = 0,
+  MBKeyboardKeyFaceGlyph = 1,
   MBKeyboardKeyFaceImage,
 
 } MBKeyboardKeyFaceType;
@@ -70,8 +74,10 @@ MBKeyboardKeyStateType;
 struct MBKeyboard
 {
   MBKeyboardUI          *ui;
+  unsigned char         *font_desc;
+
   List                  *layouts;
-  
+  MBKeyboardLayout      *selected_layout;
 };
 
 /**** UI ***********/
@@ -85,8 +91,7 @@ void
 mb_kbd_add_layout(MBKeyboard *kb, MBKeyboardLayout *layout);
 
 MBKeyboardLayout*
-mb_kbd_get_current_layout(MBKeyboard *kb);
-
+mb_kbd_get_selected_layout(MBKeyboard *kb);
 
 /**** Layout ****/
 
@@ -125,6 +130,10 @@ mb_kbd_key_set_glyph_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state,
 			  const unsigned char     *glyph);
 
+const unsigned char*
+mb_kbd_key_get_glyph_face(MBKeyboardKey           *key,
+			  MBKeyboardKeyStateType   state);
+
 void
 mb_kbd_key_set_image_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state,
@@ -138,6 +147,23 @@ void
 mb_kbd_key_set_char_action(MBKeyboardKey           *key,
 			   MBKeyboardKeyStateType   state,
 			   const unsigned char     *glyphs);
+
+void
+mb_kbd_key_set_keysym_action(MBKeyboardKey           *key,
+			     MBKeyboardKeyStateType   state,
+			     KeySym                   keysym);
+
+void
+mb_kbd_key_set_modifer_action(MBKeyboardKey           *key,
+			      MBKeyboardKeyStateType   state,
+			      int                      modifier);
+
+void
+mb_kbd_key_dump_key(MBKeyboardKey *key);
+
+#define mb_kdb_key_foreach_state(k,s)                     \
+       for((s)=0; (s) < N_MBKeyboardKeyStateTypes; (s)++) \
+            if (mb_kdb_key_has_state((k), (s)))
 
 /*** Config *****/
 
@@ -156,9 +182,12 @@ util_malloc0(int size);
 void
 util_fatal_error(char *msg);
 
+int
+util_utf8_char_cnt(unsigned char *str);
+
 /* Util list */
 
-typedef void (*ListForEachCB) (void *data, void *userdata) ;
+
 
 #define util_list_next(l) (l)->next
 #define util_list_previous(l) (l)->prev
@@ -171,6 +200,9 @@ util_list_get_last(List *list);
 
 List*
 util_list_get_first(List *list);
+
+void*
+util_list_get_nth_data(List *list, int n);
 
 List*
 util_list_append(List *list, void *data);

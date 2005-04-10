@@ -10,6 +10,9 @@ mb_kbd_new(int argc, char **argv)
   if (!mb_kbd_config_load(kb, "config.xml"))
     return NULL;
 
+  kb->selected_layout 
+    = (MBKeyboardLayout *)util_list_get_nth_data(kb->layouts, 0);
+
   if (!mb_kbd_ui_init(kb))
     return NULL;
 
@@ -23,9 +26,9 @@ mb_kbd_add_layout(MBKeyboard *kb, MBKeyboardLayout *layout)
 }
 
 MBKeyboardLayout*
-mb_kbd_get_current_layout(MBKeyboard *kb)
+mb_kbd_get_selected_layout(MBKeyboard *kb)
 {
-  return NULL;
+  return kb->selected_layout;
 }
 
 

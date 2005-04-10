@@ -183,7 +183,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 
   /* TODO: Fix below with a lookup table 
    */
-  if (streq(tag, "normal"))
+  if (streq(tag, "normal") || streq(tag, "default"))
     {
       keystate = MBKeyboardKeyStateNormal;
     }
@@ -215,26 +215,73 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
       return;
     }
 
-  if (strlen(val) > 1 
-      && ((found_keysym  = mb_kbd_config_str_to_keysym(val)) != NULL))
-    {
-
-
-    }
-
   mb_kbd_key_set_glyph_face(state->current_key, keystate, 
 			    attr_get_val("display", attr));
 
-  if (attr_get_val("action", attr) != NULL)
+  if ((val = attr_get_val("action", attr)) != NULL)
     {
+      /*
+	     action="utf8char"     // optional, action defulats to this    
+	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps"
+	     action="xkeysym:XK_BLAH"
+	     action="control:">    // return etc - not needed use lookup 
+      */
+
+      if (!strncmp(val, "modifier:", 9))
+	{
+	  /* XXX TODO XXX */
+	  DBG("modifiers not handled yet\n");
+	  
+	}
+      else if (!strncmp(val, "xkeysym:", 9))
+	{
+	  DBG("Checking %s\n", &val[8]);
+
+	  found_keysym = XStringToKeysym(&val[8]);
+
+	  if (found_keysym)
+	    {
+	      mb_kbd_key_set_keysym_action(state->current_key, 
+					   keystate,
+					   found_keysym);
+	    }
+	  else 
+	    {
+	      /* Should this error really be terminal */
+	      state->error = True;
+	      return;
+	    }
+	}
+      else
+	{
+	  /* Its just 'regular' key  */
+
+	  if (strlen(val) > 1  	/* match backspace, return etc */
+	      && ((found_keysym  = mb_kbd_config_str_to_keysym(val)) != NULL))
+	    {
+	      mb_kbd_key_set_keysym_action(state->current_key, 
+					   keystate,
+					   found_keysym);
+	    }
+	  else
+	    {
+	      /* XXX We should actually check its a single UTF8 Char here */
+	      mb_kbd_key_set_char_action(state->current_key, 
+					 keystate, val);
+	    }
+	}
+    }
+  else /* fallback to reusing whats displayed  */
+    {
+
+      /* display could be an image in which case we should throw an error 
+       * or summin.
+      */
+
       mb_kbd_key_set_char_action(state->current_key, 
 				 keystate, 
-				 attr_get_val("action", attr));
+				 attr_get_val("display", attr));
     }
-  else 
-    mb_kbd_key_set_char_action(state->current_key, 
-			       keystate, 
-			       attr_get_val("display", attr));
 
 }
 
@@ -264,7 +311,10 @@ config_handle_row_tag(MBKeyboardConfigState *state, const char **attr)
 static void
 config_handle_key_tag(MBKeyboardConfigState *state, const char **attr)
 {
+  DBG("got key");
+
   state->current_key = mb_kbd_key_new(state->keyboard);
+
   mb_kbd_row_append_key(state->current_row, state->current_key);
 }
 
@@ -286,7 +336,8 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
       config_handle_key_tag(state, attr);
     }
   else if (streq(tag, "normal") 
-	   || streq(tag, "shift")
+	   || streq(tag, "default")
+	   || streq(tag, "shifted")
 	   || streq(tag, "mod1")
 	   || streq(tag, "mod2")
 	   || streq(tag, "mod3"))

@@ -9,22 +9,49 @@ util_list_alloc_item(void)
 List*
 util_list_get_last(List *list)
 {
-  while (list->next) list = util_list_next(list);
+  if (list == NULL) 
+    return NULL;
+
+  while (list->next) 
+    list = util_list_next(list);
   return list;
 }
 
 List*
 util_list_get_first(List *list)
 {
-  while (list->prev) list = util_list_previous(list);
+  if (list == NULL) 
+    return NULL;
+
+  while (list->prev) 
+    list = util_list_previous(list);
   return list;
 }
+
+void*
+util_list_get_nth_data(List *list, int n)
+{
+  if (list == NULL) 
+    return NULL;
+
+  list = util_list_get_first(list);
+
+  while (list->next && n)
+    {
+      list = util_list_next(list);
+      n--;
+    }
+
+  if (n) return NULL;
+
+  return (void *)list->data;
+}
+
+
 
 List*
 util_list_append(List *list, void *data)
 {
-  List *new;
-
   if (list == NULL)
     {
       list = util_list_alloc_item();
