@@ -81,8 +81,8 @@ mb_kbd_locate_key(MBKeyboard *kb, int x, int y)
 	    {
 	      MBKeyboardKey *key = key_item->data;
 
-	      if (x >= mb_kbd_key_x(key)
-		  && x <= mb_kbd_key_x(key) + mb_kbd_key_width(key))
+	      if (x >= mb_kbd_key_abs_x(key)
+		  && x <= mb_kbd_key_abs_x(key) + mb_kbd_key_width(key))
 		return key;
 
 	      key_item = util_list_next(key_item);

@@ -260,6 +260,12 @@ mb_kbd_key_press(MBKeyboardKey *key)
 }
 
 void
+mb_kbd_key_release(MBKeyboard *kbd)
+{
+  mb_kbd_ui_send_release(kbd->ui);
+}
+
+void
 mb_kbd_key_dump_key(MBKeyboardKey *key)
 {
   int i;

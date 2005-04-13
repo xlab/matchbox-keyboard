@@ -1,5 +1,16 @@
 2005-04-13  mallum,,,  <mallum@openedhand.com>
 
+	reviewed by: <delete if not using a buddy>
+
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_press):
+	* src/matchbox-keyboard-ui.c: (text_extents),
+	(mb_kbd_ui_send_press), (mb_kbd_ui_events_iteration):
+	* src/matchbox-keyboard.c: (mb_kbd_locate_key):
+	* src/matchbox-keyboard.h:
+	Fix locate_key(). Handle press/release cycle better 
+
+2005-04-13  mallum,,,  <mallum@openedhand.com>
+
 	* src/config.xml:
 	* src/matchbox-keyboard-key.c: (mb_kbd_key_new),
 	(mb_kbd_key_height), (mb_kbd_key_set_row), (mb_kdb_key_has_state),

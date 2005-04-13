@@ -93,6 +93,8 @@ mb_kbd_ui_send_press(MBKeyboardUI  *ui,
 		     unsigned char *utf8_char_in,
 		     int            modifiers);
 
+void
+mb_kbd_ui_send_release(MBKeyboardUI  *ui);
 
 /**** Keyboard ****/
 
@@ -233,6 +235,9 @@ mb_kbd_key_set_modifer_action(MBKeyboardKey           *key,
 
 void
 mb_kbd_key_press(MBKeyboardKey *key);
+
+void
+mb_kbd_key_release(MBKeyboard *kbd);
 
 void
 mb_kbd_key_dump_key(MBKeyboardKey *key);

@@ -55,7 +55,6 @@ text_extents(MBKeyboardUI        *ui,
   *width  = extents.width;
   /* *height = extents.height; */
   *height = ui->font->ascent + ui->font->descent;
-
 }
 
 
@@ -66,6 +65,12 @@ mb_kbd_ui_send_press(MBKeyboardUI  *ui,
 {
   DBG("Sending '%s'", utf8_char_in);
   fakekey_press(ui->fakekey, utf8_char_in, -1, 0);
+  fakekey_release(ui->fakekey);
+}
+
+void
+mb_kbd_ui_send_release(MBKeyboardUI  *ui)
+{
   fakekey_release(ui->fakekey);
 }
 
@@ -441,7 +446,7 @@ mb_kbd_ui_events_iteration(MBKeyboardUI *ui)
 	      }
 	    break;
 	  case ButtonRelease:
-	    
+	    mb_kbd_key_release(ui->kbd);	    
 	    break;
 
 	  case ConfigureNotify:
