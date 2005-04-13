@@ -6,6 +6,19 @@ util_list_alloc_item(void)
   return util_malloc0(sizeof(List));
 }
 
+int
+util_list_length(List *list)
+{
+  int result = 0;
+
+  list = util_list_get_first(list);
+
+  while ((list = util_list_next(list)) != NULL)
+    result++;
+
+  return result;
+}
+
 List*
 util_list_get_last(List *list)
 {

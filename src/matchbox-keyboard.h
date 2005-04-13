@@ -78,6 +78,9 @@ struct MBKeyboard
 
   List                  *layouts;
   MBKeyboardLayout      *selected_layout;
+
+  int                    key_border, key_pad, key_margin;
+  int                    row_spacing, col_spacing;
 };
 
 /**** UI ***********/
@@ -85,13 +88,37 @@ struct MBKeyboard
 int
 mb_kbd_ui_init(MBKeyboard *kbd);
 
+void
+mb_kbd_ui_send_press(MBKeyboardUI  *ui,
+		     unsigned char *utf8_char_in,
+		     int            modifiers);
+
+
 /**** Keyboard ****/
+
+int
+mb_kbd_row_spacing(MBKeyboard *kb);
+
+int
+mb_kbd_col_spacing(MBKeyboard *kb);
+
+int
+mb_kbd_keys_border(MBKeyboard *kb);
+
+int
+mb_kbd_keys_pad(MBKeyboard *kb);
+
+int
+mb_kbd_keys_margin(MBKeyboard *kb);
 
 void
 mb_kbd_add_layout(MBKeyboard *kb, MBKeyboardLayout *layout);
 
 MBKeyboardLayout*
 mb_kbd_get_selected_layout(MBKeyboard *kb);
+
+MBKeyboardKey*
+mb_kbd_locate_key(MBKeyboard *kb, int x, int y);
 
 /**** Layout ****/
 
@@ -111,6 +138,24 @@ MBKeyboardRow*
 mb_kbd_row_new(MBKeyboard *kbd);
 
 void
+mb_kbd_row_set_x(MBKeyboardRow *row, int x);
+
+void
+mb_kbd_row_set_y(MBKeyboardRow *row, int y);
+
+int 
+mb_kbd_row_x (MBKeyboardRow *row) ;
+
+int 
+mb_kbd_row_y(MBKeyboardRow *row) ;
+
+int 
+mb_kbd_row_height(MBKeyboardRow *row);
+
+int 
+mb_kbd_row_width(MBKeyboardRow *row);
+
+void
 mb_kbd_row_append_key(MBKeyboardRow *row, MBKeyboardKey *key);
 
 List*
@@ -120,6 +165,34 @@ mb_kdb_row_keys(MBKeyboardRow *row);
 
 MBKeyboardKey*
 mb_kbd_key_new(MBKeyboard *kbd);
+
+void 
+mb_kbd_key_set_row(MBKeyboardKey *key, MBKeyboardRow *row);
+
+
+void
+mb_kbd_key_set_geometry(MBKeyboardKey  *key,
+			int x,
+			int y,
+			int width,
+			int height);
+int 
+mb_kbd_key_abs_x(MBKeyboardKey *key) ;
+
+int 
+mb_kbd_key_abs_y(MBKeyboardKey *key) ;
+
+int 
+mb_kbd_key_x(MBKeyboardKey *key) ;
+
+int 
+mb_kbd_key_y(MBKeyboardKey *key);
+
+int 
+mb_kbd_key_width(MBKeyboardKey *key) ;
+
+int 
+mb_kbd_key_height(MBKeyboardKey *key);
 
 Bool
 mb_kdb_key_has_state(MBKeyboardKey           *key,
@@ -159,6 +232,9 @@ mb_kbd_key_set_modifer_action(MBKeyboardKey           *key,
 			      int                      modifier);
 
 void
+mb_kbd_key_press(MBKeyboardKey *key);
+
+void
 mb_kbd_key_dump_key(MBKeyboardKey *key);
 
 #define mb_kdb_key_foreach_state(k,s)                     \
@@ -183,7 +259,7 @@ void
 util_fatal_error(char *msg);
 
 int
-util_utf8_char_cnt(unsigned char *str);
+util_utf8_char_cnt(const unsigned char *str);
 
 /* Util list */
 

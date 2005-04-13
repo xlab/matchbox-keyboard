@@ -1,3 +1,29 @@
+2005-04-13  mallum,,,  <mallum@openedhand.com>
+
+	* src/config.xml:
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_new),
+	(mb_kbd_key_height), (mb_kbd_key_set_row), (mb_kdb_key_has_state),
+	(mb_kbd_key_set_glyph_face), (mb_kbd_key_get_glyph_face),
+	(mb_kbd_key_set_image_face), (mb_kbd_key_set_char_action),
+	(mb_kbd_key_get_char_action), (mb_kbd_key_set_keysym_action),
+	(mb_kbd_key_set_modifer_action), (mb_kbd_key_get_face_type),
+	(mb_kbd_key_get_action_type):
+	* src/matchbox-keyboard-row.c: (mb_kbd_row_new):
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_send_press),
+	(mb_kdb_ui_unit_key_size), (mb_kbd_ui_allocate_ui_layout),
+	(mb_kbd_ui_redraw_key), (mb_kbd_ui_redraw_row),
+	(mb_kbd_ui_swap_buffers), (mb_kbd_ui_redraw), (mb_kbd_ui_show),
+	(mb_kbd_ui_resources_create), (mb_kbd_ui_events_iteration),
+	(mb_kbd_ui_init):
+	* src/matchbox-keyboard.c: (mb_kbd_new), (mb_kbd_col_spacing),
+	(mb_kbd_keys_border), (mb_kbd_keys_pad), (mb_kbd_keys_margin),
+	(mb_kbd_locate_key), (mb_kbd_add_layout),
+	(mb_kbd_get_selected_layout):
+	* src/matchbox-keyboard.h:
+	* src/util-list.c: (util_list_alloc_item):
+	* src/util.c: (util_fatal_error):
+	Initial UI drawing code
+
 2005-04-10  mallum,,,  <mallum@openedhand.com>
 
 	* configure.ac:

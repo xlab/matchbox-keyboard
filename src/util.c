@@ -18,6 +18,8 @@ util_fatal_error(char *msg)
   exit(1);
 }
 
+
+
 #define UTF8_COMPUTE(Char, Mask, Len)                                         \
   if (Char < 128)                                                             \
     {                                                                         \
@@ -54,7 +56,7 @@ util_fatal_error(char *msg)
 
 
 int
-util_utf8_char_cnt(unsigned char *str)
+util_utf8_char_cnt(const unsigned char *str)
 {
   unsigned char *p = str;
   int            mask, len, result = 0;

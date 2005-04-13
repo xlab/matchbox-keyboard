@@ -38,9 +38,10 @@ typedef struct MBKeyboardKeyState
 struct MBKeyboardKey
 {
   MBKeyboard            *kbd;
-  int                    alloc_x, alloc_y, alloc_width, alloc_height;
   MBKeyboardKeyState    *states[N_MBKeyboardKeyStateTypes];
   MBKeyboardRow         *row;
+
+  int                    alloc_x, alloc_y, alloc_width, alloc_height;
 };
 
 static void
@@ -64,6 +65,70 @@ mb_kbd_key_new(MBKeyboard *kbd)
 
   return key;
 }
+
+void
+mb_kbd_key_set_geometry(MBKeyboardKey  *key,
+			int x,
+			int y,
+			int width,
+			int height)
+{
+  if (x != -1)
+    key->alloc_x = x;
+
+  if (y != -1)
+    key->alloc_y = y;
+
+  if (width != -1)
+    key->alloc_width = width;
+
+  if (height != -1)
+    key->alloc_height = height;
+}
+
+int 
+mb_kbd_key_abs_x(MBKeyboardKey *key) 
+{ 
+  return mb_kbd_row_x(key->row) + key->alloc_x;
+}
+
+int 
+mb_kbd_key_abs_y(MBKeyboardKey *key) 
+{ 
+  return mb_kbd_row_y(key->row) + key->alloc_y;
+}
+
+int 
+mb_kbd_key_x(MBKeyboardKey *key) 
+{ 
+  return key->alloc_x;
+}
+
+int 
+mb_kbd_key_y(MBKeyboardKey *key) 
+{ 
+  return key->alloc_y;
+}
+
+int 
+mb_kbd_key_width(MBKeyboardKey *key) 
+{ 
+  return key->alloc_width;
+}
+
+int 
+mb_kbd_key_height(MBKeyboardKey *key) 
+{ 
+  return key->alloc_height;
+}
+
+/* URG Nasty - some stuf should be public-ish */
+void 
+mb_kbd_key_set_row(MBKeyboardKey *key, MBKeyboardRow *row) 
+{ 
+  key->row = row;
+}
+
 
 Bool
 mb_kdb_key_has_state(MBKeyboardKey           *key,
@@ -122,6 +187,17 @@ mb_kbd_key_set_char_action(MBKeyboardKey           *key,
   key->states[state]->action.u.glyph = strdup(glyphs);
 }
 
+const unsigned char*
+mb_kbd_key_get_char_action(MBKeyboardKey           *key,
+			   MBKeyboardKeyStateType   state)
+{
+  if (key->states[state] 
+      && key->states[state]->action.type == MBKeyboardKeyActionGlyph)
+    return key->states[state]->action.u.glyph;
+
+  return NULL;
+}
+
 void
 mb_kbd_key_set_keysym_action(MBKeyboardKey           *key,
 			     MBKeyboardKeyStateType   state,
@@ -167,6 +243,21 @@ mb_kbd_key_get_action_type(MBKeyboardKey           *key,
 }
 
 
+void
+mb_kbd_key_press(MBKeyboardKey *key)
+{
+  /* XXX what about state handling XXX */
+  MBKeyboardKeyStateType state = MBKeyboardKeyStateNormal;
+
+  if (mb_kbd_key_get_action_type(key, state) == MBKeyboardKeyActionGlyph)
+    {
+      const unsigned char *key_char;
+
+      if ((key_char = mb_kbd_key_get_char_action(key, state)) != NULL)
+	mb_kbd_ui_send_press(key->kbd->ui, key_char, 0);
+	 /* urk, fakekey needs to exist elsewere */
+    }
+}
 
 void
 mb_kbd_key_dump_key(MBKeyboardKey *key)
