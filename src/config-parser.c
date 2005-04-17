@@ -22,7 +22,11 @@
 
     <layout id="name">
       <row>
-        <key id="optional-id" obey-caps='true|false' geometry padding
+        <key id="optional-id" obey-caps='true|false'
+	     width="1000"   // 1/1000's of a unit key size
+	     fill="true"    // Set width to available space
+	     
+             >
 	  <defualt
 	     display="a"                
 	     display="image:" 
@@ -38,7 +42,7 @@
 	/>
         <key ... />
 	<key ... />
-	<spacer size="100px/%"
+	<space width="1000"
       </row>
     </layout>
 
@@ -311,9 +315,28 @@ config_handle_row_tag(MBKeyboardConfigState *state, const char **attr)
 static void
 config_handle_key_tag(MBKeyboardConfigState *state, const char **attr)
 {
+  const char *val;
   DBG("got key");
 
   state->current_key = mb_kbd_key_new(state->keyboard);
+
+  if ((val = attr_get_val("obey-caps", attr)) != NULL)
+    {
+      if (strcaseeq(val, "true"))
+	mb_kbd_key_set_obey_caps(state->current_key, True);
+    }
+
+  if ((val = attr_get_val("width", attr)) != NULL)
+    {
+      if (atoi(val) > 0)
+	mb_kbd_key_set_req_uwidth(state->current_key, atoi(val));
+    }
+
+  if ((val = attr_get_val("fill", attr)) != NULL)
+    {
+      if (strcaseeq(val, "true"))
+	mb_kbd_key_set_fill(state->current_key, True);
+    }
 
   mb_kbd_row_append_key(state->current_row, state->current_key);
 }
@@ -334,6 +357,11 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
   else if (streq(tag, "key"))
     {
       config_handle_key_tag(state, attr);
+    }
+  else  if (streq(tag, "space"))
+    {
+      config_handle_key_tag(state, attr);
+      mb_kbd_key_set_blank(state->current_key, True);
     }
   else if (streq(tag, "normal") 
 	   || streq(tag, "default")

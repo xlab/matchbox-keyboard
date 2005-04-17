@@ -24,7 +24,9 @@
 
 #define MARK() DBG("mark")
 
-typedef void*  pointer ;
+typedef void*         pointer;
+typedef unsigned char uchar ;
+typedef Bool          boolean ;
 
 typedef struct List List;
 
@@ -168,9 +170,32 @@ mb_kdb_row_keys(MBKeyboardRow *row);
 MBKeyboardKey*
 mb_kbd_key_new(MBKeyboard *kbd);
 
+void
+mb_kbd_key_set_obey_caps(MBKeyboardKey  *key, boolean obey);
+
+boolean
+mb_kbd_key_get_obey_caps(MBKeyboardKey  *key);
+
+void
+mb_kbd_key_set_req_uwidth(MBKeyboardKey  *key, int uwidth);
+
+int
+mb_kbd_key_get_req_uwidth(MBKeyboardKey  *key);
+
+void
+mb_kbd_key_set_fill(MBKeyboardKey  *key, boolean fill);
+
+boolean
+mb_kbd_key_get_fill(MBKeyboardKey  *key);
+
+void
+mb_kbd_key_set_blank(MBKeyboardKey  *key, boolean blank);
+
+boolean
+mb_kbd_key_is_blank(MBKeyboardKey  *key);
+
 void 
 mb_kbd_key_set_row(MBKeyboardKey *key, MBKeyboardRow *row);
-
 
 void
 mb_kbd_key_set_geometry(MBKeyboardKey  *key,
@@ -228,6 +253,11 @@ mb_kbd_key_set_keysym_action(MBKeyboardKey           *key,
 			     MBKeyboardKeyStateType   state,
 			     KeySym                   keysym);
 
+KeySym
+mb_kbd_key_get_keysym_action(MBKeyboardKey           *key,
+			     MBKeyboardKeyStateType   state,
+			     KeySym                   keysym);
+
 void
 mb_kbd_key_set_modifer_action(MBKeyboardKey           *key,
 			      MBKeyboardKeyStateType   state,
@@ -255,6 +285,7 @@ mb_kbd_config_load(MBKeyboard *kbd, char *conf_file);
 /**** Util *****/
 
 #define streq(a,b)      (strcmp(a,b) == 0)
+#define strcaseeq(a,b)  (strcasecmp(a,b) == 0)
 #define unless(x)       if (!(x))
 
 void*

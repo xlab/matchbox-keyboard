@@ -22,7 +22,6 @@ struct MBKeyboardUI
   int           xscreen;
   Window        xwin_root, xwin;
 
-
   XftFont      *font;
   XftColor      font_col; 
 
@@ -32,6 +31,8 @@ struct MBKeyboardUI
   XftDraw      *xft_backbuffer;  
   Pixmap        backbuffer;
   GC            xgc;
+
+  int           key_uwidth, key_uheight;
 
   FakeKey      *fakekey;
 
@@ -65,7 +66,17 @@ mb_kbd_ui_send_press(MBKeyboardUI  *ui,
 {
   DBG("Sending '%s'", utf8_char_in);
   fakekey_press(ui->fakekey, utf8_char_in, -1, 0);
+}
+
+void
+mb_kbd_ui_send_keysym_press(MBKeyboardUI  *ui,
+			    KeySym         ks,
+			    int            modifiers)
+{
+  /*
+  fakekey_press(ui->fakekey, utf8_char_in, -1, 0);
   fakekey_release(ui->fakekey);
+  */
 }
 
 void
@@ -131,6 +142,13 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
   const unsigned char *face_str = NULL;
   int                  max_w = 0, max_h = 0, state;
 
+  if (mb_kbd_key_get_req_uwidth(key) || mb_kbd_key_is_blank(key))
+    {
+      *width = (ui->key_uwidth * mb_kbd_key_get_req_uwidth(key)) / 1000 ;
+      *height = ui->key_uheight;
+      return;
+    }
+
   mb_kdb_key_foreach_state(key, state)
     {
       if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
@@ -159,7 +177,6 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 {
   MBKeyboardLayout *layout;
   List             *row_item, *key_item;
-  int               ukey_width, ukey_height;
   int               key_y = 0, key_x = 0; 
   int               row_y, max_row_key_height, max_row_width;
 
@@ -168,7 +185,7 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
   /* Do an initial run to figure out a 'base' size for 
    * single glyph keys 
   */
-  mb_kdb_ui_unit_key_size(ui, &ukey_width, &ukey_height);
+  mb_kdb_ui_unit_key_size(ui, &ui->key_uwidth, &ui->key_uheight);
 
   row_item = mb_kbd_layout_rows(layout);
 
@@ -193,8 +210,12 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
 	  mb_kbd_ui_min_key_size(ui, key, &key_w, &key_h);
 
-	  if (key_w < ukey_width)  key_w = ukey_width;
-	  if (key_h < ukey_height) key_h = ukey_height;
+	  if (!mb_kbd_key_get_req_uwidth(key)
+	      && key_w < ui->key_uwidth)
+	    key_w = ui->key_uwidth;
+
+	  if (key_h < ui->key_uheight) 
+	    key_h = ui->key_uheight;
 
 	  key_y = 0;
 
@@ -228,6 +249,46 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
   *height = row_y; 
 
+  row_item = mb_kbd_layout_rows(layout);
+
+  /* handle any fillers */
+
+  while (row_item != NULL)
+    {
+      MBKeyboardRow *row        = row_item->data;
+      int            n_fillers  = 0, free_space = 0, new_w = 0;
+
+      key_item = mb_kdb_row_keys(row);
+
+      while (key_item != NULL)
+	{
+	  if (mb_kbd_key_get_fill(key_item->data))
+	    n_fillers++;
+
+	  key_item = util_list_next(key_item);
+	}
+
+      if (!n_fillers)
+	break;
+
+      key_item = mb_kdb_row_keys(row);
+
+      free_space = max_row_width - mb_kbd_row_width(row);
+
+      while (key_item != NULL)
+	{
+	  if (mb_kbd_key_get_fill(key_item->data))
+	    {
+	      new_w = mb_kbd_key_width(key_item->data) + (free_space/n_fillers);
+	      mb_kbd_key_set_geometry(key_item->data, -1, -1, new_w, -1);
+	    }
+	  key_item = util_list_next(key_item);
+	}
+
+      row_item = util_list_next(row_item);
+    }
+
+
   /* Now center the rows */
   
   row_item = mb_kbd_layout_rows(layout);
@@ -242,7 +303,6 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
     }
   
   *width = max_row_width;
-
 }
 
 
@@ -251,6 +311,9 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 {
   XRectangle             rect;
   MBKeyboardKeyStateType state;
+
+  if (mb_kbd_key_is_blank(key)) /* spacer */
+    return;
 
   rect.x      = mb_kbd_key_abs_x(key); 
   rect.y      = mb_kbd_key_abs_y(key); 

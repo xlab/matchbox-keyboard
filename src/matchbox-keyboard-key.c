@@ -42,6 +42,12 @@ struct MBKeyboardKey
   MBKeyboardRow         *row;
 
   int                    alloc_x, alloc_y, alloc_width, alloc_height;
+
+  boolean                obeys_caps;
+  boolean                fill;	     /* width fills avialble space */
+  int                    req_uwidth; /* unit width in 1/1000's */
+
+  boolean                is_blank;   /* 'blank' keys are spacers */
 };
 
 static void
@@ -64,6 +70,54 @@ mb_kbd_key_new(MBKeyboard *kbd)
     key->states[i] = NULL;
 
   return key;
+}
+
+void
+mb_kbd_key_set_obey_caps(MBKeyboardKey  *key, boolean obey)
+{
+  key->obeys_caps = obey;
+}
+
+boolean
+mb_kbd_key_get_obey_caps(MBKeyboardKey  *key)
+{
+  return key->obeys_caps;
+}
+
+void
+mb_kbd_key_set_req_uwidth(MBKeyboardKey  *key, int uwidth)
+{
+  key->req_uwidth = uwidth;
+}
+
+int
+mb_kbd_key_get_req_uwidth(MBKeyboardKey  *key)
+{
+  return key->req_uwidth;
+}
+
+void
+mb_kbd_key_set_fill(MBKeyboardKey  *key, boolean fill)
+{
+  key->fill = fill;
+}
+
+boolean
+mb_kbd_key_get_fill(MBKeyboardKey  *key)
+{
+  return key->fill;
+}
+
+void
+mb_kbd_key_set_blank(MBKeyboardKey  *key, boolean blank)
+{
+  key->is_blank = blank;
+}
+
+boolean
+mb_kbd_key_is_blank(MBKeyboardKey  *key)
+{
+  return key->is_blank;
 }
 
 void
@@ -130,7 +184,7 @@ mb_kbd_key_set_row(MBKeyboardKey *key, MBKeyboardRow *row)
 }
 
 
-Bool
+boolean
 mb_kdb_key_has_state(MBKeyboardKey           *key,
 		     MBKeyboardKeyStateType   state)
 {
@@ -142,7 +196,6 @@ mb_kbd_key_set_glyph_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state,
 			  const unsigned char     *glyph)
 {
-
   if (key->states[state] == NULL)
     _mb_kbd_key_init_state(key, state);
 
@@ -210,6 +263,19 @@ mb_kbd_key_set_keysym_action(MBKeyboardKey           *key,
   key->states[state]->action.u.keysym = keysym;
 }
 
+KeySym
+mb_kbd_key_get_keysym_action(MBKeyboardKey           *key,
+			     MBKeyboardKeyStateType   state,
+			     KeySym                   keysym)
+{
+  if (key->states[state] 
+      && key->states[state]->action.type == MBKeyboardKeyActionXKeySym)
+    return key->states[state]->action.u.keysym;
+
+  return None;
+}
+
+
 void
 mb_kbd_key_set_modifer_action(MBKeyboardKey           *key,
 			      MBKeyboardKeyStateType   state,
@@ -249,14 +315,32 @@ mb_kbd_key_press(MBKeyboardKey *key)
   /* XXX what about state handling XXX */
   MBKeyboardKeyStateType state = MBKeyboardKeyStateNormal;
 
-  if (mb_kbd_key_get_action_type(key, state) == MBKeyboardKeyActionGlyph)
-    {
-      const unsigned char *key_char;
+  if (mb_kbd_key_is_blank(key))
+    return;
 
-      if ((key_char = mb_kbd_key_get_char_action(key, state)) != NULL)
-	mb_kbd_ui_send_press(key->kbd->ui, key_char, 0);
-	 /* urk, fakekey needs to exist elsewere */
-    }
+  switch (mb_kbd_key_get_action_type(key, state))
+    {
+    case MBKeyboardKeyActionGlyph:
+      {
+	const unsigned char *key_char;
+
+	if ((key_char = mb_kbd_key_get_char_action(key, state)) != NULL)
+	  mb_kbd_ui_send_press(key->kbd->ui, key_char, 0);
+	break;
+      }
+    case MBKeyboardKeyActionXKeySym:
+      {
+	/*
+	KeySym ks;
+	if ((ks = mb_kbd_key_get_keysym_action(key, state)) != None)
+	  mb_kbd_ui_send_keysym_press(key->kbd->ui, key_char, 0);
+
+	*/
+	break;
+      }
+    default:
+      break;
+    }      
 }
 
 void

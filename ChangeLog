@@ -1,3 +1,25 @@
+2005-04-17  mallum,,,  <mallum@openedhand.com>
+
+	* src/config-parser.c: (config_handle_row_tag),
+	(config_handle_key_tag), (config_xml_start_cb):
+	* src/config.xml:
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_new),
+	(mb_kbd_key_set_geometry), (mb_kbd_key_abs_x), (mb_kbd_key_abs_y),
+	(mb_kbd_key_x), (mb_kbd_key_y), (mb_kbd_key_width),
+	(mb_kbd_key_height), (mb_kbd_key_set_row), (mb_kdb_key_has_state),
+	(mb_kbd_key_set_glyph_face), (mb_kbd_key_get_glyph_face),
+	(mb_kbd_key_set_image_face), (mb_kbd_key_set_char_action),
+	(mb_kbd_key_get_char_action), (mb_kbd_key_set_keysym_action),
+	(mb_kbd_key_get_keysym_action), (mb_kbd_key_set_modifer_action),
+	(mb_kbd_key_get_face_type), (mb_kbd_key_get_action_type),
+	(mb_kbd_key_press):
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_send_press),
+	(mb_kdb_ui_unit_key_size), (mb_kbd_ui_min_key_size),
+	(mb_kbd_ui_allocate_ui_layout), (mb_kbd_ui_redraw_key):
+	* src/matchbox-keyboard.c: (mb_kbd_locate_key):
+	* src/matchbox-keyboard.h:
+	Layout engine improvements
+
 2005-04-13  mallum,,,  <mallum@openedhand.com>
 
 	reviewed by: <delete if not using a buddy>

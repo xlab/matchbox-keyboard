@@ -18,10 +18,11 @@
     <key>
 	  <default display="Ӫ" />                
     </key>
-    <key>
+    <key width="1500">
 	  <default display="Ω" />                
     </key>
-    <key>
+    <space width="1500" />
+    <key fill="true">
 	  <default display="⠿" />                
     </key>
   </row>
