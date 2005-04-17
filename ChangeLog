@@ -1,3 +1,14 @@
+2005-04-18  mallum,,,  <mallum@openedhand.com>
+
+	* src/config-parser.c: (config_handle_key_subtag):
+	* src/config.xml:
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_set_keysym_action),
+	(mb_kbd_key_get_keysym_action), (mb_kbd_key_press):
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_redraw_key):
+	* src/matchbox-keyboard.c: (mb_kbd_keys_margin):
+	* src/matchbox-keyboard.h:
+	Initial code for handling 'modifiers'
+
 2005-04-17  mallum,,,  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (text_extents),

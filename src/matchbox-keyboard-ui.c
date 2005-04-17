@@ -419,11 +419,14 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
     + mb_kbd_keys_margin(ui->kbd)
     + mb_kbd_keys_pad(ui->kbd);
 
+  /* Why does below need +1's ? */
   XFillRectangle(ui->xdpy, ui->backbuffer, ui->xgc, 
 		 rect.x + side_pad,
 		 rect.y + side_pad,
 		 rect.width  - (side_pad * 2) + 1,
-		 rect.height - (side_pad * 2)) + 1;
+		 rect.height - (side_pad * 2) + 1);
+
+  /* real code is here */
 
   state = MBKeyboardKeyStateNormal;
 

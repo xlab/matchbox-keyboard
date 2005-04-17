@@ -55,6 +55,20 @@ typedef enum
 
 typedef enum 
 {
+  MBKeyboardKeyModUnknown,
+  MBKeyboardKeyModShift,
+  MBKeyboardKeyModMod1,
+  MBKeyboardKeyModMod2,
+  MBKeyboardKeyModMod3,
+  MBKeyboardKeyModCaps,
+  MBKeyboardKeyModControl,
+  MBKeyboardKeyModAlt,
+  MBKeyboardKeyModLayout
+
+} MBKeyboardKeyModType;
+
+typedef enum 
+{
   MBKeyboardKeyFaceNone  = 0,
   MBKeyboardKeyFaceGlyph = 1,
   MBKeyboardKeyFaceImage,
@@ -72,6 +86,20 @@ typedef enum
 } 
 MBKeyboardKeyStateType;
 
+typedef enum 
+{
+  MBKeyboardStateNormal = 0,
+  MBKeyboardStateShifted = (1<<1),
+  MBKeyboardStateMod1    = (1<<2),
+  MBKeyboardStateMod2    = (1<<3),
+  MBKeyboardStateMod3    = (1<<4),
+  MBKeyboardStateCaps    = (1<<5),
+  MBKeyboardStateControl = (1<<6),
+  MBKeyboardStateAlt     = (1<<7),
+  N_MBKeyboardStateTypes
+} 
+MBKeyboardStateType;
+
 
 struct MBKeyboard
 {
@@ -83,6 +111,9 @@ struct MBKeyboard
 
   int                    key_border, key_pad, key_margin;
   int                    row_spacing, col_spacing;
+
+  MBKeyboardKey         *held_key;
+  MBKeyboardStateType    keys_state;
 };
 
 /**** UI ***********/
@@ -116,6 +147,15 @@ int
 mb_kbd_keys_margin(MBKeyboard *kb);
 
 void
+mb_kbd_add_state(MBKeyboard *kbd, MBKeyboardStateType state);
+
+void
+mb_kbd_has_state(MBKeyboard *kbd, MBKeyboardStateType state);
+
+void
+mb_kbd_keys_remove_state(MBKeyboard *kbd, MBKeyboardStateType state);
+
+void
 mb_kbd_add_layout(MBKeyboard *kb, MBKeyboardLayout *layout);
 
 MBKeyboardLayout*
@@ -135,6 +175,7 @@ mb_kbd_layout_append_row(MBKeyboardLayout *layout,
 
 List*
 mb_kbd_layout_rows(MBKeyboardLayout *layout);
+
 
 /**** Rows ******/
 
@@ -255,13 +296,17 @@ mb_kbd_key_set_keysym_action(MBKeyboardKey           *key,
 
 KeySym
 mb_kbd_key_get_keysym_action(MBKeyboardKey           *key,
-			     MBKeyboardKeyStateType   state,
-			     KeySym                   keysym);
+			     MBKeyboardKeyStateType   state);
 
 void
-mb_kbd_key_set_modifer_action(MBKeyboardKey           *key,
-			      MBKeyboardKeyStateType   state,
-			      int                      modifier);
+mb_kbd_key_set_modifer_action(MBKeyboardKey          *key,
+			      MBKeyboardKeyStateType  state,
+			      MBKeyboardKeyModType    type);
+
+MBKeyboardKeyModType 
+mb_kbd_key_get_modifer_action(MBKeyboardKey          *key,
+			      MBKeyboardKeyStateType  state);
+
 
 void
 mb_kbd_key_press(MBKeyboardKey *key);

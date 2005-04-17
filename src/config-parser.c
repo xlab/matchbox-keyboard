@@ -31,9 +31,9 @@
 	     display="a"                
 	     display="image:" 
 	     action="utf8char"     // optional, action defulats to this    
+	     action="string"       // from lookup below
 	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps"
 	     action="xkeysym:XK_BLAH"
-	     action="control:">    // return etc 
 	  <shifted 
 	     ...... >
 	  <mod1
@@ -77,6 +77,7 @@ MBKeyboardKeysymLookup[] =
  { XK_Page_Down,   "pagedown" },
  { XK_End,         "end" },
  { XK_Begin,	   "begin" },
+ { XK_space,        "space" },
  { XK_F1,          "f1" },
  { XK_F2,          "f2" },
  { XK_F3,          "f3" },
@@ -91,6 +92,21 @@ MBKeyboardKeysymLookup[] =
  { XK_F12,         "f12" }
 };
 
+struct _modlookup
+{
+  char *name; MBKeyboardKeyModType type;
+}
+ModLookup[] =
+{
+  { "shift",   MBKeyboardKeyModShift },
+  { "alt",     MBKeyboardKeyModAlt },
+  { "ctrl",    MBKeyboardKeyModControl },
+  { "control", MBKeyboardKeyModControl },
+  { "mod1",    MBKeyboardKeyModMod1 },
+  { "mod2",    MBKeyboardKeyModMod2 },
+  { "mod3",    MBKeyboardKeyModMod3 },
+  { "caps",    MBKeyboardKeyModCaps }
+};
 
 typedef struct MBKeyboardConfigState
 {
@@ -104,16 +120,33 @@ typedef struct MBKeyboardConfigState
 MBKeyboardConfigState;
 
 KeySym
-mb_kbd_config_str_to_keysym(const char* str)
+config_str_to_keysym(const char* str)
 {
   int i;
+
+  DBG("checking %s", str);
 
   for (i=0; i<sizeof(MBKeyboardKeysymLookup)/sizeof(struct _keysymlookup); i++)
     if (streq(str, MBKeyboardKeysymLookup[i].name))
       return MBKeyboardKeysymLookup[i].keysym;
 
+  DBG("didnt find it %s", str);
+
   return 0;
 }
+
+MBKeyboardKeyModType
+config_str_to_modtype(const char* str)
+{
+  int i;
+
+  for (i=0; i<sizeof(ModLookup)/sizeof(struct _modlookup); i++)
+    if (streq(str, ModLookup[i].name))
+      return ModLookup[i].type;
+
+  return 0;
+}
+
 
 static unsigned char* 
 config_load_file(const char* filename) 
@@ -233,15 +266,28 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 
       if (!strncmp(val, "modifier:", 9))
 	{
-	  /* XXX TODO XXX */
-	  DBG("modifiers not handled yet\n");
+	  MBKeyboardKeyModType found_type;
+
+	  found_type = config_str_to_modtype(&val[8]);
+
+	  if (found_type)
+	    {
+	      mb_kbd_key_set_modifer_action(state->current_key,
+					    keystate,
+					    found_type);
+	    }
+	  else
+	    {
+	      state->error = True;
+	      return;
+	    }
 	  
 	}
-      else if (!strncmp(val, "xkeysym:", 9))
+      else if (!strncmp(val, "xkeysym:", 8))
 	{
-	  DBG("Checking %s\n", &val[8]);
+	  DBG("Checking %s\n", &val[7]);
 
-	  found_keysym = XStringToKeysym(&val[8]);
+	  found_keysym = XStringToKeysym(&val[7]);
 
 	  if (found_keysym)
 	    {
@@ -261,7 +307,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	  /* Its just 'regular' key  */
 
 	  if (strlen(val) > 1  	/* match backspace, return etc */
-	      && ((found_keysym  = mb_kbd_config_str_to_keysym(val)) != NULL))
+	      && ((found_keysym  = config_str_to_keysym(val)) != 0))
 	    {
 	      mb_kbd_key_set_keysym_action(state->current_key, 
 					   keystate,

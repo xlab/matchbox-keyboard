@@ -56,6 +56,24 @@ mb_kbd_keys_margin(MBKeyboard *kb)
   return kb->key_margin;
 }
 
+void
+mb_kbd_add_state(MBKeyboard *kbd, MBKeyboardStateType state)
+{
+  kbd->keys_state |= state;
+}
+
+void
+mb_kbd_has_state(MBKeyboard *kbd, MBKeyboardStateType state)
+{
+  return (kbd->keys_state & state);
+}
+
+void
+mb_kbd_keys_remove_state(MBKeyboard *kbd, MBKeyboardStateType state)
+{
+  kbd->keys_state &= ~(state);
+}
+
 MBKeyboardKey*
 mb_kbd_locate_key(MBKeyboard *kb, int x, int y)
 {

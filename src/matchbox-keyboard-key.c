@@ -19,8 +19,9 @@ typedef struct MBKeyboardKeyAction
   MBKeyboardKeyActionType  type;
   union 
   {
-    unsigned char *glyph;
-    KeySym         keysym;
+    unsigned char         *glyph;
+    KeySym                 keysym;
+    MBKeyboardKeyModType   type;
   } u;
 } 
 MBKeyboardKeyAction;
@@ -46,8 +47,9 @@ struct MBKeyboardKey
   boolean                obeys_caps;
   boolean                fill;	     /* width fills avialble space */
   int                    req_uwidth; /* unit width in 1/1000's */
-
   boolean                is_blank;   /* 'blank' keys are spacers */
+
+  MBKeyboardStateType    sets_kbdstate; /* needed */
 };
 
 static void
@@ -265,8 +267,7 @@ mb_kbd_key_set_keysym_action(MBKeyboardKey           *key,
 
 KeySym
 mb_kbd_key_get_keysym_action(MBKeyboardKey           *key,
-			     MBKeyboardKeyStateType   state,
-			     KeySym                   keysym)
+			     MBKeyboardKeyStateType   state)
 {
   if (key->states[state] 
       && key->states[state]->action.type == MBKeyboardKeyActionXKeySym)
@@ -277,15 +278,28 @@ mb_kbd_key_get_keysym_action(MBKeyboardKey           *key,
 
 
 void
-mb_kbd_key_set_modifer_action(MBKeyboardKey           *key,
-			      MBKeyboardKeyStateType   state,
-			      int                      modifier)
+mb_kbd_key_set_modifer_action(MBKeyboardKey          *key,
+			      MBKeyboardKeyStateType  state,
+			      MBKeyboardKeyModType    type)
 {
   if (key->states[state] == NULL)
     _mb_kbd_key_init_state(key, state);
 
   key->states[state]->action.type = MBKeyboardKeyActionModifier;
+  key->states[state]->action.u.type   = type;
 }
+
+MBKeyboardKeyModType 
+mb_kbd_key_get_modifer_action(MBKeyboardKey          *key,
+			      MBKeyboardKeyStateType  state)
+{
+  if (key->states[state] 
+      && key->states[state]->action.type == MBKeyboardKeyActionModifier)
+    return key->states[state]->action.u.type;
+
+  return 0;
+}
+
 
 MBKeyboardKeyFaceType
 mb_kbd_key_get_face_type(MBKeyboardKey           *key,
@@ -338,6 +352,17 @@ mb_kbd_key_press(MBKeyboardKey *key)
 	*/
 	break;
       }
+    case MBKeyboardKeyActionModifier:
+      {
+	/*
+	KeySym ks;
+	if ((ks = mb_kbd_key_get_keysym_action(key, state)) != None)
+	  mb_kbd_ui_send_keysym_press(key->kbd->ui, key_char, 0);
+
+	*/
+	break;
+      }
+
     default:
       break;
     }      

@@ -69,6 +69,10 @@
 	  <default display="0" />
 	  <shifted display=")" />                
     </key>
+    <key>
+	  <default display="del" action="delete"/>
+    </key>
+
   </row>
 
   <row>
@@ -111,6 +115,9 @@
     <key obey-caps='true'>
 	  <default display="p" />                
 	  <shifted display="P" />
+    </key>
+    <key>
+	  <default display="RET" action="return"/>
     </key>
 
   </row>
