@@ -32,6 +32,12 @@ struct MBKeyboardUI
   Pixmap        backbuffer;
   GC            xgc;
 
+  /* Crusty temp theme stuff */
+
+  XColor xcol_c5c5c5, xcol_d3d3d3, xcol_f0f0f0, xcol_f8f8f5, xcol_f4f4f4;
+
+  /************************* */
+
   int           key_uwidth, key_uheight;
 
   FakeKey      *fakekey;
@@ -58,6 +64,26 @@ text_extents(MBKeyboardUI        *ui,
   *height = ui->font->ascent + ui->font->descent;
 }
 
+void
+alloc_color(MBKeyboardUI  *ui, XColor *xcol, char *spec)
+{
+  int           result;
+
+  if (spec[0] != '#')
+    return;
+
+  if ( sscanf (spec+1, "%x", &result))
+    {
+      xcol->red   = ((result >> 16) & 0xff) << 8;
+      xcol->green = ((result >> 8) & 0xff)  << 8;
+      xcol->blue  = (result & 0xff) << 8;
+      xcol->flags = DoRed|DoGreen|DoBlue;
+
+      XAllocColor(ui->xdpy, DefaultColormap(ui->xdpy, ui->xscreen), xcol);
+    }
+  
+  return;
+}
 
 void
 mb_kbd_ui_send_press(MBKeyboardUI  *ui,
@@ -305,12 +331,30 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
   *width = max_row_width;
 }
 
+/* 
+
+  XColor        xcol;
+#if defined (USE_XFT) || defined (USE_PANGO)
+  XftColor      xftcol;
+
+
+ xcol_c5c5c5
+ xcol_d3d3d3
+ xcol_f0f0f0
+
+ xcol_f8f8f5 - key bg ( 2px white border )
+ xcol_f4f4f4 - line on bottom of key
+
+ #636262 - text
+
+ */
 
 static void
 mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 {
   XRectangle             rect;
   MBKeyboardKeyStateType state;
+  int                    side_pad;
 
   if (mb_kbd_key_is_blank(key)) /* spacer */
     return;
@@ -320,7 +364,66 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   rect.width  = mb_kbd_key_width(key);       
   rect.height = mb_kbd_key_height(key);       
 
+  /* clear it */
+
+  XSetForeground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
+
+  XFillRectangles(ui->xdpy, ui->backbuffer, ui->xgc, &rect, 1);
+
+  /* draw 'main border' */
+
+  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_c5c5c5.pixel);
+
   XDrawRectangles(ui->xdpy, ui->backbuffer, ui->xgc, &rect, 1);
+
+  /* shaded bottom line */
+
+  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f4f4f4.pixel);
+  XDrawLine(ui->xdpy, ui->backbuffer, ui->xgc,
+	    rect.x + 1,
+	    rect.y + rect.height - 1,
+	    rect.x + rect.width -2 ,
+	    rect.y + rect.height - 1);
+
+  /* Corners - XXX should really use drawpoints */
+
+  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f0f0f0.pixel);
+
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y);
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y);
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y+rect.height);
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y+rect.height);
+
+  /* soften them more */
+
+  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_d3d3d3.pixel);
+
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+1, rect.y);
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y+1);
+
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width-1, rect.y);
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y+1);
+
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width-1, rect.y+rect.height);
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y+rect.height-1);
+
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y+rect.height-1);
+  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+1, rect.y+rect.height);
+
+  /* background */
+
+  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f8f8f5.pixel);
+
+  side_pad = 
+    mb_kbd_keys_border(ui->kbd)
+    + mb_kbd_keys_margin(ui->kbd)
+    + mb_kbd_keys_pad(ui->kbd);
+
+  XFillRectangle(ui->xdpy, ui->backbuffer, ui->xgc, 
+		 rect.x + side_pad,
+		 rect.y + side_pad,
+		 rect.width  - (side_pad * 2) + 1,
+		 rect.height - (side_pad * 2)) + 1;
 
   state = MBKeyboardKeyStateNormal;
 
@@ -469,7 +572,8 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 				     DefaultVisual(ui->xdpy, ui->xscreen),
 				     DefaultColormap(ui->xdpy, ui->xscreen));
 
-  coltmp.red   = coltmp.green = coltmp.blue  = 0x0000; coltmp.alpha = 0xffff;
+  /* #636262 - for text maybe */
+  coltmp.red   = coltmp.green = coltmp.blue  = 0x0000; coltmp.alpha = 0x7575;
 
   XftColorAllocValue(ui->xdpy,
 		     DefaultVisual(ui->xdpy, ui->xscreen), 
@@ -482,6 +586,14 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 
   XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
   XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
+
+  /* Crusty theme stuff  */
+
+  alloc_color(ui, &ui->xcol_c5c5c5, "#c5c5c5");
+  alloc_color(ui, &ui->xcol_d3d3d3, "#d3d3d3");
+  alloc_color(ui, &ui->xcol_f0f0f0, "#f0f0f0");
+  alloc_color(ui, &ui->xcol_f8f8f5, "#f8f8f5");
+  alloc_color(ui, &ui->xcol_f4f4f4, "#f4f4f4");
 
   return 1;
 }
@@ -539,7 +651,7 @@ mb_kbd_ui_init(MBKeyboard *kbd)
   ui->xscreen   = DefaultScreen(ui->xdpy);
   ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);   
 
-  kbd->font_desc = "Sans-10"; 	/* HACK HACK HACK */
+  kbd->font_desc = "Sans-10:bold"; 	/* HACK HACK HACK */
 
   if ((ui->font = XftFontOpenName(ui->xdpy, 
 				  ui->xscreen, 
