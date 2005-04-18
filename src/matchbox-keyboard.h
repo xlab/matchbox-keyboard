@@ -104,7 +104,9 @@ MBKeyboardStateType;
 struct MBKeyboard
 {
   MBKeyboardUI          *ui;
-  unsigned char         *font_desc;
+  unsigned char         *font_family;
+  int                    font_pt_size;
+  unsigned char         *font_variant;
 
   List                  *layouts;
   MBKeyboardLayout      *selected_layout;
@@ -122,9 +124,23 @@ int
 mb_kbd_ui_init(MBKeyboard *kbd);
 
 void
+mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key);
+
+void
+mb_kbd_ui_redraw(MBKeyboardUI  *ui);
+
+void
+mb_kbd_ui_swap_buffers(MBKeyboardUI  *ui);
+
+void
 mb_kbd_ui_send_press(MBKeyboardUI  *ui,
 		     unsigned char *utf8_char_in,
 		     int            modifiers);
+
+void
+mb_kbd_ui_send_keysym_press(MBKeyboardUI  *ui,
+			    KeySym         ks,
+			    int            modifiers);
 
 void
 mb_kbd_ui_send_release(MBKeyboardUI  *ui);
@@ -149,11 +165,17 @@ mb_kbd_keys_margin(MBKeyboard *kb);
 void
 mb_kbd_add_state(MBKeyboard *kbd, MBKeyboardStateType state);
 
-void
+boolean
 mb_kbd_has_state(MBKeyboard *kbd, MBKeyboardStateType state);
 
+boolean
+mb_kbd_has_any_state(MBKeyboard *kbd);
+
 void
-mb_kbd_keys_remove_state(MBKeyboard *kbd, MBKeyboardStateType state);
+mb_kbd_remove_state(MBKeyboard *kbd, MBKeyboardStateType state);
+
+MBKeyboardKeyStateType
+mb_kbd_keys_current_state(MBKeyboard *kbd);
 
 void
 mb_kbd_add_layout(MBKeyboard *kb, MBKeyboardLayout *layout);
@@ -163,6 +185,19 @@ mb_kbd_get_selected_layout(MBKeyboard *kb);
 
 MBKeyboardKey*
 mb_kbd_locate_key(MBKeyboard *kb, int x, int y);
+
+void
+mb_kbd_set_held_key(MBKeyboard *kb, MBKeyboardKey *key);
+
+MBKeyboardKey *
+mb_kbd_get_held_key(MBKeyboard *kb);
+
+void
+mb_kbd_redraw(MBKeyboard *kb);
+
+void
+mb_kbd_redraw_key(MBKeyboard *kb, MBKeyboardKey *key);
+
 
 /**** Layout ****/
 
@@ -199,6 +234,9 @@ mb_kbd_row_height(MBKeyboardRow *row);
 
 int 
 mb_kbd_row_width(MBKeyboardRow *row);
+
+int 
+mb_kbd_row_base_width(MBKeyboardRow *row);
 
 void
 mb_kbd_row_append_key(MBKeyboardRow *row, MBKeyboardKey *key);
@@ -262,6 +300,18 @@ mb_kbd_key_width(MBKeyboardKey *key) ;
 int 
 mb_kbd_key_height(MBKeyboardKey *key);
 
+void
+mb_kbd_key_set_extra_width_pad(MBKeyboardKey  *key, int pad);
+
+void
+mb_kbd_key_set_extra_height_pad(MBKeyboardKey  *key, int pad);
+
+int
+mb_kbd_key_get_extra_height_pad(MBKeyboardKey  *key);
+
+int
+mb_kbd_key_get_extra_width_pad(MBKeyboardKey  *key);
+
 Bool
 mb_kdb_key_has_state(MBKeyboardKey           *key,
 		     MBKeyboardKeyStateType   state);
@@ -307,6 +357,8 @@ MBKeyboardKeyModType
 mb_kbd_key_get_modifer_action(MBKeyboardKey          *key,
 			      MBKeyboardKeyStateType  state);
 
+boolean 
+mb_kbd_key_is_held(MBKeyboard *kbd, MBKeyboardKey *key);
 
 void
 mb_kbd_key_press(MBKeyboardKey *key);
@@ -332,6 +384,7 @@ mb_kbd_config_load(MBKeyboard *kbd, char *conf_file);
 #define streq(a,b)      (strcmp(a,b) == 0)
 #define strcaseeq(a,b)  (strcasecmp(a,b) == 0)
 #define unless(x)       if (!(x))
+#define util_abs(x)     ((x) > 0) ? (x) : -1*(x)
 
 void*
 util_malloc0(int size);
@@ -351,6 +404,9 @@ util_utf8_char_cnt(const unsigned char *str);
 
 List*
 util_list_alloc_item(void);
+
+int
+util_list_length(List *list);
 
 List*
 util_list_get_last(List *list);

@@ -11,6 +11,7 @@
 
 <layout id="name">
 
+<!--
   <row>
      <key>
 	  <default display="ヂ" />                
@@ -26,9 +27,11 @@
 	  <default display="⠿" />                
     </key>
   </row>
+-->
+
   <row>
     <key>
-	  <default display="" />                
+	  <default display="`" />
     </key>
     <key>
 	  <default display="1" />                
@@ -36,10 +39,11 @@
     </key>
     <key>
 	  <default display="2" />                
-	  <shifted display="" />
+	  <shifted display='"' />
     </key>
     <key>
-	  <default display="3" />                
+	  <default display="3" />
+	  <shifted display="" />                
     </key>
     <key>
 	  <default display="4" />
@@ -70,12 +74,24 @@
 	  <shifted display=")" />                
     </key>
     <key>
-	  <default display="del" action="delete"/>
+	  <default display="-" />
+	  <shifted display="_" />                
+    </key>
+    <key>
+	  <default display="+" />
+	  <shifted display="=" />                
+    </key>
+
+    <key>
+	  <default display="DEL" action="backspace"/>
     </key>
 
   </row>
 
   <row>
+    <key>
+	  <default display="TAB" action="tab"/>                
+    </key>
     <key obey-caps='true'>
 	  <default display="q" />                
 	  <shifted display="Q" />
@@ -117,12 +133,23 @@
 	  <shifted display="P" />
     </key>
     <key>
+	  <default display="{" />                
+	  <shifted display="[" />
+    </key>
+    <key>
+	  <default display="}" />                
+	  <shifted display="]" />
+    </key>
+    <key width="3500">
 	  <default display="RET" action="return"/>
     </key>
 
+
   </row>
   <row>
-
+    <key>
+	  <default display="CAPS" action="modifier:caps"/>                
+    </key>
     <key obey-caps='true'>
 	  <default display="a" />                
 	  <shifted display="A" />
@@ -159,17 +186,34 @@
 	  <default display="l" />                
 	  <shifted display="L" />
     </key>
-
+    <key>
+	  <default display=":" />                
+	  <shifted display=";" />
+    </key>
+    <key>
+	  <default display="'" />                
+	  <shifted display="@" />
+    </key>
+    <key>
+	  <default display="#" />                
+	  <shifted display="~" />
+    </key>
+    <space width="2500" />
   </row>
   <row>
 
-    <key obey-caps='true'>
-	  <default display="shift" />                
+    <key fill="true">
+	  <default display="SHIFT" action="modifier:shift"/>                
     </key>
 
     <key obey-caps='true'>
 	  <default display="z" />                
 	  <shifted display="Z" />
+    </key>
+
+    <key>
+	  <default display="\" />                
+	  <shifted display="|" />
     </key>
 
     <key obey-caps='true'>
@@ -202,15 +246,51 @@
 	  <shifted display="M" />
     </key>
 
-    <key obey-caps='true'>
-	  <default display="shift" />                
+    <key>
+	  <default display="." />                
+	  <shifted display="&lt;" />
+    </key>
+    <key>
+	  <default display="." />                
+	  <shifted display="&gt;" />
+    </key>
+    <key>
+	  <default display="?" />                
+	  <shifted display="/" />
+    </key>
+
+
+    <key fill="true">
+	  <default display="SHIFT" action="modifier:shift"/>                
     </key>
 
  </row>
   <row>
     <key>
-	  <default display="                            " action="space" />                
+	  <default display="CTRL" action="modifier:ctrl"/>                
     </key>
+
+    <key>
+	  <default display="ALT" action="modifier:alt"/>                
+    </key>
+
+    <key width="10000">
+	  <default display=" " action="space" />                
+    </key>
+
+    <key>
+	  <default display="^" action="up" />                
+    </key>
+    <key>
+	  <default display="^" action="down" />                
+    </key>
+    <key>
+	  <default display="&lt;" action="left" />                
+    </key>
+    <key>
+	  <default display="&gt;" action="right" />                
+    </key>
+
 
 
 </row>

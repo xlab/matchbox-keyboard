@@ -34,16 +34,23 @@ struct MBKeyboardUI
 
   /* Crusty temp theme stuff */
 
-  XColor xcol_c5c5c5, xcol_d3d3d3, xcol_f0f0f0, xcol_f8f8f5, xcol_f4f4f4;
+  XColor xcol_c5c5c5, xcol_d3d3d3, xcol_f0f0f0, xcol_f8f8f5, 
+    xcol_f4f4f4, xcol_a4a4a4;
 
   /************************* */
 
   int           key_uwidth, key_uheight;
 
+  int           base_alloc_width, base_alloc_height;
+  int           base_font_pt_size;
+
   FakeKey      *fakekey;
 
   MBKeyboard   *kbd;
 };
+
+static int
+mb_kbd_ui_load_font(MBKeyboardUI *ui);
 
 static void 
 text_extents(MBKeyboardUI        *ui, 
@@ -91,7 +98,7 @@ mb_kbd_ui_send_press(MBKeyboardUI  *ui,
 		     int            modifiers)
 {
   DBG("Sending '%s'", utf8_char_in);
-  fakekey_press(ui->fakekey, utf8_char_in, -1, 0);
+  fakekey_press(ui->fakekey, utf8_char_in, -1, modifiers);
 }
 
 void
@@ -99,10 +106,7 @@ mb_kbd_ui_send_keysym_press(MBKeyboardUI  *ui,
 			    KeySym         ks,
 			    int            modifiers)
 {
-  /*
-  fakekey_press(ui->fakekey, utf8_char_in, -1, 0);
-  fakekey_release(ui->fakekey);
-  */
+  fakekey_press_keysym(ui->fakekey, ks, modifiers);
 }
 
 void
@@ -349,7 +353,7 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
  */
 
-static void
+void
 mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 {
   XRectangle             rect;
@@ -412,7 +416,10 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
   /* background */
 
-  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f8f8f5.pixel);
+  if (mb_kbd_key_is_held(ui->kbd, key))
+    XSetForeground(ui->xdpy, ui->xgc, ui->xcol_a4a4a4.pixel);
+  else
+    XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f8f8f5.pixel);
 
   side_pad = 
     mb_kbd_keys_border(ui->kbd)
@@ -428,7 +435,17 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
   /* real code is here */
 
-  state = MBKeyboardKeyStateNormal;
+  state = mb_kbd_keys_current_state(ui->kbd); 
+
+  if (!mb_kdb_key_has_state(key, state))
+    {
+      if (state == MBKeyboardKeyStateNormal)
+	return;  /* keys should at least have a normal state */
+      else
+        state = MBKeyboardKeyStateNormal;
+    }
+
+
 
   if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
   {
@@ -443,12 +460,9 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
 	x = mb_kbd_key_abs_x(key) + ((mb_kbd_key_width(key) - face_str_w)/2);
 
-	y = mb_kbd_key_abs_y(key) 
-	  + mb_kbd_keys_border(ui->kbd) /* this is rect line */
-	  + mb_kbd_keys_margin(ui->kbd) 
-	  + mb_kbd_keys_pad(ui->kbd);
-	
-	DBG("painting '%s' to %ix%i", face_str, x, y);
+	y = mb_kbd_key_abs_y(key) + 
+	  ( (mb_kbd_key_height(key) - (ui->font->ascent + ui->font->descent))
+	                                / 2 );
 
 	XftDrawStringUtf8(ui->xft_backbuffer,
 			  &ui->font_col,
@@ -456,7 +470,7 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 			  x,
 			  y + ui->font->ascent,
 			  face_str, 
-			  strlen(face_str));
+ 			  strlen(face_str));
       }
   }
 
@@ -478,15 +492,15 @@ mb_kbd_ui_redraw_row(MBKeyboardUI  *ui, MBKeyboardRow *row)
     }
 }
 
-static void
+void
 mb_kbd_ui_swap_buffers(MBKeyboardUI  *ui)
 {
   XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
   XClearWindow(ui->xdpy, ui->xwin);
-  XFlush(ui->xdpy);
+  XSync(ui->xdpy, False);
 }
 
-static void
+void
 mb_kbd_ui_redraw(MBKeyboardUI  *ui)
 {
   List             *row_item;
@@ -526,20 +540,10 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   XSizeHints           size_hints;
   XWMHints            *wm_hints;
   XSetWindowAttributes win_attr;
+  XRenderColor         coltmp;
 
-  XRenderColor      coltmp;
 
-  /*
-  ui->xwin = XCreateSimpleWindow(ui->xdpy,
-				 ui->xwin_root,
-				 0, 0,
-				 ui->xwin_width, ui->xwin_height,
-				 0, 
-				 BlackPixel(ui->xdpy, ui->xscreen),
-				 WhitePixel(ui->xdpy, ui->xscreen));
-  */
-
-  win_attr.override_redirect = True;
+  win_attr.override_redirect = False;
   win_attr.event_mask 
     = ButtonPressMask|ButtonReleaseMask|Button1MotionMask|StructureNotifyMask;
 
@@ -563,6 +567,17 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
       XSetWMHints(ui->xdpy, ui->xwin, wm_hints );
       XFree(wm_hints);
     }
+
+  size_hints.flags = PPosition | PSize | PMinSize;
+  size_hints.x = 0;
+  size_hints.y = 0;
+  size_hints.width      =  ui->xwin_width; 
+  size_hints.height     =  ui->xwin_height;
+  size_hints.min_width  =  ui->xwin_width;
+  size_hints.min_height =  ui->xwin_height;
+    
+  XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard", 
+			 NULL, 0, NULL, 0, &size_hints);
 
   ui->backbuffer = XCreatePixmap(ui->xdpy,
 				 ui->xwin,
@@ -597,8 +612,147 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   alloc_color(ui, &ui->xcol_f0f0f0, "#f0f0f0");
   alloc_color(ui, &ui->xcol_f8f8f5, "#f8f8f5");
   alloc_color(ui, &ui->xcol_f4f4f4, "#f4f4f4");
-
+  alloc_color(ui, &ui->xcol_a4a4a4, "#a4a4a4");
   return 1;
+}
+
+static void
+mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height) 
+{
+  MBKeyboard       *kbd = ui->kbd;
+  MBKeyboardLayout *layout;
+  List              *row_item, *key_item;
+  int               width_diff, height_diff;
+  int               height_font_pt_size, width_font_pt_size;
+  int               next_row_y,  n_rows, extra_key_height;
+
+  MARK();
+
+  width_diff  = width  - ui->base_alloc_width; 
+  height_diff = height - ui->base_alloc_height; 
+
+  if (width_diff < 0 || height_diff < 0)
+    return;  /* dont go smaller than our int request - get clipped */
+
+  layout   = mb_kbd_get_selected_layout(ui->kbd);
+  row_item = mb_kbd_layout_rows(layout);
+
+  /* load a bigger font ? 
+   * Only load if height and width have changed
+   */
+
+  width_font_pt_size = ( (ui->base_font_pt_size * width) 
+		               / ui->base_alloc_width );
+  
+  if (util_abs(width_font_pt_size - kbd->font_pt_size) > 2)
+    {
+      height_font_pt_size = ( (ui->base_font_pt_size * height) 
+			         / ui->base_alloc_height );
+
+      if (util_abs(height_font_pt_size - kbd->font_pt_size) > 2)
+	{
+	  ui->kbd->font_pt_size = (height_font_pt_size > width_font_pt_size) 
+                 	       ? width_font_pt_size : height_font_pt_size;
+
+	  mb_kbd_ui_load_font(ui);
+	}
+    }
+
+  n_rows = util_list_length(row_item);
+
+  extra_key_height = (height_diff / n_rows);
+
+  DBG("****** extra height is %i ******", extra_key_height);
+
+  next_row_y = mb_kbd_row_spacing(ui->kbd);
+
+  /* allocate some extra width padding to keys */
+
+  while (row_item != NULL)
+    {
+      int row_base_width, new_row_base_width, row_width_diff;
+      int  next_key_x = 0;
+
+      row_base_width = mb_kbd_row_base_width(row_item->data) + mb_kbd_row_spacing(ui->kbd);
+
+      new_row_base_width = ( row_base_width * width ) / ui->base_alloc_width;
+
+      row_width_diff = new_row_base_width - row_base_width;
+
+      next_key_x = mb_kbd_col_spacing(ui->kbd);
+
+
+      /* 
+       * row_base_width       
+       * --------------  X  new_width  = new_base_width
+       *   base_width      
+       *
+       * key_extra_pad  = key_base_width X base_width_diff 
+       *                  --------------------------------
+       *                          row_base_width
+      */
+
+      key_item = mb_kdb_row_keys(row_item->data);
+
+      MARK();
+
+      while (key_item != NULL)
+	{
+	  MBKeyboardKey *key = key_item->data;
+	  int            key_base_width, key_new_pad;
+
+	  key_base_width =( mb_kbd_key_width(key) 
+			    - mb_kbd_key_get_extra_width_pad(key));
+
+	  key_new_pad = ((key_base_width * row_width_diff)
+			            / row_base_width );
+
+	  mb_kbd_key_set_extra_width_pad (key, key_new_pad );
+
+	  /* Height */
+
+	  mb_kbd_key_set_extra_height_pad (key, extra_key_height);
+
+	  mb_kbd_key_set_geometry(key, next_key_x, -1, -1, -1);
+
+	  next_key_x += (mb_kbd_key_width(key) + mb_kbd_col_spacing(ui->kbd)); 
+
+	  key_item = util_list_next(key_item);
+	}
+
+
+      /* re-center row */
+
+      mb_kbd_row_set_x(row_item->data, 
+		       (width - mb_kbd_row_width(row_item->data))/2);
+
+      /* and position down */
+
+      mb_kbd_row_set_y(row_item->data, next_row_y);
+
+      DBG("************ setting row y to %i ***********", next_row_y);
+
+      next_row_y  += (mb_kbd_row_height(row_item->data) 
+		      + mb_kbd_row_spacing(ui->kbd));
+
+      row_item = util_list_next(row_item);
+    }
+
+  XResizeWindow(ui->xdpy, ui->xwin, width, height);
+
+  ui->xwin_width  = width;
+  ui->xwin_height = height;
+
+  XFreePixmap(ui->xdpy, ui->backbuffer);
+  ui->backbuffer = XCreatePixmap(ui->xdpy,
+				 ui->xwin,
+				 ui->xwin_width, 
+				 ui->xwin_height,
+				 DefaultDepth(ui->xdpy, ui->xscreen));
+
+  XftDrawChange (ui->xft_backbuffer, ui->backbuffer);
+
+  mb_kbd_ui_redraw(ui);
 }
 
 int
@@ -628,13 +782,35 @@ mb_kbd_ui_events_iteration(MBKeyboardUI *ui)
 	    break;
 
 	  case ConfigureNotify:
-	    /* XXX Handle resize */
+	    if (xev.xconfigure.width != ui->xwin_width
+		|| xev.xconfigure.height != ui->xwin_height)
+	      mb_kbd_ui_resize(ui, 
+			       xev.xconfigure.width, 
+			       xev.xconfigure.height);
+	    break;
 	  default:
 	    break;
 	  }
       }
 }
 
+static int
+mb_kbd_ui_load_font(MBKeyboardUI *ui)
+{
+  MBKeyboard *kb = ui->kbd;
+  char desc[512];
+
+  snprintf(desc, 512, "%s-%i:%s", 
+	   kb->font_family, kb->font_pt_size, kb->font_variant);
+
+  if (ui->font != NULL)
+    XftFontClose(ui->xdpy, ui->font);
+
+  if ((ui->font = XftFontOpenName(ui->xdpy, ui->xscreen, desc)) == NULL)
+    return 0;
+  
+  return 1;
+}
 
 int
 mb_kbd_ui_init(MBKeyboard *kbd)
@@ -654,14 +830,16 @@ mb_kbd_ui_init(MBKeyboard *kbd)
   ui->xscreen   = DefaultScreen(ui->xdpy);
   ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);   
 
-  kbd->font_desc = "Sans-10:bold"; 	/* HACK HACK HACK */
+  ui->base_font_pt_size = kbd->font_pt_size;
 
-  if ((ui->font = XftFontOpenName(ui->xdpy, 
-				  ui->xscreen, 
-				  kbd->font_desc)) == NULL)
+  if (!mb_kbd_ui_load_font(ui))
     return 0;
 
-  mb_kbd_ui_allocate_ui_layout(ui, &ui->xwin_width, &ui->xwin_height);
+  mb_kbd_ui_allocate_ui_layout(ui, 
+			       &ui->base_alloc_width, &ui->base_alloc_height);
+
+  ui->xwin_width  = ui->base_alloc_width;
+  ui->xwin_height = ui->base_alloc_height;
 
   mb_kbd_ui_resources_create(ui);
 

@@ -1,5 +1,29 @@
 2005-04-18  mallum,,,  <mallum@openedhand.com>
 
+	* src/config-parser.c: (config_str_to_modtype),
+	(config_handle_key_subtag):
+	* src/config.xml:
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_is_blank),
+	(mb_kbd_key_height), (mb_kbd_key_get_modifer_action),
+	(mb_kbd_key_get_face_type), (mb_kbd_key_get_action_type),
+	(mb_kbd_key_press):
+	* src/matchbox-keyboard-row.c: (mb_kbd_row_width):
+	* src/matchbox-keyboard-ui.c: (alloc_color),
+	(mb_kbd_ui_send_press), (mb_kbd_ui_send_keysym_press),
+	(mb_kbd_ui_redraw_key), (mb_kbd_ui_redraw_row), (mb_kbd_ui_redraw),
+	(mb_kbd_ui_show), (mb_kbd_ui_resources_create), (mb_kbd_ui_resize),
+	(mb_kbd_ui_events_iteration), (mb_kbd_ui_load_font),
+	(mb_kbd_ui_init):
+	* src/matchbox-keyboard.c: (mb_kbd_new), (mb_kbd_add_state),
+	(mb_kbd_locate_key), (mb_kbd_add_layout),
+	(mb_kbd_get_selected_layout):
+	* src/matchbox-keyboard.h:
+	* src/util-list.c:
+	Implement more state handling.
+	Handle window resizes.
+
+2005-04-18  mallum,,,  <mallum@openedhand.com>
+
 	* src/config-parser.c: (config_handle_key_subtag):
 	* src/config.xml:
 	* src/matchbox-keyboard-key.c: (mb_kbd_key_set_keysym_action),

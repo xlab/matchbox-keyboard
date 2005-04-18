@@ -141,8 +141,11 @@ config_str_to_modtype(const char* str)
   int i;
 
   for (i=0; i<sizeof(ModLookup)/sizeof(struct _modlookup); i++)
-    if (streq(str, ModLookup[i].name))
-      return ModLookup[i].type;
+    {
+      DBG("checking '%s' vs '%s'", str, ModLookup[i].name);
+      if (streq(str, ModLookup[i].name))
+	return ModLookup[i].type;
+    }
 
   return 0;
 }
@@ -268,7 +271,9 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	{
 	  MBKeyboardKeyModType found_type;
 
-	  found_type = config_str_to_modtype(&val[8]);
+	  DBG("checking '%s'", &val[9]);
+
+	  found_type = config_str_to_modtype(&val[9]);
 
 	  if (found_type)
 	    {
@@ -285,9 +290,9 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	}
       else if (!strncmp(val, "xkeysym:", 8))
 	{
-	  DBG("Checking %s\n", &val[7]);
+	  DBG("Checking %s\n", &val[8]);
 
-	  found_keysym = XStringToKeysym(&val[7]);
+	  found_keysym = XStringToKeysym(&val[8]);
 
 	  if (found_keysym)
 	    {

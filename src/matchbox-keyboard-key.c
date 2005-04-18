@@ -44,6 +44,9 @@ struct MBKeyboardKey
 
   int                    alloc_x, alloc_y, alloc_width, alloc_height;
 
+  int                    extra_width_pad;  /* via win resizes */
+  int                    extra_height_pad;
+
   boolean                obeys_caps;
   boolean                fill;	     /* width fills avialble space */
   int                    req_uwidth; /* unit width in 1/1000's */
@@ -122,6 +125,7 @@ mb_kbd_key_is_blank(MBKeyboardKey  *key)
   return key->is_blank;
 }
 
+
 void
 mb_kbd_key_set_geometry(MBKeyboardKey  *key,
 			int x,
@@ -177,6 +181,35 @@ mb_kbd_key_height(MBKeyboardKey *key)
 { 
   return key->alloc_height;
 }
+
+void
+mb_kbd_key_set_extra_width_pad(MBKeyboardKey  *key, int pad)
+{
+  key->alloc_width -= key->extra_width_pad;
+  key->extra_width_pad = pad;
+  key->alloc_width += key->extra_width_pad;
+}
+
+void
+mb_kbd_key_set_extra_height_pad(MBKeyboardKey  *key, int pad)
+{
+  key->alloc_height -= key->extra_height_pad;
+  key->extra_height_pad = pad;
+  key->alloc_height += key->extra_height_pad;
+}
+
+int
+mb_kbd_key_get_extra_height_pad(MBKeyboardKey  *key)
+{
+  return key->extra_height_pad;
+}
+
+int
+mb_kbd_key_get_extra_width_pad(MBKeyboardKey  *key)
+{
+  return key->extra_width_pad;
+}
+
 
 /* URG Nasty - some stuf should be public-ish */
 void 
@@ -327,10 +360,37 @@ void
 mb_kbd_key_press(MBKeyboardKey *key)
 {
   /* XXX what about state handling XXX */
-  MBKeyboardKeyStateType state = MBKeyboardKeyStateNormal;
+  MBKeyboardKeyStateType state;
+  int                    flags = 0;
+  boolean                queue_full_kbd_redraw = False;
 
   if (mb_kbd_key_is_blank(key))
     return;
+
+  state = mb_kbd_keys_current_state(key->kbd);
+
+  if (mb_kbd_has_state(key->kbd, MBKeyboardStateCaps)
+      && mb_kbd_key_get_obey_caps(key))
+    state = MBKeyboardKeyStateShifted;
+
+  /* XXX below fakekey mods probably better in ui */
+
+  if (state == MBKeyboardKeyStateShifted)
+    flags |= FAKEKEYMOD_SHIFT; 	/* does fakekey actually need this ? */
+
+  if (mb_kbd_has_state(key->kbd, MBKeyboardStateControl))
+    flags |= FAKEKEYMOD_CONTROL;
+
+  if (mb_kbd_has_state(key->kbd, MBKeyboardStateAlt))
+    flags |= FAKEKEYMOD_ALT;
+
+  if (!mb_kdb_key_has_state(key, state))
+    {
+      if (state == MBKeyboardKeyStateNormal)
+	return;  /* keys should at least have a normal state */
+      else
+        state = MBKeyboardKeyStateNormal;
+    }
 
   switch (mb_kbd_key_get_action_type(key, state))
     {
@@ -339,39 +399,171 @@ mb_kbd_key_press(MBKeyboardKey *key)
 	const unsigned char *key_char;
 
 	if ((key_char = mb_kbd_key_get_char_action(key, state)) != NULL)
-	  mb_kbd_ui_send_press(key->kbd->ui, key_char, 0);
+	  {
+	    mb_kbd_ui_send_press(key->kbd->ui, key_char, flags);
+	    mb_kbd_set_held_key(key->kbd, key);
+	  }
 	break;
+
+
       }
     case MBKeyboardKeyActionXKeySym:
       {
-	/*
 	KeySym ks;
 	if ((ks = mb_kbd_key_get_keysym_action(key, state)) != None)
-	  mb_kbd_ui_send_keysym_press(key->kbd->ui, key_char, 0);
-
-	*/
+	  {
+	    mb_kbd_ui_send_keysym_press(key->kbd->ui, ks, flags);
+	    mb_kbd_set_held_key(key->kbd, key);
+	  }
 	break;
       }
     case MBKeyboardKeyActionModifier:
       {
-	/*
-	KeySym ks;
-	if ((ks = mb_kbd_key_get_keysym_action(key, state)) != None)
-	  mb_kbd_ui_send_keysym_press(key->kbd->ui, key_char, 0);
+	
+	switch ( mb_kbd_key_get_modifer_action(key, state) )
+	  {
+	  case MBKeyboardKeyModShift:
+	    if (mb_kbd_has_state(key->kbd, MBKeyboardStateShifted))
+	      mb_kbd_remove_state(key->kbd, MBKeyboardStateShifted);
+	    else
+	      mb_kbd_add_state(key->kbd, MBKeyboardStateShifted);
+	    break;
+	  case MBKeyboardKeyModMod1:
+	    mb_kbd_add_state(key->kbd, MBKeyboardStateMod1);
+	    break;
+	  case MBKeyboardKeyModMod2:
+	    mb_kbd_add_state(key->kbd, MBKeyboardStateMod2);
+	    break;
+	  case MBKeyboardKeyModMod3:
+	    mb_kbd_add_state(key->kbd, MBKeyboardStateMod3);
+	    break;
+	  case MBKeyboardKeyModCaps:
+	    mb_kbd_add_state(key->kbd, MBKeyboardStateCaps);
+	    break;
+          case MBKeyboardKeyModControl:
+	    mb_kbd_add_state(key->kbd, MBKeyboardStateControl);
+	    break;
+	  case MBKeyboardKeyModAlt:
+	    mb_kbd_add_state(key->kbd, MBKeyboardStateAlt);
+	    break;
+	  default:
+	    DBG("unknown modifier action");
+	    break;
+	  }
+	queue_full_kbd_redraw = True;
 
+	/* we dont actually have to send a key sym here - but should we ? 
+         *
+         * Also we dont set a held key, as we've changed the keyboard 
+         * state instead.
 	*/
 	break;
       }
 
     default:
       break;
-    }      
+    }  
+  
+  if (queue_full_kbd_redraw)
+    mb_kbd_redraw(key->kbd);
+  else
+    mb_kbd_redraw_key(key->kbd, key);
+}
+
+boolean 
+mb_kbd_key_is_held(MBKeyboard *kbd, MBKeyboardKey *key)
+{
+  MBKeyboardKeyStateType  state;
+
+  if (mb_kbd_get_held_key(key->kbd) ==  key)
+    return True;
+
+  /* XXX below should probably go into own func */
+
+  state = mb_kbd_keys_current_state(kbd); 
+
+  if (!mb_kdb_key_has_state(key, state))
+    {
+      if (state == MBKeyboardKeyStateNormal)
+	return False;  /* keys should at least have a normal state */
+      else
+        state = MBKeyboardKeyStateNormal;
+    }
+
+  if (mb_kbd_key_get_action_type(key, state) == MBKeyboardKeyActionModifier)
+    {
+	switch ( mb_kbd_key_get_modifer_action(key, state) )
+	  {
+	  case MBKeyboardKeyModShift:
+	    if (mb_kbd_has_state(kbd, MBKeyboardStateShifted))
+	      return True;
+	    break;
+	  case MBKeyboardKeyModMod1:
+	    if (mb_kbd_has_state(kbd, MBKeyboardStateMod1))
+	      return True;
+	    break;
+	  case MBKeyboardKeyModMod2:
+	    if (mb_kbd_has_state(kbd, MBKeyboardStateMod2))
+	      return True;
+	    break;
+	  case MBKeyboardKeyModMod3:
+	    if (mb_kbd_has_state(kbd, MBKeyboardStateMod3))
+	      return True;
+	    break;
+	  case MBKeyboardKeyModCaps:
+	    if (mb_kbd_has_state(kbd, MBKeyboardStateCaps))
+	      return True;
+	    break;
+          case MBKeyboardKeyModControl:
+	    if (mb_kbd_has_state(kbd, MBKeyboardStateControl))
+	      return True;
+	    break;
+	  case MBKeyboardKeyModAlt:
+	    if (mb_kbd_has_state(kbd, MBKeyboardStateAlt))
+	      return True;
+	    break;
+	  default:
+	    DBG("unknown modifier action");
+	    break;
+	  }
+    }
+
+  return False;
 }
 
 void
 mb_kbd_key_release(MBKeyboard *kbd)
 {
-  mb_kbd_ui_send_release(kbd->ui);
+  MBKeyboardKey *key = mb_kbd_get_held_key(kbd);
+
+  mb_kbd_set_held_key(kbd, NULL);
+
+  if (key)
+    {
+      boolean queue_full_kbd_redraw = False;
+
+      if (mb_kbd_key_get_action_type(key, MBKeyboardKeyStateNormal) != MBKeyboardKeyActionModifier)
+	{
+	  if (mb_kbd_has_any_state(kbd))
+	    {
+	      mb_kbd_remove_state(kbd, (MBKeyboardStateShifted|
+					MBKeyboardStateMod1|
+					MBKeyboardStateMod2|
+					MBKeyboardStateMod3|
+					MBKeyboardStateCaps|
+					MBKeyboardStateControl|
+					MBKeyboardStateAlt));
+	      queue_full_kbd_redraw = True;
+	    }
+	}
+
+      if (queue_full_kbd_redraw)
+	mb_kbd_redraw(key->kbd);
+      else
+	mb_kbd_redraw_key(key->kbd, key);
+
+      mb_kbd_ui_send_release(kbd->ui);
+    }
 }
 
 void

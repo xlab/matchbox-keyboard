@@ -14,6 +14,10 @@ mb_kbd_new(int argc, char **argv)
   kb->col_spacing = 5;
   kb->row_spacing = 5;
 
+  kb->font_family  = strdup("sans");
+  kb->font_pt_size = 8;
+  kb->font_variant = strdup("bold");
+
   if (!mb_kbd_config_load(kb, "config.xml"))
     return NULL;
 
@@ -62,16 +66,53 @@ mb_kbd_add_state(MBKeyboard *kbd, MBKeyboardStateType state)
   kbd->keys_state |= state;
 }
 
-void
+boolean
 mb_kbd_has_state(MBKeyboard *kbd, MBKeyboardStateType state)
 {
   return (kbd->keys_state & state);
 }
 
+boolean
+mb_kbd_has_any_state(MBKeyboard *kbd)
+{
+  return  (kbd->keys_state > 0);
+}
+
 void
-mb_kbd_keys_remove_state(MBKeyboard *kbd, MBKeyboardStateType state)
+mb_kbd_remove_state(MBKeyboard *kbd, MBKeyboardStateType state)
 {
   kbd->keys_state &= ~(state);
+}
+
+MBKeyboardKeyStateType
+mb_kbd_keys_current_state(MBKeyboard *kbd)
+{
+  if (mb_kbd_has_state(kbd, MBKeyboardStateShifted))
+    return MBKeyboardKeyStateShifted;
+
+  if (mb_kbd_has_state(kbd, MBKeyboardStateMod1))
+    return MBKeyboardKeyStateMod1;
+
+  if (mb_kbd_has_state(kbd, MBKeyboardStateMod2))
+    return MBKeyboardKeyStateMod2;
+  
+  if (mb_kbd_has_state(kbd, MBKeyboardStateMod3))
+    return MBKeyboardKeyStateMod3;
+  
+  return MBKeyboardKeyStateNormal;
+}
+
+void
+mb_kbd_redraw(MBKeyboard *kb)
+{
+  mb_kbd_ui_redraw(kb->ui);
+}
+
+void
+mb_kbd_redraw_key(MBKeyboard *kb, MBKeyboardKey *key)
+{
+  mb_kbd_ui_redraw_key(kb->ui, key);
+  mb_kbd_ui_swap_buffers(kb->ui);
 }
 
 MBKeyboardKey*
@@ -125,6 +166,18 @@ MBKeyboardLayout*
 mb_kbd_get_selected_layout(MBKeyboard *kb)
 {
   return kb->selected_layout;
+}
+
+void
+mb_kbd_set_held_key(MBKeyboard *kb, MBKeyboardKey *key)
+{
+  kb->held_key = key;
+}
+
+MBKeyboardKey *
+mb_kbd_get_held_key(MBKeyboard *kb)
+{
+  return kb->held_key;
 }
 
 

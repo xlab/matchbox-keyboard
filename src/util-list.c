@@ -9,7 +9,7 @@ util_list_alloc_item(void)
 int
 util_list_length(List *list)
 {
-  int result = 0;
+  int result = 1;
 
   list = util_list_get_first(list);
 
