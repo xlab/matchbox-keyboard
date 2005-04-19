@@ -92,6 +92,50 @@ alloc_color(MBKeyboardUI  *ui, XColor *xcol, char *spec)
   return;
 }
 
+static unsigned char*
+get_current_window_manager_name (MBKeyboardUI  *ui)
+{
+  Atom           atom_utf8_string, atom_wm_name, atom_check, type;
+  int            result, format;
+  unsigned char *val, *retval;
+  long           nitems, bytes_after;
+  Window        *support_xwin = NULL;
+
+  atom_check = XInternAtom (ui->xdpy, "_NET_SUPPORTING_WM_CHECK", False);
+
+  XGetWindowProperty (ui->xdpy, 
+		      RootWindow(ui->xdpy, ui->xscreen),
+		      atom_check,
+		      0, 16L, False, XA_WINDOW, &type, &format,
+		      &nitems, &bytes_after, (unsigned char **)&support_xwin);
+
+  if (support_xwin == NULL)
+      return NULL;
+
+  atom_utf8_string = XInternAtom (ui->xdpy, "UTF8_STRING", False);
+  atom_wm_name     = XInternAtom (ui->xdpy, "_NET_WM_NAME", False);
+
+  result = XGetWindowProperty (ui->xdpy, *support_xwin, atom_wm_name,
+			       0, 1000L,False, atom_utf8_string,
+			       &type, &format, &nitems,
+			       &bytes_after, (unsigned char **)&val);
+  if (result != Success)
+    return NULL;
+
+  if (type != atom_utf8_string || format !=8 || nitems == 0)
+    {
+      if (val) XFree (val);
+      return NULL;
+    }
+
+  retval = strdup (val);
+
+  XFree (val);
+
+  return retval;
+}
+
+
 void
 mb_kbd_ui_send_press(MBKeyboardUI  *ui,
 		     unsigned char *utf8_char_in,
@@ -437,6 +481,10 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
   state = mb_kbd_keys_current_state(ui->kbd); 
 
+  if (mb_kbd_has_state(ui->kbd, MBKeyboardStateCaps)
+      && mb_kbd_key_get_obey_caps(key))
+    state = MBKeyboardKeyStateShifted;
+
   if (!mb_kdb_key_has_state(key, state))
     {
       if (state == MBKeyboardKeyStateNormal)
@@ -444,8 +492,6 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
       else
         state = MBKeyboardKeyStateNormal;
     }
-
-
 
   if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
   {
@@ -536,14 +582,69 @@ mb_kbd_ui_show(MBKeyboardUI  *ui)
 static int
 mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 {
+
+#define PROP_MOTIF_WM_HINTS_ELEMENTS    5
+#define MWM_HINTS_DECORATIONS          (1L << 1)
+#define MWM_DECOR_BORDER               (1L << 1)
+
+  typedef struct
+  {
+    unsigned long       flags;
+    unsigned long       functions;
+    unsigned long       decorations;
+    long                inputMode;
+    unsigned long       status;
+  } PropMotifWmHints ;
+
+  Atom atom_wm_protocols[3], 
+    atom_NET_WM_WINDOW_TYPE, 
+    atom_NET_WM_WINDOW_TYPE_TOOLBAR,
+    atom_NET_WM_WINDOW_TYPE_DOCK,
+    atom_NET_WM_STRUT_PARTIAL,
+    atom_MOTIF_WM_HINTS;
+
   PropMotifWmHints    *mwm_hints;
   XSizeHints           size_hints;
   XWMHints            *wm_hints;
   XSetWindowAttributes win_attr;
   XRenderColor         coltmp;
 
+  unsigned char       *wm_name;
+  boolean              have_matchbox_wm = False;             
+  boolean              have_ewmh_wm     = False;             
 
-  win_attr.override_redirect = False;
+  /*
+  atom_wm_protocols = { 
+    XInternAtom(ui->xdpy, "WM_DELETE_WINDOW",False),
+    XInternAtom(ui->xdpy, "WM_PROTOCOLS",False),
+    XInternAtom(ui->xdpy, "WM_NORMAL_HINTS", False),
+  };
+  */
+  atom_NET_WM_WINDOW_TYPE =
+    XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE" , False);
+
+  atom_NET_WM_WINDOW_TYPE_TOOLBAR =
+    XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
+
+  atom_NET_WM_WINDOW_TYPE_DOCK = 
+    XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+
+  atom_MOTIF_WM_HINTS =
+    XInternAtom(ui->xdpy, "_MOTIF_WM_HINTS", False);
+
+  atom_NET_WM_STRUT_PARTIAL = 
+    XInternAtom(ui->xdpy, "_NET_WM_STRUT_PARTIAL", False);
+
+  if ((wm_name = get_current_window_manager_name(ui)) != NULL)
+    {
+      have_ewmh_wm = True; 	/* basically assumed to be Metacity
+				   or at least only tested with mcity */
+
+      if (streq(wm_name, "matchbox"))
+	have_matchbox_wm = True;
+    }
+
+  win_attr.override_redirect = False; /* Set to true for extreme case */
   win_attr.event_mask 
     = ButtonPressMask|ButtonReleaseMask|Button1MotionMask|StructureNotifyMask;
 
@@ -555,7 +656,6 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			   CopyFromParent, CopyFromParent, CopyFromParent,
 			   CWOverrideRedirect|CWEventMask,
 			   &win_attr);
-
 
   wm_hints = XAllocWMHints();
 
@@ -578,6 +678,50 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
     
   XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard", 
 			 NULL, 0, NULL, 0, &size_hints);
+
+  mwm_hints = util_malloc0(sizeof(PropMotifWmHints));
+  
+  if (mwm_hints)
+    {
+      mwm_hints->flags = MWM_HINTS_DECORATIONS;
+      mwm_hints->decorations = 0;
+
+      XChangeProperty(ui->xdpy, ui->xwin, atom_MOTIF_WM_HINTS, 
+		      XA_ATOM, 32, PropModeReplace, 
+		      (unsigned char *)mwm_hints, 
+		      PROP_MOTIF_WM_HINTS_ELEMENTS);
+
+      free(mwm_hints);
+    }
+
+  if (have_ewmh_wm)
+    {
+      /* XXX Fix this for display size */
+      int wm_struct_vals[] = { 0, /* left */			
+			     0, /* right */ 
+			     0, /* top */
+			     50, /* bottom */
+			     0, /* left_start_y */
+			     0, /* left_end_y */
+			     0, /* right_start_y */
+			     0, /* right_end_y */
+			     0, /* top_start_x */
+			     0, /* top_end_x */
+			     0, /* bottom_start_x */
+			     1399 }; /* bottom_end_x */
+
+      XChangeProperty(ui->xdpy, ui->xwin, 
+		      atom_NET_WM_STRUT_PARTIAL, XA_ATOM, 32, 
+		      PropModeReplace, 
+		      (unsigned char *)wm_struct_vals , 12);
+
+      if (have_matchbox_wm)
+	XChangeProperty(ui->xdpy, ui->xwin, 
+			atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
+			PropModeReplace, 
+			(unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
+    }
+
 
   ui->backbuffer = XCreatePixmap(ui->xdpy,
 				 ui->xwin,

@@ -423,34 +423,35 @@ mb_kbd_key_press(MBKeyboardKey *key)
 	switch ( mb_kbd_key_get_modifer_action(key, state) )
 	  {
 	  case MBKeyboardKeyModShift:
-	    if (mb_kbd_has_state(key->kbd, MBKeyboardStateShifted))
-	      mb_kbd_remove_state(key->kbd, MBKeyboardStateShifted);
-	    else
-	      mb_kbd_add_state(key->kbd, MBKeyboardStateShifted);
+	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateShifted);
+	    queue_full_kbd_redraw = True;
 	    break;
 	  case MBKeyboardKeyModMod1:
-	    mb_kbd_add_state(key->kbd, MBKeyboardStateMod1);
+	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateMod1);
+	    queue_full_kbd_redraw = True;
 	    break;
 	  case MBKeyboardKeyModMod2:
-	    mb_kbd_add_state(key->kbd, MBKeyboardStateMod2);
+	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateMod2);
+	    queue_full_kbd_redraw = True;
 	    break;
 	  case MBKeyboardKeyModMod3:
-	    mb_kbd_add_state(key->kbd, MBKeyboardStateMod3);
+	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateMod3);
+	    queue_full_kbd_redraw = True;
 	    break;
 	  case MBKeyboardKeyModCaps:
-	    mb_kbd_add_state(key->kbd, MBKeyboardStateCaps);
+	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateCaps);
+	    queue_full_kbd_redraw = True;
 	    break;
           case MBKeyboardKeyModControl:
-	    mb_kbd_add_state(key->kbd, MBKeyboardStateControl);
+	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateControl);
 	    break;
 	  case MBKeyboardKeyModAlt:
-	    mb_kbd_add_state(key->kbd, MBKeyboardStateAlt);
+	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateAlt);
 	    break;
 	  default:
 	    DBG("unknown modifier action");
 	    break;
 	  }
-	queue_full_kbd_redraw = True;
 
 	/* we dont actually have to send a key sym here - but should we ? 
          *
@@ -550,7 +551,6 @@ mb_kbd_key_release(MBKeyboard *kbd)
 					MBKeyboardStateMod1|
 					MBKeyboardStateMod2|
 					MBKeyboardStateMod3|
-					MBKeyboardStateCaps|
 					MBKeyboardStateControl|
 					MBKeyboardStateAlt));
 	      queue_full_kbd_redraw = True;

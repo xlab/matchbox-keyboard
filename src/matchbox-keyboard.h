@@ -165,6 +165,9 @@ mb_kbd_keys_margin(MBKeyboard *kb);
 void
 mb_kbd_add_state(MBKeyboard *kbd, MBKeyboardStateType state);
 
+void
+mb_kbd_toggle_state(MBKeyboard *kbd, MBKeyboardStateType state);
+
 boolean
 mb_kbd_has_state(MBKeyboard *kbd, MBKeyboardStateType state);
 

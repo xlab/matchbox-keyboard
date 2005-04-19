@@ -66,6 +66,12 @@ mb_kbd_add_state(MBKeyboard *kbd, MBKeyboardStateType state)
   kbd->keys_state |= state;
 }
 
+void
+mb_kbd_toggle_state(MBKeyboard *kbd, MBKeyboardStateType state)
+{
+  kbd->keys_state ^= state;
+}
+
 boolean
 mb_kbd_has_state(MBKeyboard *kbd, MBKeyboardStateType state)
 {

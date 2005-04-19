@@ -1,3 +1,16 @@
+2005-04-19  mallum,,,  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_press),
+	(mb_kbd_key_release):
+	* src/matchbox-keyboard-ui.c: (alloc_color),
+	(mb_kbd_ui_redraw_key), (mb_kbd_ui_redraw_row),
+	(mb_kbd_ui_swap_buffers), (mb_kbd_ui_redraw), (mb_kbd_ui_show),
+	(mb_kbd_ui_resources_create):
+	* src/matchbox-keyboard.c: (mb_kbd_add_state):
+	* src/matchbox-keyboard.h:
+	Fix caps handling and modifier toggling. 
+	Add a chunk of WM handling and 'co-operation'.
+
 2005-04-18  mallum,,,  <mallum@openedhand.com>
 
 	* src/config-parser.c: (config_str_to_modtype),
