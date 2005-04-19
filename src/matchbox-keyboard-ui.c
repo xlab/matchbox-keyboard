@@ -323,6 +323,8 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
   *height = row_y; 
 
+  DBG("Handling fillers");
+
   row_item = mb_kbd_layout_rows(layout);
 
   /* handle any fillers */
@@ -337,27 +339,45 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
       while (key_item != NULL)
 	{
 	  if (mb_kbd_key_get_fill(key_item->data))
-	    n_fillers++;
+	      n_fillers++;
 
 	  key_item = util_list_next(key_item);
 	}
 
       if (!n_fillers)
-	break;
+	goto next_row;
 
       key_item = mb_kdb_row_keys(row);
 
       free_space = max_row_width - mb_kbd_row_width(row);
 
+      DBG("free space is %i ( %i - %i )", 
+	  free_space,  max_row_width - mb_kbd_row_width(row));
+
       while (key_item != NULL)
 	{
 	  if (mb_kbd_key_get_fill(key_item->data))
 	    {
-	      new_w = mb_kbd_key_width(key_item->data) + (free_space/n_fillers);
+	      int   old_w;
+	      List *nudge_key_item = util_list_next(key_item);
+
+	      old_w = mb_kbd_key_width(key_item->data);
+	      new_w = old_w + (free_space/n_fillers);
+
 	      mb_kbd_key_set_geometry(key_item->data, -1, -1, new_w, -1);
+
+	      /* nudge next keys forward */
+	      while (nudge_key_item)
+		{
+		  mb_kbd_key_set_geometry(nudge_key_item->data,
+					  mb_kbd_key_x(nudge_key_item->data) + (new_w - old_w ), -1, -1, -1);
+		  nudge_key_item = util_list_next(nudge_key_item);
+		}
 	    }
 	  key_item = util_list_next(key_item);
 	}
+
+    next_row:
 
       row_item = util_list_next(row_item);
     }

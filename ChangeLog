@@ -1,3 +1,11 @@
+2005-04-20  mallum,,,  <mallum@openedhand.com>
+
+	* src/config.xml:
+	Improve layout some more with experimentation
+	* src/matchbox-keyboard-key.c:
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_allocate_ui_layout):
+	Fix some layout bugs - making 'fill' work.
+
 2005-04-19  mallum,,,  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-key.c: (mb_kbd_key_press),

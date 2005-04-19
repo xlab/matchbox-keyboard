@@ -104,6 +104,7 @@ mb_kbd_key_get_req_uwidth(MBKeyboardKey  *key)
 void
 mb_kbd_key_set_fill(MBKeyboardKey  *key, boolean fill)
 {
+  MARK();
   key->fill = fill;
 }
 
