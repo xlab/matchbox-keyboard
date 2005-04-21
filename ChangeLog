@@ -1,3 +1,28 @@
+2005-04-21  mallum,,,  <mallum@openedhand.com>
+
+
+	* Makefile.am:
+	* configure.ac:
+	* data/Makefile.am:
+	* data/keyboard-extended.xml:
+	* data/keyboard.xml:
+	* src/Makefile.am:
+	* src/config.xml:
+	Sort out keyboard configs so they actually get installed.
+	* src/config-parser.c: (config_handle_key_tag),
+	(config_xml_start_cb), (mb_kbd_config_load):
+	and then loaded
+	* src/matchbox-keyboard-row.c: (mb_kbd_row_base_width):
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_allocate_ui_layout),
+	(mb_kbd_ui_resources_create), (mb_kbd_ui_resize),
+	(mb_kbd_ui_events_iteration), (mb_kbd_ui_load_font),
+	(mb_kbd_ui_init):
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+	* src/matchbox-keyboard.h:
+	Fix layout resizing code. Make defaults dependant on display size.
+	* src/util.c: (util_utf8_char_cnt):
+	remove random printf
+
 2005-04-20  mallum,,,  <mallum@openedhand.com>
 
 	* src/config.xml:

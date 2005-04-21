@@ -1,5 +1,5 @@
 PREFIXDIR  = $(prefix)
-PKGDATADIR = $(datadir)/matchbox
+PKGDATADIR = $(datadir)/matchbox-keyboard
 DATADIR    = $(datadir)
 
 INCLUDES = -DDATADIR=\"$(DATADIR)\" -DPKGDATADIR=\"$(PKGDATADIR)\" -DPREFIX=\"$(PREFIXDIR)\" $(LIBMB_CFLAGS) $(EXPAT_CFLAGS)

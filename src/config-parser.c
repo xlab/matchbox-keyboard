@@ -1,14 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <libgen.h>    /* dirname() */
-#include <expat.h>
-
 #include "matchbox-keyboard.h"
 
 /* 
@@ -152,48 +141,121 @@ config_str_to_modtype(const char* str)
 
 
 static unsigned char* 
-config_load_file(const char* filename) 
+config_load_file(MBKeyboard *kbd, char *variant_in)
 {
-  struct stat    st;
+  struct stat    stat_info;
   FILE*          fp;
-  unsigned char* str;
-  int            len;
-  char           tmp[1024];
+  unsigned char* result;
 
-  strncpy(tmp, filename, 1024);
+  char          *country  = NULL;  
+  char          *variant  = NULL;
+  int            n = 0, i = 0;
+  char           path[1024]; 	/* XXX MAXPATHLEN */
 
-  stat(tmp, &st);
+  /* keyboard[-country][-variant].xml */
 
-#if 0  
-  if (stat(tmp, &st)) 
+  /* This is an overide mainly for people developing keyboard layouts  */
+
+  if (getenv("MB_KBD_CONFIG"))
     {
-      snprintf(tmp, 1024, "%s.xml", filename);
-      if (stat(tmp, &st)) 
-	{/*
-	  snprintf(tmp, 1024, PKGDATADIR "/%s", filename);
-	  if (stat(tmp, &st)) 
-	    {
-	      snprintf(tmp, 1024, PKGDATADIR "/%s.xml", filename);
-	      if (stat(tmp, &st)) 
-		return NULL;
-	    }
-	 */
-	}
-  }  
-#endif
+      snprintf(path, 1024, "%s", getenv("MB_KBD_CONFIG"));
 
-  if (!(fp = fopen(tmp, "rb"))) return NULL;
+      DBG("checking %s\n", path);
+
+      if (util_file_readable(path))
+	goto load;
+
+      return NULL;
+    }
+
+  if (getenv("LANG"))
+    {
+      n = strlen(getenv("LANG")) + 2;
+
+      country = alloca(n);
+
+      snprintf(country, n, "-%s", getenv("LANG"));
+
+      /* strip anything after first '.' */
+      while(country[i] != '\0')
+	if (country[i] == '.')
+	  country[i] = '\0';
+	else
+	  i++;
+    }
+
+  if (variant_in)
+    {
+      n = strlen(variant_in) + 2;
+      variant = alloca(n);
+      snprintf(variant, n, "-%s", variant_in);
+    }
+
+  if (getenv("HOME"))
+    {
+      snprintf(path, 1024, "%s/matchbox/keyboard.xml", getenv("HOME"));
+
+      DBG("checking %s\n", path);
+
+      if (util_file_readable(path))
+	goto load;
+    }
+
+  /* Hmmm :/ */
+ 
+  snprintf(path, 1024, PKGDATADIR "/keyboard%s%s.xml",
+	   country == NULL ? "" : country,
+	   variant == NULL ? "" : variant);
+
+  DBG("checking %s\n", path);
   
-  /* Read in the file. */
-  str = malloc(sizeof(char)*(st.st_size + 1));
-  len = fread(str, 1, st.st_size, fp);
-  if (len >= 0) str[len] = '\0';
+  if (util_file_readable(path))
+    goto load;
+
+  snprintf(path, 1024, PKGDATADIR "/keyboard%s.xml",
+	   variant == NULL ? "" : variant);
+
+  DBG("checking %s\n", path);
+
+  if (util_file_readable(path))
+    goto load;
+
+  snprintf(path, 1024, PKGDATADIR "/keyboard%s.xml",
+	   country == NULL ? "" : country);
+
+  DBG("checking %s\n", path);
+
+  if (util_file_readable(path))
+    goto load;
+
+  snprintf(path, 1024, PKGDATADIR "/keyboard.xml");
+  
+  DBG("checking %s\n", path);
+
+  if (!util_file_readable(path))
+    return NULL;
+
+ load:
+
+  if (stat(path, &stat_info)) 
+    return NULL;
+
+  if ((fp = fopen(path, "rb")) == NULL) 
+    return NULL;
+
+  DBG("loading %s\n", path);
+
+  kbd->config_file = strdup(path);
+
+  result = malloc(stat_info.st_size + 1);
+
+  n = fread(result, 1, stat_info.st_size, fp);
+
+  if (n >= 0) result[n] = '\0';
   
   fclose(fp);
-  
-  /* change to the same directory as the conf file - for images */
-  // chdir(dirname(tmp));
-  return str;
+
+  return result;
 }
 
 static const char *
@@ -432,24 +494,25 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
 
 
 int
-mb_kbd_config_load(MBKeyboard *kbd, char *conf_file)
+mb_kbd_config_load(MBKeyboard *kbd, char *variant)
 {
   unsigned char         *data;
   XML_Parser             p;
   MBKeyboardConfigState *state;
 
-  if ((data = config_load_file(conf_file)) == NULL)
-    {
-      fprintf(stderr, "Couldn't find '%s' device config file\n", conf_file);
-      exit(1);
-    }
+  if ((data = config_load_file(kbd, variant)) == NULL)
+    util_fatal_error("Couldn't find a keyboard config file\n");
 
   p = XML_ParserCreate(NULL);
 
-  if (! p) {
-    fprintf(stderr, "Couldn't allocate memory for XML parser\n");
-    exit(1);
-  }
+  if (!p) 
+    util_fatal_error("Couldn't allocate memory for XML parser\n");
+
+  if (variant && !strstr(kbd->config_file, variant))
+    fprintf(stderr, 
+	    "matchbox-keyboard: *Warning* Unable to locate variant: %s"
+	    "                   falling back to %s\n",
+	    variant, kbd->config_file);
 
   state = util_malloc0(sizeof(MBKeyboardConfigState));
 
@@ -462,10 +525,12 @@ mb_kbd_config_load(MBKeyboard *kbd, char *conf_file)
   XML_SetUserData(p, (void *)state);
 
   if (! XML_Parse(p, data, strlen(data), 1)) {
-    fprintf(stderr, "XML Parse error at line %d:\n%s\n",
+    fprintf(stderr, 
+	    "matchbox-keyboard: XML Parse error at line %d:\n%s\n of %s",
 	    XML_GetCurrentLineNumber(p),
-	    XML_ErrorString(XML_GetErrorCode(p)));
-    exit(1);
+	    XML_ErrorString(XML_GetErrorCode(p)),
+	    kbd->config_file);
+    util_fatal_error("XML Parse failed.\n");
   }
 
   return 1;

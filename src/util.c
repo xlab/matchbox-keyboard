@@ -14,7 +14,7 @@ util_malloc0(int size)
 void
 util_fatal_error(char *msg)
 {
-  fprintf(stderr, "%s", msg);
+  fprintf(stderr, "matchbox-keyboard: *Error*  %s", msg);
   exit(1);
 }
 
@@ -71,4 +71,15 @@ util_utf8_char_cnt(const unsigned char *str)
     }
 
   return result;
+}
+
+boolean 
+util_file_readable(char *path)
+{
+  struct stat st;
+
+  if (stat(path, &st)) 
+    return False;
+ 
+ return True;
 }

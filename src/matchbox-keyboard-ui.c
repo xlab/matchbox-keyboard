@@ -22,6 +22,9 @@ struct MBKeyboardUI
   int           xscreen;
   Window        xwin_root, xwin;
 
+  int           dpy_width;
+  int           dpy_height;
+
   XftFont      *font;
   XftColor      font_col; 
 
@@ -351,9 +354,6 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
       free_space = max_row_width - mb_kbd_row_width(row);
 
-      DBG("free space is %i ( %i - %i )", 
-	  free_space,  max_row_width - mb_kbd_row_width(row));
-
       while (key_item != NULL)
 	{
 	  if (mb_kbd_key_get_fill(key_item->data))
@@ -616,7 +616,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
     unsigned long       status;
   } PropMotifWmHints ;
 
-  Atom atom_wm_protocols[3], 
+  Atom /* atom_wm_protocols[3], */ 
     atom_NET_WM_WINDOW_TYPE, 
     atom_NET_WM_WINDOW_TYPE_TOOLBAR,
     atom_NET_WM_WINDOW_TYPE_DOCK,
@@ -835,13 +835,15 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   while (row_item != NULL)
     {
       int row_base_width, new_row_base_width, row_width_diff;
-      int  next_key_x = 0;
+      int  next_key_x = 0,  n_fillers  = 0, free_space = 0, new_w = 0;
 
-      row_base_width = mb_kbd_row_base_width(row_item->data) + mb_kbd_row_spacing(ui->kbd);
+      row_base_width = mb_kbd_row_base_width(row_item->data);
 
       new_row_base_width = ( row_base_width * width ) / ui->base_alloc_width;
 
       row_width_diff = new_row_base_width - row_base_width;
+
+      DBG("row_width_diff = %i", row_width_diff);
 
       next_key_x = mb_kbd_col_spacing(ui->kbd);
 
@@ -868,9 +870,8 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 	  key_base_width =( mb_kbd_key_width(key) 
 			    - mb_kbd_key_get_extra_width_pad(key));
 
-	  key_new_pad = ((key_base_width * row_width_diff)
-			            / row_base_width );
-
+	  key_new_pad= ( (key_base_width + mb_kbd_col_spacing(kbd)) * row_width_diff) / row_base_width; 
+                             
 	  mb_kbd_key_set_extra_width_pad (key, key_new_pad );
 
 	  /* Height */
@@ -881,7 +882,48 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
 	  next_key_x += (mb_kbd_key_width(key) + mb_kbd_col_spacing(ui->kbd)); 
 
+	  if (mb_kbd_key_get_fill(key))
+	      n_fillers++;
+
 	  key_item = util_list_next(key_item);
+	}
+
+      key_item = mb_kdb_row_keys(row_item->data);
+
+      /* The above ( likely due to rounding ) leaves a few pixels free. 
+       * This can be critical on a small handheld display. Therefore 
+       * we do a second parse deviding up any left over space between
+       * keys marked as fill. 
+      */
+
+      if (n_fillers)
+	{
+	  key_item = mb_kdb_row_keys(row_item->data);
+
+	  free_space = width - mb_kbd_row_width(row_item->data);
+
+	  while (key_item != NULL)
+	    {
+	      if (mb_kbd_key_get_fill(key_item->data))
+		{
+		  int   old_w;
+		  List *nudge_key_item = util_list_next(key_item);
+		  
+		  old_w = mb_kbd_key_width(key_item->data);
+		  new_w = old_w + (free_space/n_fillers);
+		  
+		  mb_kbd_key_set_geometry(key_item->data, -1, -1, new_w, -1);
+		  
+		  /* nudge next keys forward */
+		  while (nudge_key_item)
+		    {
+		      mb_kbd_key_set_geometry(nudge_key_item->data,
+					      mb_kbd_key_x(nudge_key_item->data) + (new_w - old_w ), -1, -1, -1);
+		      nudge_key_item = util_list_next(nudge_key_item);
+		    }
+		}
+	      key_item = util_list_next(key_item);
+	    }
 	}
 
 
@@ -994,7 +1036,29 @@ mb_kbd_ui_init(MBKeyboard *kbd)
   ui->xscreen   = DefaultScreen(ui->xdpy);
   ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);   
 
-  ui->base_font_pt_size = kbd->font_pt_size;
+  ui->dpy_width  = DisplayWidth(ui->xdpy, ui->xscreen);
+  ui->dpy_height = DisplayHeight(ui->xdpy, ui->xscreen);
+
+
+  return 1;
+}
+
+int
+mb_kbd_ui_display_width(MBKeyboardUI *ui)
+{
+  return ui->dpy_width;
+}
+
+int
+mb_kbd_ui_display_height(MBKeyboardUI *ui)
+{
+  return ui->dpy_height;
+}
+
+int
+mb_kbd_ui_realize(MBKeyboardUI *ui)
+{
+  ui->base_font_pt_size = ui->kbd->font_pt_size;
 
   if (!mb_kbd_ui_load_font(ui))
     return 0;

@@ -86,8 +86,6 @@ mb_kbd_row_base_width(MBKeyboardRow *row)
   List *key_item;
   int   result;
 
-  /* XXX we should cache this result somehow as locate_key calls this */
-
   result = mb_kbd_col_spacing(row->kbd);
 
   key_item = mb_kdb_row_keys(row);

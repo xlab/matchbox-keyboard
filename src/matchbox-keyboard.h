@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <locale.h>
+
+#include <expat.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -108,6 +117,8 @@ struct MBKeyboard
   int                    font_pt_size;
   unsigned char         *font_variant;
 
+  unsigned char         *config_file;
+
   List                  *layouts;
   MBKeyboardLayout      *selected_layout;
 
@@ -122,6 +133,9 @@ struct MBKeyboard
 
 int
 mb_kbd_ui_init(MBKeyboard *kbd);
+
+int
+mb_kbd_ui_realize(MBKeyboardUI  *ui);
 
 void
 mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key);
@@ -144,6 +158,13 @@ mb_kbd_ui_send_keysym_press(MBKeyboardUI  *ui,
 
 void
 mb_kbd_ui_send_release(MBKeyboardUI  *ui);
+
+int
+mb_kbd_ui_display_width(MBKeyboardUI *ui);
+
+int
+mb_kbd_ui_display_height(MBKeyboardUI *ui);
+
 
 /**** Keyboard ****/
 
@@ -379,7 +400,7 @@ mb_kbd_key_dump_key(MBKeyboardKey *key);
 /*** Config *****/
 
 int
-mb_kbd_config_load(MBKeyboard *kbd, char *conf_file);
+mb_kbd_config_load(MBKeyboard *kbd, char *varient);
 
 
 /**** Util *****/
@@ -397,6 +418,9 @@ util_fatal_error(char *msg);
 
 int
 util_utf8_char_cnt(const unsigned char *str);
+
+boolean 
+util_file_readable(char *path);
 
 /* Util list */
 

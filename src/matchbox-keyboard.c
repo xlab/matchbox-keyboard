@@ -4,6 +4,7 @@ MBKeyboard*
 mb_kbd_new(int argc, char **argv)
 {
   MBKeyboard *kb = NULL;
+  char       *variant = NULL; 
 
   kb = util_malloc0(sizeof(MBKeyboard));
 
@@ -18,13 +19,31 @@ mb_kbd_new(int argc, char **argv)
   kb->font_pt_size = 8;
   kb->font_variant = strdup("bold");
 
-  if (!mb_kbd_config_load(kb, "config.xml"))
+  if (argc > 1) 
+    {
+      variant = argv[1];
+      DBG("varient is %s\n", variant);
+    }
+  else variant = getenv("MB_KBD_VARIANT");
+
+  if (!mb_kbd_ui_init(kb))
+    return NULL;
+
+  if (mb_kbd_ui_display_width(kb->ui) <= 320) 
+    {
+      kb->key_pad      = 1;
+      kb->col_spacing  = 2;
+      kb->row_spacing  = 2;
+      kb->font_pt_size = 7;
+    }
+
+  if (!mb_kbd_config_load(kb, variant))
     return NULL;
 
   kb->selected_layout 
     = (MBKeyboardLayout *)util_list_get_nth_data(kb->layouts, 0);
 
-  if (!mb_kbd_ui_init(kb))
+  if (!mb_kbd_ui_realize(kb->ui))
     return NULL;
 
   return kb;
