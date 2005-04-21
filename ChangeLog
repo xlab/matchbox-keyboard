@@ -1,5 +1,10 @@
 2005-04-21  mallum,,,  <mallum@openedhand.com>
 
+	* configure.ac:
+	Remove unneeded libmb dep check
+
+2005-04-21  mallum,,,  <mallum@openedhand.com>
+
 
 	* Makefile.am:
 	* configure.ac:
