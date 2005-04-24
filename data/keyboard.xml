@@ -103,9 +103,9 @@
 	  <shifted display="W" />
     </key>
     <key obey-caps='true'>
-	  <default display="e" />                
+	  <mod1 display="ë" />
+	  <default    display="e" />                
 	  <shifted display="E" />
-	  <mod1    display="ë" />
     </key>
     <key obey-caps='true'>
 	  <default display="r" />                

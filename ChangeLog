@@ -1,3 +1,15 @@
+2005-04-24  mallum,,,  <mallum@openedhand.com>
+
+	* README:
+        Write one.
+	* configure.ac:
+	* data/keyboard.xml:
+	* src/config-parser.c: (config_load_file):
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_redraw),
+	(mb_kbd_ui_resources_create), (mb_kbd_ui_resize):
+	* src/matchbox-keyboard.h:
+	Various minor tweaks. 
+
 2005-04-21  mallum,,,  <mallum@openedhand.com>
 
 	* configure.ac:

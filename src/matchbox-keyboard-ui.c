@@ -561,7 +561,6 @@ mb_kbd_ui_redraw_row(MBKeyboardUI  *ui, MBKeyboardRow *row)
 void
 mb_kbd_ui_swap_buffers(MBKeyboardUI  *ui)
 {
-  XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
   XClearWindow(ui->xdpy, ui->xwin);
   XSync(ui->xdpy, False);
 }
@@ -572,7 +571,8 @@ mb_kbd_ui_redraw(MBKeyboardUI  *ui)
   List             *row_item;
   MBKeyboardLayout *layout;
 
-  XSetForeground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
+  /* Background */
+  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f4f4f4.pixel);
   XFillRectangle(ui->xdpy, ui->backbuffer, ui->xgc,
 		 0, 0, ui->xwin_width, ui->xwin_height);
   XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
@@ -769,6 +769,8 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
   XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
 
+  XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
+
   /* Crusty theme stuff  */
 
   alloc_color(ui, &ui->xcol_c5c5c5, "#c5c5c5");
@@ -957,6 +959,8 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 				 DefaultDepth(ui->xdpy, ui->xscreen));
 
   XftDrawChange (ui->xft_backbuffer, ui->backbuffer);
+
+  XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
 
   mb_kbd_ui_redraw(ui);
 }

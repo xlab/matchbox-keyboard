@@ -149,6 +149,7 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
 
   char          *country  = NULL;  
   char          *variant  = NULL;
+  char          *lang     = NULL;
   int            n = 0, i = 0;
   char           path[1024]; 	/* XXX MAXPATHLEN */
 
@@ -168,13 +169,18 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
       return NULL;
     }
 
-  if (getenv("LANG"))
+  lang = getenv("MB_KBD_LANG");
+
+  if (lang == NULL)
+    lang = getenv("LANG");
+
+  if (lang)
     {
-      n = strlen(getenv("LANG")) + 2;
+      n = strlen(lang) + 2;
 
       country = alloca(n);
 
-      snprintf(country, n, "-%s", getenv("LANG"));
+      snprintf(country, n, "-%s", lang);
 
       /* strip anything after first '.' */
       while(country[i] != '\0')

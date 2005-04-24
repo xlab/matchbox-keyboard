@@ -132,19 +132,8 @@ dnl ------ Expat ------------------------------------------------------------
 dnl ------ Debug Build ------------------------------------------------------
 
 if test x$enable_debug = xyes; then
-      LIBMB_CFLAGS="$LIBMB_CFLAGS -DDEBUG"
+   AC_DEFINE_UNQUOTED(WANT_DEBUG, 1, [Make a debug (Verbose) Build])
 fi
-
-
-dnl ---- Png Support -------------------------------------------------------
-
-if $PKG_CONFIG --libs libmb | grep png ; then
-   found_png="yes"
-else
-   found_png="no"	
-fi
-
-AM_CONDITIONAL(WANT_PNGS, test x$found_png = xyes)  
 
 
 dnl ------ GCC flags --------------------------------------------------------
