@@ -188,6 +188,12 @@ Todo
 
  Again needs an image lib.
 
+ * Dynamic Extended keys 
+
+ Some how have certain keys limit themselves to only being displayed if 
+ width is avialable.
+ This would work hopefull work well for screen rotation. 
+
  * Embedding. 
 
  Should be quite easy to add.

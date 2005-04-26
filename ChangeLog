@@ -1,5 +1,12 @@
 2005-04-26  mallum,,,  <mallum@openedhand.com>
 
+	* README:
+	Small update on Todo.
+	* configure.ac:
+	Fix a minor snafu
+
+2005-04-26  mallum,,,  <mallum@openedhand.com>
+
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
         Make key faces darker to increase visibility on Ipaq.
 	* src/matchbox-keyboard.c: (mb_kbd_new):
