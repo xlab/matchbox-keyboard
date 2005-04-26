@@ -34,7 +34,7 @@ mb_kbd_new(int argc, char **argv)
       kb->key_pad      = 1;
       kb->col_spacing  = 2;
       kb->row_spacing  = 2;
-      kb->font_pt_size = 7;
+      kb->font_pt_size = 5;
     }
 
   if (!mb_kbd_config_load(kb, variant))

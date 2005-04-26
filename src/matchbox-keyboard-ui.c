@@ -681,7 +681,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 
   if (wm_hints)
     {
-      DBG("setting no fous hint");
+      DBG("setting no focus hint");
       wm_hints->input = False;
       wm_hints->flags = InputHint;
       XSetWMHints(ui->xdpy, ui->xwin, wm_hints );
@@ -755,7 +755,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 				     DefaultColormap(ui->xdpy, ui->xscreen));
 
   /* #636262 - for text maybe */
-  coltmp.red   = coltmp.green = coltmp.blue  = 0x0000; coltmp.alpha = 0x7575;
+  coltmp.red   = coltmp.green = coltmp.blue  = 0x0000; coltmp.alpha = 0xcccc;
 
   XftColorAllocValue(ui->xdpy,
 		     DefaultVisual(ui->xdpy, ui->xscreen), 

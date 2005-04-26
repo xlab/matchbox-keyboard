@@ -1,3 +1,10 @@
+2005-04-26  mallum,,,  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
+        Make key faces darker to increase visibility on Ipaq.
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+	Make small font smaller to fit Ipaq display
+
 2005-04-24  mallum,,,  <mallum@openedhand.com>
 
 	* README:
