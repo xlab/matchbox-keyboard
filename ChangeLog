@@ -1,5 +1,10 @@
 2005-04-26  mallum,,,  <mallum@openedhand.com>
 
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
+	Fix taskbar skip hint
+
+2005-04-26  mallum,,,  <mallum@openedhand.com>
+
 	* src/matchbox-keyboard-ui.c: (get_current_window_manager_name),
 	(mb_kbd_ui_redraw), (mb_kbd_ui_show), (mb_kbd_ui_resources_create),
 	(mb_kbd_ui_resize):

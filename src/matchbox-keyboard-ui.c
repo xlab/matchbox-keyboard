@@ -784,9 +784,9 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 		      (unsigned char *)wm_struct_vals , 12);
 
       XChangeProperty(ui->xdpy, ui->xwin, 
-		      atom_NET_WM_STATE_SKIP_TASKBAR, XA_ATOM, 32, 
+		      atom_NET_WM_STATE, XA_ATOM, 32, 
 		      PropModeReplace, 
-		      (unsigned char *)states, 1);
+		      (unsigned char **)&states, 1);
 
       if (get_desktop_area(ui, NULL, NULL, &desk_width, NULL))
 	{
