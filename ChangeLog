@@ -1,5 +1,13 @@
 2005-04-26  mallum,,,  <mallum@openedhand.com>
 
+	* src/matchbox-keyboard-ui.c: (get_current_window_manager_name),
+	(mb_kbd_ui_redraw), (mb_kbd_ui_show), (mb_kbd_ui_resources_create),
+	(mb_kbd_ui_resize):
+	Try to avoid ugly flash ( caused by repaint/resize ) on startup.
+	Also probably speeds up startup a little.
+
+2005-04-26  mallum,,,  <mallum@openedhand.com>
+
 	* src/matchbox-keyboard-ui.c:
 	* src/matchbox-keyboard.h:
 	* src/util-list.c: (util_list_append):

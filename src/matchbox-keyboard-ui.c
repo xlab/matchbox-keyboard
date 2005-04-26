@@ -52,6 +52,9 @@ struct MBKeyboardUI
   MBKeyboard   *kbd;
 };
 
+static void
+mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height);
+
 static int
 mb_kbd_ui_load_font(MBKeyboardUI *ui);
 
@@ -138,6 +141,38 @@ get_current_window_manager_name (MBKeyboardUI  *ui)
   return retval;
 }
 
+static boolean
+get_desktop_area(MBKeyboardUI *ui, int *x, int *y, int *width, int *height)
+{
+  Atom           atom_area, type;
+  int            result, format;
+  long           nitems, bytes_after;
+  int           *geometry = NULL;
+
+  atom_area = XInternAtom (ui->xdpy, "_NET_WORKAREA", False);
+
+  result = XGetWindowProperty (ui->xdpy, 
+			       RootWindow(ui->xdpy, ui->xscreen),
+			       atom_area,
+			       0, 16L, False, XA_CARDINAL, &type, &format,
+			       &nitems, &bytes_after, 
+			       (unsigned char **)&geometry);
+
+  if (result != Success || nitems < 4 || geometry == NULL)
+    {
+      if (geometry) XFree(geometry);
+      return False;
+    }
+
+  if (x) *x           = geometry[0];
+  if (y) *y           = geometry[1];
+  if (width)  *width  = geometry[2];
+  if (height) *height = geometry[3];
+  
+  XFree(geometry);
+
+  return True;
+}
 
 void
 mb_kbd_ui_send_press(MBKeyboardUI        *ui,
@@ -621,7 +656,10 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
     atom_NET_WM_WINDOW_TYPE_TOOLBAR,
     atom_NET_WM_WINDOW_TYPE_DOCK,
     atom_NET_WM_STRUT_PARTIAL,
+    atom_NET_WM_STATE_SKIP_TASKBAR,
+    atom_NET_WM_STATE,
     atom_MOTIF_WM_HINTS;
+  
 
   PropMotifWmHints    *mwm_hints;
   XSizeHints           size_hints;
@@ -655,6 +693,12 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   atom_NET_WM_STRUT_PARTIAL = 
     XInternAtom(ui->xdpy, "_NET_WM_STRUT_PARTIAL", False);
 
+  atom_NET_WM_STATE_SKIP_TASKBAR =
+    XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
+
+  atom_NET_WM_STATE =
+    XInternAtom(ui->xdpy, "_NET_WM_STATE", False);
+
   if ((wm_name = get_current_window_manager_name(ui)) != NULL)
     {
       have_ewmh_wm = True; 	/* basically assumed to be Metacity
@@ -676,6 +720,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			   CopyFromParent, CopyFromParent, CopyFromParent,
 			   CWOverrideRedirect|CWEventMask,
 			   &win_attr);
+
 
   wm_hints = XAllocWMHints();
 
@@ -730,18 +775,45 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			     0, /* bottom_start_x */
 			     1399 }; /* bottom_end_x */
 
+      Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR };
+      int  desk_width = 0;
+
       XChangeProperty(ui->xdpy, ui->xwin, 
 		      atom_NET_WM_STRUT_PARTIAL, XA_ATOM, 32, 
 		      PropModeReplace, 
 		      (unsigned char *)wm_struct_vals , 12);
 
-      if (have_matchbox_wm)
-	XChangeProperty(ui->xdpy, ui->xwin, 
-			atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
-			PropModeReplace, 
-			(unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
-    }
+      XChangeProperty(ui->xdpy, ui->xwin, 
+		      atom_NET_WM_STATE_SKIP_TASKBAR, XA_ATOM, 32, 
+		      PropModeReplace, 
+		      (unsigned char *)states, 1);
 
+      if (get_desktop_area(ui, NULL, NULL, &desk_width, NULL))
+	{
+	  /* Assuming we take up all available display width 
+           * ( at least true with matchbox wm ). we resize
+	   * the base ui width to this ( and height as a factor ) 
+           * to avoid the case of mapping and then the wm resizing
+           * us, causing an ugly repaint. 
+	  */
+	  if (desk_width > ui->xwin_width)
+	    {
+	      mb_kbd_ui_resize(ui, 
+			       desk_width, 
+			       ( desk_width * ui->xwin_height ) / ui->xwin_width);
+	    }
+	}
+
+      if (have_matchbox_wm)
+	{
+	  XChangeProperty(ui->xdpy, ui->xwin, 
+			  atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
+			  PropModeReplace, 
+			  (unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
+
+	 
+	}
+    }
 
   ui->backbuffer = XCreatePixmap(ui->xdpy,
 				 ui->xwin,
@@ -753,6 +825,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 				     ui->backbuffer,
 				     DefaultVisual(ui->xdpy, ui->xscreen),
 				     DefaultColormap(ui->xdpy, ui->xscreen));
+
 
   /* #636262 - for text maybe */
   coltmp.red   = coltmp.green = coltmp.blue  = 0x0000; coltmp.alpha = 0xcccc;
@@ -951,18 +1024,21 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   ui->xwin_width  = width;
   ui->xwin_height = height;
 
-  XFreePixmap(ui->xdpy, ui->backbuffer);
-  ui->backbuffer = XCreatePixmap(ui->xdpy,
-				 ui->xwin,
-				 ui->xwin_width, 
-				 ui->xwin_height,
-				 DefaultDepth(ui->xdpy, ui->xscreen));
+  if (ui->backbuffer) /* may get called before initialised */
+    {
+      XFreePixmap(ui->xdpy, ui->backbuffer);
+      ui->backbuffer = XCreatePixmap(ui->xdpy,
+				     ui->xwin,
+				     ui->xwin_width, 
+				     ui->xwin_height,
+				     DefaultDepth(ui->xdpy, ui->xscreen));
 
-  XftDrawChange (ui->xft_backbuffer, ui->backbuffer);
+      XftDrawChange (ui->xft_backbuffer, ui->backbuffer);
 
-  XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
+      XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
 
-  mb_kbd_ui_redraw(ui);
+      mb_kbd_ui_redraw(ui);
+    }
 }
 
 int
