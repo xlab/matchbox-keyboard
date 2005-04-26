@@ -140,9 +140,9 @@ get_current_window_manager_name (MBKeyboardUI  *ui)
 
 
 void
-mb_kbd_ui_send_press(MBKeyboardUI  *ui,
-		     unsigned char *utf8_char_in,
-		     int            modifiers)
+mb_kbd_ui_send_press(MBKeyboardUI        *ui,
+		     const unsigned char *utf8_char_in,
+		     int                  modifiers)
 {
   DBG("Sending '%s'", utf8_char_in);
   fakekey_press(ui->fakekey, utf8_char_in, -1, modifiers);

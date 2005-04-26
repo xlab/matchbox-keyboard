@@ -82,7 +82,7 @@ util_list_append(List *list, void *data)
   return list;
 }
 
-List*
+void
 util_list_foreach(List *list, ListForEachCB func, void *userdata)
 {
   while (list)

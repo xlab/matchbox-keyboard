@@ -58,8 +58,8 @@ util_fatal_error(char *msg)
 int
 util_utf8_char_cnt(const unsigned char *str)
 {
-  unsigned char *p = str;
-  int            mask, len, result = 0;
+  const unsigned char *p = str;
+  int                      mask, len, result = 0;
 
   /* XXX Should validate too */
 

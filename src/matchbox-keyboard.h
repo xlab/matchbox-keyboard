@@ -149,9 +149,9 @@ void
 mb_kbd_ui_swap_buffers(MBKeyboardUI  *ui);
 
 void
-mb_kbd_ui_send_press(MBKeyboardUI  *ui,
-		     unsigned char *utf8_char_in,
-		     int            modifiers);
+mb_kbd_ui_send_press(MBKeyboardUI        *ui,
+		     const unsigned char *utf8_char_in,
+		     int                  modifiers);
 
 void
 mb_kbd_ui_send_keysym_press(MBKeyboardUI  *ui,
@@ -449,7 +449,7 @@ util_list_get_nth_data(List *list, int n);
 List*
 util_list_append(List *list, void *data);
 
-List*
+void
 util_list_foreach(List *list, ListForEachCB func, void *userdata);
 
 
