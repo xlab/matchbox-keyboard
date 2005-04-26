@@ -156,7 +156,7 @@ AC_SUBST(EXPAT_CFLAGS)
 AC_OUTPUT([
 Makefile
 src/Makefile  
-data/Makefile
+layouts/Makefile
 ])
 
 dnl ==========================================================================

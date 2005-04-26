@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Keyboard
+Comment=Virtual Keyboard
+Exec=matchbox-keyboard
+Type=Application
+Icon=matchbox-keyboard.png
+Categories=Panel;Utility;MB
+X-MB-INPUT-MECHANSIM=True

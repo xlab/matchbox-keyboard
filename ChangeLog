@@ -1,5 +1,17 @@
 2005-04-26  mallum,,,  <mallum@openedhand.com>
 
+	* configure.ac:
+	* data/Makefile.am:
+	* data/keyboard-extended.xml:
+	* data/keyboard.xml:
+	Rename data -> layouts
+	* Makefile.am:
+	* matchbox-keyboard.desktop:
+        * matchbox-keyboard.png
+	Add a icon and .desktop file
+
+2005-04-26  mallum,,,  <mallum@openedhand.com>
+
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
 	Fix taskbar skip hint
 
