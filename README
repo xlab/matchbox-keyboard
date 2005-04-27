@@ -121,6 +121,14 @@ children. A key tag can optionally have the following attributes;
 
   If set, the keys width is set to fill all available free space. 
 
+  * extended=true|false ( defaults to false )
+
+  Keys set with this extended attribute set to true will *only*
+  be shown if the display is landscape, rather than portrait.
+  The rational for this is to better adapt to screen rotations.
+  ( Note: the <space> tag can also use this. )
+  
+
 The <key> then has sub tags specifies the appearance and action for
 the five possible key states; <default>,<shifted>,<mod1>,<mod2>,<mod3>.
 

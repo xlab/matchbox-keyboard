@@ -93,10 +93,10 @@
     <space width="500" extended="true"/>
 
     <key width="4000"  extended="true">
-	  <default display="Home" />
+	  <default display="Home" action="home"/>
     </key>
     <key width="4000"  extended="true">
-	  <default display="PgUp" />
+	  <default display="PgUp" action="pageup"/>
     </key>
 
     <space width="500" extended="true"/>
@@ -168,10 +168,10 @@
     <space width="500" extended="true"/>
 
     <key width="4000"  extended="true">
-	  <default display="End" />
+	  <default display="End" action="end"/>
     </key>
     <key width="4000"  extended="true">
-	  <default display="PgDn" />
+	  <default display="PgDn" action="pagedown"/>
     </key>
 
     <space width="500" extended="true"/>
