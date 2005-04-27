@@ -1039,6 +1039,7 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
 		      mb_kbd_key_set_geometry(nudge_key_item->data,
 					      mb_kbd_key_x(nudge_key_item->data) + (new_w - old_w ), -1, -1, -1);
+
 		    }
 		}
 
@@ -1055,16 +1056,27 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
       mb_kbd_row_set_y(row_item->data, next_row_y);
 
-      DBG("************ setting row y to %i , next is %i, %i***********", 
-	  next_row_y, 
-	  mb_kbd_row_height(row_item->data) 
-	  ,mb_kbd_row_spacing(ui->kbd)
-	  );
-
       next_row_y  += (mb_kbd_row_height(row_item->data) 
 		      + mb_kbd_row_spacing(ui->kbd));
 
       row_item = util_list_next(row_item);
+    }
+
+  /* center entire layout vertically if space left */
+
+  if (next_row_y < height)
+    {
+      int vspace = ( height - next_row_y ) / 2;
+
+      row_item = mb_kbd_layout_rows(layout);
+
+      while (row_item != NULL)
+	{
+	  mb_kbd_row_set_y(row_item->data, 
+			   mb_kbd_row_y(row_item->data) + vspace + 1);
+
+	  row_item = util_list_next(row_item);
+	}
     }
 
   XResizeWindow(ui->xdpy, ui->xwin, width, height);
@@ -1170,6 +1182,10 @@ mb_kbd_ui_events_iteration(MBKeyboardUI *ui)
 	      mb_kbd_ui_handle_configure(ui,
 					 xev.xconfigure.width,
 					 xev.xconfigure.height);
+	    break;
+	  case MappingNotify: 
+	    fakekey_reload_keysyms(ui->fakekey);
+	    XRefreshKeyboardMapping(&xev.xmapping);
 	    break;
 	  default:
 	    break;

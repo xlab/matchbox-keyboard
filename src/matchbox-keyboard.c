@@ -32,8 +32,8 @@ mb_kbd_new(int argc, char **argv)
   if (mb_kbd_ui_display_width(kb->ui) <= 320) 
     {
       kb->key_pad      = 1;
-      kb->col_spacing  = 2;
-      kb->row_spacing  = 2;
+      kb->col_spacing  = 1;
+      kb->row_spacing  = 1;
       kb->font_pt_size = 5;
     }
 
