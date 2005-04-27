@@ -445,6 +445,12 @@ config_handle_key_tag(MBKeyboardConfigState *state, const char **attr)
 	mb_kbd_key_set_obey_caps(state->current_key, True);
     }
 
+  if ((val = attr_get_val("extended", attr)) != NULL)
+    {
+      if (strcaseeq(val, "true"))
+	mb_kbd_key_set_extended(state->current_key, True);
+    }
+
   if ((val = attr_get_val("width", attr)) != NULL)
     {
       if (atoi(val) > 0)

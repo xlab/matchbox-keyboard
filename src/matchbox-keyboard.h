@@ -127,6 +127,8 @@ struct MBKeyboard
   int                    key_border, key_pad, key_margin;
   int                    row_spacing, col_spacing;
 
+  boolean                extended; /* are we showing extended keys ? */
+
   MBKeyboardKey         *held_key;
   MBKeyboardStateType    keys_state;
 };
@@ -204,6 +206,12 @@ MBKeyboardKeyStateType
 mb_kbd_keys_current_state(MBKeyboard *kbd);
 
 void
+mb_kbd_set_extended(MBKeyboard *kb, boolean extend);
+
+boolean
+mb_kbd_is_extended(MBKeyboard *kb);
+
+void
 mb_kbd_add_layout(MBKeyboard *kb, MBKeyboardLayout *layout);
 
 MBKeyboardLayout*
@@ -270,6 +278,12 @@ mb_kbd_row_append_key(MBKeyboardRow *row, MBKeyboardKey *key);
 List*
 mb_kdb_row_keys(MBKeyboardRow *row);
 
+#define mb_kbd_row_for_each_key(r,k)            \
+      for ((k) = mb_kdb_row_keys((r));          \
+	   (k) != NULL;                         \
+	   (k) = util_list_next((k))) 
+
+
 /**** Keys ******/
 
 MBKeyboardKey*
@@ -325,6 +339,12 @@ mb_kbd_key_width(MBKeyboardKey *key) ;
 
 int 
 mb_kbd_key_height(MBKeyboardKey *key);
+
+void
+mb_kbd_key_set_extended(MBKeyboardKey  *key, boolean extend);
+
+boolean
+mb_kbd_key_get_extended(MBKeyboardKey  *key);
 
 void
 mb_kbd_key_set_extra_width_pad(MBKeyboardKey  *key, int pad);

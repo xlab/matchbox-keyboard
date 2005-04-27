@@ -1,3 +1,28 @@
+2005-04-27  mallum,,,  <mallum@openedhand.com>
+
+
+	* layouts/keyboard.xml:
+	New layout with extended keys.
+
+	* src/config-parser.c: (config_handle_key_tag):
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_get_extra_width_pad):
+	* src/matchbox-keyboard-row.c: (mb_kbd_row_height),
+	(mb_kbd_row_width), (mb_kbd_row_base_width):
+	* src/matchbox-keyboard-ui.c: (get_desktop_area),
+	(mb_kbd_ui_send_keysym_press), (mb_kbd_ui_send_release),
+	(mb_kdb_ui_unit_key_size), (mb_kbd_ui_min_key_size),
+	(mb_kbd_ui_allocate_ui_layout), (mb_kbd_ui_redraw_key),
+	(mb_kbd_ui_redraw_row), (mb_kbd_ui_resources_create),
+	(mb_kbd_ui_resize), (mb_kbd_ui_handle_configure),
+	(mb_kbd_ui_events_iteration), (mb_kbd_ui_load_font),
+	(mb_kbd_ui_init), (mb_kbd_ui_display_width),
+	(mb_kbd_ui_display_height), (mb_kbd_ui_realize):
+	* src/matchbox-keyboard.c: (mb_kbd_locate_key),
+	(mb_kbd_get_held_key):
+	* src/matchbox-keyboard.h:
+	Make keyboard 'adapt' with extended keys to screen rotation
+	and screen orientation.
+
 2005-04-26  mallum,,,  <mallum@openedhand.com>
 
 	* configure.ac:

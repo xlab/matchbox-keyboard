@@ -159,18 +159,19 @@ mb_kbd_locate_key(MBKeyboard *kb, int x, int y)
 	  && y >= mb_kbd_row_y(row)
 	  && y <= mb_kbd_row_y(row) + mb_kbd_row_height(row) )
 	{
-	  key_item = mb_kdb_row_keys(row);
-
-	  while (key_item != NULL)
+	  mb_kbd_row_for_each_key(row, key_item) 
 	    {
 	      MBKeyboardKey *key = key_item->data;
+
+	      if (!mb_kbd_is_extended(kb) 
+		      && mb_kbd_key_get_extended(key))
+		continue;
 
 	      if (!mb_kbd_key_is_blank(key)
 		  && x >= mb_kbd_key_abs_x(key)
 		  && x <= mb_kbd_key_abs_x(key) + mb_kbd_key_width(key))
 		return key;
 
-	      key_item = util_list_next(key_item);
 	    }
 	 
 	  return NULL;
@@ -203,6 +204,18 @@ MBKeyboardKey *
 mb_kbd_get_held_key(MBKeyboard *kb)
 {
   return kb->held_key;
+}
+
+void
+mb_kbd_set_extended(MBKeyboard *kb, boolean extend)
+{
+  kb->extended = extend;
+}
+
+boolean
+mb_kbd_is_extended(MBKeyboard *kb)
+{
+  return kb->extended;
 }
 
 

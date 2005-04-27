@@ -39,21 +39,31 @@ mb_kbd_row_x (MBKeyboardRow *row)
 
 int 
 mb_kbd_row_y(MBKeyboardRow *row) 
-{ 
+{
   return row->alloc_y;
 }
 
 int 
 mb_kbd_row_height(MBKeyboardRow *row) 
 {
-  List          *key_item = mb_kdb_row_keys(row);
-  MBKeyboardKey *key;
+  List          *key_item;
 
-  /* XX this is a little crazed */
+  /* XX this is a little crazed 
+   * We avoid keys with 0 height - spacers or non allocated extended ones
+  */
 
-  key = key_item->data;
+  mb_kbd_row_for_each_key(row, key_item)
+    {
+      if (!mb_kbd_is_extended(row->kbd) 
+	  && mb_kbd_key_get_extended(key_item->data))
+	continue;
 
-  return mb_kbd_key_height(key);
+
+      if (mb_kbd_key_height(key_item->data) > 0)
+	return mb_kbd_key_height(key_item->data);
+    }
+
+  return 0;
 }
 
 int 
@@ -66,15 +76,16 @@ mb_kbd_row_width(MBKeyboardRow *row)
 
   result = mb_kbd_col_spacing(row->kbd);
 
-  key_item = mb_kdb_row_keys(row);
-
-  while (key_item != NULL)
-    {
+  
+  mb_kbd_row_for_each_key(row, key_item) 
+   {
       MBKeyboardKey *key = key_item->data;
       
-      result += (mb_kbd_key_width(key) + mb_kbd_col_spacing(row->kbd));
+      if (!mb_kbd_is_extended(row->kbd) 
+	  && mb_kbd_key_get_extended(key))
+	continue;
 
-      key_item = util_list_next(key_item);
+      result += (mb_kbd_key_width(key) + mb_kbd_col_spacing(row->kbd));
     }
 
   return result;
@@ -88,17 +99,18 @@ mb_kbd_row_base_width(MBKeyboardRow *row)
 
   result = mb_kbd_col_spacing(row->kbd);
 
-  key_item = mb_kdb_row_keys(row);
-
-  while (key_item != NULL)
+  mb_kbd_row_for_each_key(row, key_item) 
     {
       MBKeyboardKey *key = key_item->data;
       
+      if (!mb_kbd_is_extended(row->kbd) 
+	  && mb_kbd_key_get_extended(key))
+	continue;
+
       result += (mb_kbd_key_width(key) 
 		 + mb_kbd_col_spacing(row->kbd) 
 		 - mb_kbd_key_get_extra_width_pad(key));
- 
-      key_item = util_list_next(key_item);
+
     }
 
   return result;

@@ -26,6 +26,9 @@
 -->
 
   <row>
+
+    <space width="500" extended="true"/>
+
     <key fill="true">
 	  <default display="Esc" action="escape" />
     </key>
@@ -87,10 +90,24 @@
 	  <default display="Bksp" action="backspace"/>
     </key>
 
+    <space width="500" extended="true"/>
+
+    <key width="4000"  extended="true">
+	  <default display="Home" />
+    </key>
+    <key width="4000"  extended="true">
+	  <default display="PgUp" />
+    </key>
+
+    <space width="500" extended="true"/>
+
 
   </row>
 
   <row>
+
+    <space width="500" extended="true"/>
+
     <key fill="true">
 	  <default display="Tab" action="tab"/>                
     </key>
@@ -148,9 +165,22 @@
 	  <shifted display="|" />
     </key>
 
+    <space width="500" extended="true"/>
+
+    <key width="4000"  extended="true">
+	  <default display="End" />
+    </key>
+    <key width="4000"  extended="true">
+	  <default display="PgDn" />
+    </key>
+
+    <space width="500" extended="true"/>
 
   </row>
   <row>
+
+    <space width="500" extended="true"/>
+
     <key fill="true">
 	  <default display="Caps" action="modifier:caps"/>                
     </key>
@@ -202,9 +232,19 @@
 	  <default display="Ret" action="return"/>
     </key>
 
+    <space width="500" extended="true"/>
+
+    <space width="4000"  extended="true" />
+
+    <space width="4000"  extended="true" />
+
+    <space width="500" extended="true"/>
+
 
   </row>
   <row>
+
+    <space width="500" extended="true"/>
 
     <key fill="true">
 	  <default display="Shift" action="modifier:shift"/>                
@@ -263,10 +303,21 @@
 	  <default display="Shift" action="modifier:shift"/>                
     </key>
 
+    <space width="500" extended="true"/>
+
+    <space width="4000"  extended="true" />
+
+    <space width="4000"  extended="true" />
+
+    <space width="500" extended="true"/>
+
 
 
  </row>
   <row>
+
+    <space width="500" extended="true"/>
+
     <key>
 	  <default display="äëö" action="modifier:mod1"/>                
     </key>
@@ -301,6 +352,14 @@
     <key>
 	  <default display="&gt;" action="right" />                
     </key>
+
+    <space width="500" extended="true"/>
+
+    <space width="4000"  extended="true" />
+
+    <space width="4000"  extended="true" />
+
+    <space width="500" extended="true"/>
 
 </row>
 

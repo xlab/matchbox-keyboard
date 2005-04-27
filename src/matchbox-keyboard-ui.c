@@ -174,6 +174,31 @@ get_desktop_area(MBKeyboardUI *ui, int *x, int *y, int *width, int *height)
   return True;
 }
 
+static void
+update_display_size(MBKeyboardUI *ui)
+{
+  XWindowAttributes winattr;
+
+  XGetWindowAttributes(ui->xdpy, ui->xwin_root, &winattr);
+
+  /* XXX should actually trap an X error here */
+
+  ui->dpy_width  = winattr.width;
+  ui->dpy_height = winattr.height;
+
+  return;
+}
+
+static boolean
+want_extended(MBKeyboardUI *ui)
+{
+  /* Are we in portrait ? */
+  if (ui->dpy_width > ui->dpy_height)
+    return True;
+
+  return False;
+}
+
 void
 mb_kbd_ui_send_press(MBKeyboardUI        *ui,
 		     const unsigned char *utf8_char_in,
@@ -212,11 +237,13 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
 
   while (row_item != NULL)
     {
-      key_item = mb_kdb_row_keys((MBKeyboardRow *)row_item->data);
-
-      while (key_item != NULL)
+      mb_kbd_row_for_each_key(row_item->data, key_item)
 	{
 	  MBKeyboardKey *key = key_item->data;
+
+	  if (!mb_kbd_is_extended(ui->kbd) 
+	      && mb_kbd_key_get_extended(key))
+	    continue;
 
 	  mb_kdb_key_foreach_state(key, state)
 	    {
@@ -239,7 +266,6 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
 	      /* XXX TODO, also need to check height of image keys etc */
 
 	    }
-	  key_item = util_list_next(key_item);
 	}
       row_item = util_list_next(row_item);
     }
@@ -309,16 +335,21 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
     {
       MBKeyboardRow *row = row_item->data;
       
-      key_item = mb_kdb_row_keys(row);
-
       key_x = mb_kbd_col_spacing(ui->kbd);
 
       max_row_key_height = 0;
 
-      while (key_item != NULL)
+      mb_kbd_row_for_each_key(row, key_item)
 	{
 	  int            key_w, key_h;          
 	  MBKeyboardKey *key = key_item->data;
+
+	  mb_kbd_key_set_extra_height_pad(key, 0);
+	  mb_kbd_key_set_extra_width_pad(key, 0);
+	  mb_kbd_key_set_geometry(key, 0, 0, 0, 0);
+
+	  if (!mb_kbd_is_extended(ui->kbd) && mb_kbd_key_get_extended(key))
+	    continue;
 
 	  mb_kbd_ui_min_key_size(ui, key, &key_w, &key_h);
 
@@ -343,14 +374,13 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 	    max_row_key_height = key_h;
 
 	  mb_kbd_key_set_geometry(key, key_x, key_y, key_w, key_h); 
-
-	  key_item = util_list_next(key_item);
-
+	  
 	  key_x += (mb_kbd_col_spacing(ui->kbd) + key_w);
 	}
 
       if (key_x > max_row_width) /* key_x now represents row width */
 	max_row_width = key_x;
+
 
       mb_kbd_row_set_y(row, row_y);
 
@@ -372,25 +402,27 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
       MBKeyboardRow *row        = row_item->data;
       int            n_fillers  = 0, free_space = 0, new_w = 0;
 
-      key_item = mb_kdb_row_keys(row);
-
-      while (key_item != NULL)
+      mb_kbd_row_for_each_key(row,key_item)
 	{
+	  if (!mb_kbd_is_extended(ui->kbd) 
+	      && mb_kbd_key_get_extended(key_item->data))
+	    continue;
+
 	  if (mb_kbd_key_get_fill(key_item->data))
 	      n_fillers++;
-
-	  key_item = util_list_next(key_item);
 	}
 
       if (!n_fillers)
 	goto next_row;
 
-      key_item = mb_kdb_row_keys(row);
-
       free_space = max_row_width - mb_kbd_row_width(row);
 
-      while (key_item != NULL)
+      mb_kbd_row_for_each_key(row, key_item)
 	{
+	  if (!mb_kbd_is_extended(ui->kbd) 
+	      && mb_kbd_key_get_extended(key_item->data))
+	    continue;
+
 	  if (mb_kbd_key_get_fill(key_item->data))
 	    {
 	      int   old_w;
@@ -402,18 +434,23 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 	      mb_kbd_key_set_geometry(key_item->data, -1, -1, new_w, -1);
 
 	      /* nudge next keys forward */
-	      while (nudge_key_item)
+
+	      for (; 
+		   nudge_key_item != NULL; 
+		   nudge_key_item = util_list_next(nudge_key_item)) 
 		{
+		  if (!mb_kbd_is_extended(ui->kbd) 
+		      && mb_kbd_key_get_extended(nudge_key_item->data))
+		    continue;
+
 		  mb_kbd_key_set_geometry(nudge_key_item->data,
 					  mb_kbd_key_x(nudge_key_item->data) + (new_w - old_w ), -1, -1, -1);
-		  nudge_key_item = util_list_next(nudge_key_item);
+		  
 		}
 	    }
-	  key_item = util_list_next(key_item);
+
 	}
-
     next_row:
-
       row_item = util_list_next(row_item);
     }
 
@@ -583,13 +620,13 @@ mb_kbd_ui_redraw_row(MBKeyboardUI  *ui, MBKeyboardRow *row)
 {
   List *key_item;
 
-  key_item = mb_kdb_row_keys(row);
-
-  while (key_item != NULL)
+  mb_kbd_row_for_each_key(row,key_item)
     {
-      mb_kbd_ui_redraw_key(ui, key_item->data);
+      if (!mb_kbd_is_extended(ui->kbd) 
+	  && mb_kbd_key_get_extended(key_item->data))
+	continue;
 
-      key_item = util_list_next(key_item);
+      mb_kbd_ui_redraw_key(ui, key_item->data);
     }
 }
 
@@ -786,7 +823,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
       XChangeProperty(ui->xdpy, ui->xwin, 
 		      atom_NET_WM_STATE, XA_ATOM, 32, 
 		      PropModeReplace, 
-		      (unsigned char **)&states, 1);
+		      (unsigned char **)states, 1);
 
       if (get_desktop_area(ui, NULL, NULL, &desk_width, NULL))
 	{
@@ -852,6 +889,11 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   alloc_color(ui, &ui->xcol_f8f8f5, "#f8f8f5");
   alloc_color(ui, &ui->xcol_f4f4f4, "#f4f4f4");
   alloc_color(ui, &ui->xcol_a4a4a4, "#a4a4a4");
+
+  /* Get root size change events for rotation */
+
+  /* XSelectInput(ui->xdpy, ui->xwin_root, StructureNotifyMask); */
+
   return 1;
 }
 
@@ -922,7 +964,6 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
       next_key_x = mb_kbd_col_spacing(ui->kbd);
 
-
       /* 
        * row_base_width       
        * --------------  X  new_width  = new_base_width
@@ -933,14 +974,13 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
        *                          row_base_width
       */
 
-      key_item = mb_kdb_row_keys(row_item->data);
-
-      MARK();
-
-      while (key_item != NULL)
+      mb_kbd_row_for_each_key(row_item->data, key_item)
 	{
 	  MBKeyboardKey *key = key_item->data;
 	  int            key_base_width, key_new_pad;
+
+	  if (!mb_kbd_is_extended(kbd) && mb_kbd_key_get_extended(key))
+	    continue;
 
 	  key_base_width =( mb_kbd_key_width(key) 
 			    - mb_kbd_key_get_extra_width_pad(key));
@@ -959,11 +999,7 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
 	  if (mb_kbd_key_get_fill(key))
 	      n_fillers++;
-
-	  key_item = util_list_next(key_item);
 	}
-
-      key_item = mb_kdb_row_keys(row_item->data);
 
       /* The above ( likely due to rounding ) leaves a few pixels free. 
        * This can be critical on a small handheld display. Therefore 
@@ -973,12 +1009,14 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
       if (n_fillers)
 	{
-	  key_item = mb_kdb_row_keys(row_item->data);
-
 	  free_space = width - mb_kbd_row_width(row_item->data);
 
-	  while (key_item != NULL)
+	  mb_kbd_row_for_each_key(row_item->data, key_item)
 	    {
+	      if (!mb_kbd_is_extended(kbd) 
+		  && mb_kbd_key_get_extended(key_item->data))
+		continue;
+
 	      if (mb_kbd_key_get_fill(key_item->data))
 		{
 		  int   old_w;
@@ -990,14 +1028,20 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 		  mb_kbd_key_set_geometry(key_item->data, -1, -1, new_w, -1);
 		  
 		  /* nudge next keys forward */
-		  while (nudge_key_item)
+
+		  for (; 
+		       nudge_key_item != NULL; 
+		       nudge_key_item = util_list_next(nudge_key_item)) 
 		    {
+		      if (!mb_kbd_is_extended(ui->kbd) 
+			  && mb_kbd_key_get_extended(nudge_key_item->data))
+			continue;
+
 		      mb_kbd_key_set_geometry(nudge_key_item->data,
 					      mb_kbd_key_x(nudge_key_item->data) + (new_w - old_w ), -1, -1, -1);
-		      nudge_key_item = util_list_next(nudge_key_item);
 		    }
 		}
-	      key_item = util_list_next(key_item);
+
 	    }
 	}
 
@@ -1011,7 +1055,11 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
       mb_kbd_row_set_y(row_item->data, next_row_y);
 
-      DBG("************ setting row y to %i ***********", next_row_y);
+      DBG("************ setting row y to %i , next is %i, %i***********", 
+	  next_row_y, 
+	  mb_kbd_row_height(row_item->data) 
+	  ,mb_kbd_row_spacing(ui->kbd)
+	  );
 
       next_row_y  += (mb_kbd_row_height(row_item->data) 
 		      + mb_kbd_row_spacing(ui->kbd));
@@ -1041,6 +1089,56 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
     }
 }
 
+void
+mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
+			   int           width,
+			   int           height)
+{
+  boolean old_state, new_state;
+  int     desk_width;
+
+  MARK();
+
+  /* Figure out if screen size has changed - does a round trip - bad */
+
+  update_display_size(ui);
+
+  old_state = mb_kbd_is_extended(ui->kbd);
+  new_state = want_extended(ui);
+   
+  if (new_state == old_state) 	/* Not a rotation */
+    {
+      mb_kbd_ui_resize(ui, width, height); 
+      return;
+    }
+
+  mb_kbd_set_extended(ui->kbd, new_state);
+
+  /* realocate the layout */
+
+  mb_kbd_ui_allocate_ui_layout(ui, 
+			       &ui->base_alloc_width, &ui->base_alloc_height);
+
+  mb_kbd_ui_resize(ui, width, height); 
+
+  /*
+  ui->xwin_width  = ui->base_alloc_width;
+  ui->xwin_height = ui->base_alloc_height;
+  */
+
+  /*
+  if (get_desktop_area(ui, NULL, NULL, &desk_width, NULL))
+    {
+      if (desk_width != ui->xwin_width)
+	{
+	  mb_kbd_ui_resize(ui, 
+			   desk_width, 
+			   ( desk_width * ui->xwin_height ) / ui->xwin_width);
+	}
+    }
+  */
+}
+
 int
 mb_kbd_ui_events_iteration(MBKeyboardUI *ui)
 {
@@ -1066,13 +1164,12 @@ mb_kbd_ui_events_iteration(MBKeyboardUI *ui)
 	  case ButtonRelease:
 	    mb_kbd_key_release(ui->kbd);	    
 	    break;
-
 	  case ConfigureNotify:
 	    if (xev.xconfigure.width != ui->xwin_width
 		|| xev.xconfigure.height != ui->xwin_height)
-	      mb_kbd_ui_resize(ui, 
-			       xev.xconfigure.width, 
-			       xev.xconfigure.height);
+	      mb_kbd_ui_handle_configure(ui,
+					 xev.xconfigure.width,
+					 xev.xconfigure.height);
 	    break;
 	  default:
 	    break;
@@ -1116,9 +1213,12 @@ mb_kbd_ui_init(MBKeyboard *kbd)
   ui->xscreen   = DefaultScreen(ui->xdpy);
   ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);   
 
+  /*
   ui->dpy_width  = DisplayWidth(ui->xdpy, ui->xscreen);
   ui->dpy_height = DisplayHeight(ui->xdpy, ui->xscreen);
+  */
 
+  update_display_size(ui);
 
   return 1;
 }
@@ -1142,6 +1242,10 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
 
   if (!mb_kbd_ui_load_font(ui))
     return 0;
+
+  /* potrait or landscape */
+  if (want_extended(ui))
+    mb_kbd_set_extended(ui->kbd, True);
 
   mb_kbd_ui_allocate_ui_layout(ui, 
 			       &ui->base_alloc_width, &ui->base_alloc_height);

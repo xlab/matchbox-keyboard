@@ -51,6 +51,7 @@ struct MBKeyboardKey
   boolean                fill;	     /* width fills avialble space */
   int                    req_uwidth; /* unit width in 1/1000's */
   boolean                is_blank;   /* 'blank' keys are spacers */
+  boolean                extended;   /* only show in landscape */
 
   MBKeyboardStateType    sets_kbdstate; /* needed */
 };
@@ -209,6 +210,18 @@ int
 mb_kbd_key_get_extra_width_pad(MBKeyboardKey  *key)
 {
   return key->extra_width_pad;
+}
+
+void
+mb_kbd_key_set_extended(MBKeyboardKey  *key, boolean extend)
+{
+  key->extended = extend;
+}
+
+boolean
+mb_kbd_key_get_extended(MBKeyboardKey  *key)
+{
+  return key->extended;
 }
 
 
