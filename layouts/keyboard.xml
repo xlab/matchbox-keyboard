@@ -221,8 +221,8 @@
 	  <shifted display="L" />
     </key>
     <key>
-	  <default display=":" />                
-	  <shifted display=";" />
+	  <default display=";" />                
+	  <shifted display=":" />
     </key>
     <key>
 	  <default display="#" />                

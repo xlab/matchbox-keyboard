@@ -1,5 +1,10 @@
 2005-04-27  mallum,,,  <mallum@openedhand.com>
 
+	* layouts/keyboard.xml:
+	Swicth shift state for ; key
+
+2005-04-27  mallum,,,  <mallum@openedhand.com>
+
 
 	* layouts/keyboard.xml:
 	New layout with extended keys.
