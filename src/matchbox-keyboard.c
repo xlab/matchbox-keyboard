@@ -222,9 +222,7 @@ mb_kbd_is_extended(MBKeyboard *kb)
 void
 mb_kbd_run(MBKeyboard *kb)
 {
-  /* mb_kbb_ui_process_events() */
-
-
+  mb_kbd_ui_event_loop(kb->ui);
 }
 
 

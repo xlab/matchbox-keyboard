@@ -1,3 +1,15 @@
+2005-05-02  mallum,,,  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard-ui.c: (want_extended),
+	(mb_kbd_ui_resources_create), (mb_kbd_ui_resize),
+	(mb_kbd_ui_handle_configure), (mb_kbd_ui_event_loop),
+	(mb_kbd_ui_load_font), (mb_kbd_ui_init), (mb_kbd_ui_display_width),
+	(mb_kbd_ui_display_height), (mb_kbd_ui_realize):
+	* src/matchbox-keyboard.c:
+	* src/matchbox-keyboard.h:
+	Clean up warnings
+	Implement key repeat
+
 2005-04-27  mallum,,,  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resize),

@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include <locale.h>
 
@@ -39,6 +40,7 @@ typedef void*         pointer;
 typedef unsigned char uchar ;
 typedef Bool          boolean ;
 
+typedef struct Pixbuf Pixbuf;
 typedef struct List List;
 
 typedef void (*ListForEachCB) (void *data, void *userdata);
@@ -168,6 +170,9 @@ mb_kbd_ui_display_width(MBKeyboardUI *ui);
 
 int
 mb_kbd_ui_display_height(MBKeyboardUI *ui);
+
+void
+mb_kbd_ui_event_loop(MBKeyboardUI *ui);
 
 
 /**** Keyboard ****/
@@ -446,8 +451,6 @@ util_file_readable(char *path);
 
 /* Util list */
 
-
-
 #define util_list_next(l) (l)->next
 #define util_list_previous(l) (l)->prev
 
@@ -471,6 +474,8 @@ util_list_append(List *list, void *data);
 
 void
 util_list_foreach(List *list, ListForEachCB func, void *userdata);
+
+/* util pixbuf */
 
 
 #endif

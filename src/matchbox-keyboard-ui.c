@@ -199,6 +199,41 @@ want_extended(MBKeyboardUI *ui)
   return False;
 }
 
+static boolean
+get_xevent_timed(Display        *dpy,
+		 XEvent         *event_return, 
+		 struct timeval *tv)
+{
+  if (tv->tv_usec == 0 && tv->tv_sec == 0)
+    {
+      XNextEvent(dpy, event_return);
+      return True;
+    }
+
+  XFlush(dpy);
+
+  if (XPending(dpy) == 0) 
+    {
+      int fd = ConnectionNumber(dpy);
+
+      fd_set readset;
+      FD_ZERO(&readset);
+      FD_SET(fd, &readset);
+
+      if (select(fd+1, &readset, NULL, NULL, tv) == 0) 
+	return False;
+      else 
+	{
+	  XNextEvent(dpy, event_return);
+	  return True;
+	}
+    } else {
+      XNextEvent(dpy, event_return);
+      return True;
+    }
+}
+
+
 void
 mb_kbd_ui_send_press(MBKeyboardUI        *ui,
 		     const unsigned char *utf8_char_in,
@@ -823,7 +858,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
       XChangeProperty(ui->xdpy, ui->xwin, 
 		      atom_NET_WM_STATE, XA_ATOM, 32, 
 		      PropModeReplace, 
-		      (unsigned char **)states, 1);
+		      (unsigned char *)states, 1);
 
       if (get_desktop_area(ui, NULL, NULL, &desk_width, NULL))
 	{
@@ -1107,7 +1142,6 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 			   int           height)
 {
   boolean old_state, new_state;
-  int     desk_width;
 
   MARK();
 
@@ -1133,62 +1167,69 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 
   mb_kbd_ui_resize(ui, width, height); 
 
-  /*
-  ui->xwin_width  = ui->base_alloc_width;
-  ui->xwin_height = ui->base_alloc_height;
-  */
-
-  /*
-  if (get_desktop_area(ui, NULL, NULL, &desk_width, NULL))
-    {
-      if (desk_width != ui->xwin_width)
-	{
-	  mb_kbd_ui_resize(ui, 
-			   desk_width, 
-			   ( desk_width * ui->xwin_height ) / ui->xwin_width);
-	}
-    }
-  */
 }
 
-int
-mb_kbd_ui_events_iteration(MBKeyboardUI *ui)
+void
+mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 {
   MBKeyboardKey *key = NULL;
+  struct timeval tvt;
 
-  /* while ( XPending(ui->xdpy) ) */
+  /* Key repeat - values for standard xorg install ( xset q) */
+  int repeat_delay = 500 * 10000;
+  int repeat_rate  = 30  * 10000;
+
+  tvt.tv_sec  = 0;
+  tvt.tv_usec = repeat_delay;
+
   while (True)
       {
 	XEvent xev;
-	XNextEvent(ui->xdpy, &xev);
 
-	switch (xev.type) 
+	if (get_xevent_timed(ui->xdpy, &xev, &tvt))
 	  {
-	  case ButtonPress:
-	    DBG("got button bress at %i,%i", xev.xbutton.x, xev.xbutton.y);
-	    key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
-	    if (key)
+	    switch (xev.type) 
 	      {
-		DBG("found key for press");
-		mb_kbd_key_press(key);
+	      case ButtonPress:
+		DBG("got button bress at %i,%i", xev.xbutton.x, xev.xbutton.y);
+		key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
+		if (key)
+		  {
+		    DBG("found key for press");
+		    mb_kbd_key_press(key);
+		    tvt.tv_usec = repeat_rate;
+		  }
+		break;
+	      case ButtonRelease:
+		if (mb_kbd_get_held_key(ui->kbd) != NULL)
+		  {
+		    mb_kbd_key_release(ui->kbd);	 
+		    tvt.tv_usec = repeat_delay;   
+		  }
+		break;
+	      case ConfigureNotify:
+		if (xev.xconfigure.width != ui->xwin_width
+		    || xev.xconfigure.height != ui->xwin_height)
+		  mb_kbd_ui_handle_configure(ui,
+					     xev.xconfigure.width,
+					     xev.xconfigure.height);
+		break;
+	      case MappingNotify: 
+		fakekey_reload_keysyms(ui->fakekey);
+		XRefreshKeyboardMapping(&xev.xmapping);
+		break;
+	      default:
+		break;
 	      }
-	    break;
-	  case ButtonRelease:
-	    mb_kbd_key_release(ui->kbd);	    
-	    break;
-	  case ConfigureNotify:
-	    if (xev.xconfigure.width != ui->xwin_width
-		|| xev.xconfigure.height != ui->xwin_height)
-	      mb_kbd_ui_handle_configure(ui,
-					 xev.xconfigure.width,
-					 xev.xconfigure.height);
-	    break;
-	  case MappingNotify: 
-	    fakekey_reload_keysyms(ui->fakekey);
-	    XRefreshKeyboardMapping(&xev.xmapping);
-	    break;
-	  default:
-	    break;
+	  }
+	else
+	  {
+	    /* Keyrepeat */
+	    if (mb_kbd_get_held_key(ui->kbd) != NULL)
+	      {
+		fakekey_repeat(ui->fakekey);
+		tvt.tv_usec = repeat_rate;
+	      }
 	  }
       }
 }
@@ -1228,11 +1269,6 @@ mb_kbd_ui_init(MBKeyboard *kbd)
 
   ui->xscreen   = DefaultScreen(ui->xdpy);
   ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);   
-
-  /*
-  ui->dpy_width  = DisplayWidth(ui->xdpy, ui->xscreen);
-  ui->dpy_height = DisplayHeight(ui->xdpy, ui->xscreen);
-  */
 
   update_display_size(ui);
 
@@ -1274,8 +1310,6 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
   mb_kbd_ui_redraw(ui);
 
   mb_kbd_ui_show(ui);
-
-  mb_kbd_ui_events_iteration(ui);
 
   return 1;
 }
