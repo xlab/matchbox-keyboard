@@ -837,7 +837,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
       int wm_struct_vals[] = { 0, /* left */			
 			     0, /* right */ 
 			     0, /* top */
-			     50, /* bottom */
+			     0, /* bottom */
 			     0, /* left_start_y */
 			     0, /* left_end_y */
 			     0, /* right_start_y */
@@ -848,19 +848,14 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			     1399 }; /* bottom_end_x */
 
       Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR };
-      int  desk_width = 0;
-
-      XChangeProperty(ui->xdpy, ui->xwin, 
-		      atom_NET_WM_STRUT_PARTIAL, XA_ATOM, 32, 
-		      PropModeReplace, 
-		      (unsigned char *)wm_struct_vals , 12);
+      int  desk_width = 0, desk_height = 0, desk_y = 0;
 
       XChangeProperty(ui->xdpy, ui->xwin, 
 		      atom_NET_WM_STATE, XA_ATOM, 32, 
 		      PropModeReplace, 
 		      (unsigned char *)states, 1);
 
-      if (get_desktop_area(ui, NULL, NULL, &desk_width, NULL))
+      if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height))
 	{
 	  /* Assuming we take up all available display width 
            * ( at least true with matchbox wm ). we resize
@@ -874,6 +869,18 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			       desk_width, 
 			       ( desk_width * ui->xwin_height ) / ui->xwin_width);
 	    }
+
+	  wm_struct_vals[2]  = desk_y + desk_height - ui->xwin_height;
+	  wm_struct_vals[11] = desk_width;
+
+	  XChangeProperty(ui->xdpy, ui->xwin, 
+			  atom_NET_WM_STRUT_PARTIAL, XA_CARDINAL, 32, 
+			  PropModeReplace, 
+			  (unsigned char *)wm_struct_vals , 12);
+
+	  DBG("desk width: %i, desk height: %i xwin_height :%i",
+	      desk_width, desk_height, ui->xwin_height);
+
 	}
 
       if (have_matchbox_wm)
@@ -882,8 +889,16 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			  atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
 			  PropModeReplace, 
 			  (unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
+	}
+      else
+	{
+	  /*
+	  XChangeProperty(ui->xdpy, ui->xwin, 
+			  atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
+			  PropModeReplace, 
+			  (unsigned char *) &atom_NET_WM_WINDOW_TYPE_DOCK, 1);
+	  */
 
-	 
 	}
     }
 
