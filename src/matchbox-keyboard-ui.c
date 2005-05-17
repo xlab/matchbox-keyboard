@@ -723,14 +723,16 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
     unsigned long       status;
   } PropMotifWmHints ;
 
+
   Atom /* atom_wm_protocols[3], */ 
-    atom_NET_WM_WINDOW_TYPE, 
-    atom_NET_WM_WINDOW_TYPE_TOOLBAR,
-    atom_NET_WM_WINDOW_TYPE_DOCK,
-    atom_NET_WM_STRUT_PARTIAL,
-    atom_NET_WM_STATE_SKIP_TASKBAR,
-    atom_NET_WM_STATE,
-    atom_MOTIF_WM_HINTS;
+     atom_NET_WM_WINDOW_TYPE, 
+     atom_NET_WM_WINDOW_TYPE_TOOLBAR,
+     atom_NET_WM_WINDOW_TYPE_DOCK,
+     atom_NET_WM_STRUT_PARTIAL,
+     atom_NET_WM_STATE_SKIP_PAGER,
+     atom_NET_WM_STATE_SKIP_TASKBAR,
+     atom_NET_WM_STATE,
+     atom_MOTIF_WM_HINTS;
   
 
   PropMotifWmHints    *mwm_hints;
@@ -767,6 +769,9 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 
   atom_NET_WM_STATE_SKIP_TASKBAR =
     XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
+
+  atom_NET_WM_STATE_SKIP_PAGER = 
+    XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_PAGER", False);
 
   atom_NET_WM_STATE =
     XInternAtom(ui->xdpy, "_NET_WM_STATE", False);
@@ -847,13 +852,13 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			     0, /* bottom_start_x */
 			     1399 }; /* bottom_end_x */
 
-      Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR };
+      Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, atom_NET_WM_STATE_SKIP_PAGER };
       int  desk_width = 0, desk_height = 0, desk_y = 0;
 
       XChangeProperty(ui->xdpy, ui->xwin, 
 		      atom_NET_WM_STATE, XA_ATOM, 32, 
 		      PropModeReplace, 
-		      (unsigned char *)states, 1);
+		      (unsigned char *)states, 2);
 
       if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height))
 	{

@@ -1,3 +1,8 @@
+2005-05-17  mallum,,,  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
+	Add SKIP_PAGER hint.
+
 2005-05-10  mallum,,,  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
