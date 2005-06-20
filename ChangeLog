@@ -1,3 +1,9 @@
+2005-06-20  mallum,,,  <mallum@openedhand.com>
+
+	* layouts/Makefile.am:
+	* layouts/keyboard-dvorak.xml:
+	Add dvorak from Leon Matthews.
+
 2005-05-17  mallum,,,  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):

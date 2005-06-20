@@ -1,3 +1,3 @@
 keyboardsdir = $(datadir)/matchbox-keyboard
-keyboards_DATA = keyboard.xml keyboard-extended.xml
+keyboards_DATA = keyboard.xml keyboard-extended.xml keyboard-dvorak.xml
 
