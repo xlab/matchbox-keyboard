@@ -1,3 +1,9 @@
+2005-09-01  mallum,,,  <mallum@openedhand.com>
+
+	* layouts/Makefile.am:
+	* layouts/keyboard-ru.xml:
+	Add Russian layout from Stanislav Bogatyrev
+
 2005-06-20  mallum,,,  <mallum@openedhand.com>
 
 	* layouts/Makefile.am:
