@@ -286,7 +286,7 @@
     </key>
 
     <key>
-	  <default display="." />                
+	  <default display="," />                
 	  <shifted display="&lt;" />
     </key>
     <key>
@@ -294,8 +294,8 @@
 	  <shifted display="&gt;" />
     </key>
     <key>
-	  <default display="?" />                
-	  <shifted display="/" />
+	  <default display="/" />                
+	  <shifted display="?" />
     </key>
 
 
