@@ -16,7 +16,7 @@ mb_kbd_new(int argc, char **argv)
   kb->row_spacing = 5;
 
   kb->font_family  = strdup("sans");
-  kb->font_pt_size = 8;
+  kb->font_pt_size = 6;
   kb->font_variant = strdup("bold");
 
   if (argc > 1) 

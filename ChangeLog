@@ -1,3 +1,8 @@
+2005-10-04  mallum  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+	Make initial point size smaller to kbd fitting on large DPI's.
+
 2005-09-15  mallum,,,  <mallum@openedhand.com>
 
 	* layouts/keyboard.xml:
