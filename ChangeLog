@@ -1,3 +1,18 @@
+2005-10-10  Matthew Allum  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_event_loop):
+	Handle 'stuck' key case ( hopefully ) when release X event is 
+	missed.	
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+	Qucik hacks to look better on small displays.
+
+2005-10-10  mallum,,,  <mallum@openedhand.com>
+
+	reviewed by: <delete if not using a buddy>
+
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_event_loop):
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+
 2005-10-04  mallum  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard.c: (mb_kbd_new):

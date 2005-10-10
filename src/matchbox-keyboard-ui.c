@@ -1215,6 +1215,13 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 		key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
 		if (key)
 		  {
+		    /* Hack if we never go a release event */
+		    if (key != mb_kbd_get_held_key(ui->kbd))
+		      {
+			mb_kbd_key_release(ui->kbd);	 
+			tvt.tv_usec = repeat_delay;   
+		      }
+
 		    DBG("found key for press");
 		    mb_kbd_key_press(key);
 		    tvt.tv_usec = repeat_rate;
