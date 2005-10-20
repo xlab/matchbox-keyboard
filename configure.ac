@@ -29,6 +29,15 @@ AC_ARG_ENABLE(debug,
   [  --enable-debug    enable debug ( verbose ) build],
      enable_debug=$enableval, enable_debug=no )
 
+AC_ARG_ENABLE(cairo,
+  [  --disable-cairo            disable Cairo support [default=auto]],
+   		enable_cairo=$enableval, 
+		enable_cairo=yes)	    
+
+AC_ARG_ENABLE(debug,
+  [  --enable-debug    enable debug ( verbose ) build],
+     enable_debug=$enableval, enable_debug=no )
+
 AC_ARG_WITH(expat-includes,    
   [  --with-expat-includes=DIR     Use Expat includes in DIR], 
 	   expat_includes=$withval, expat_includes=yes)
@@ -37,9 +46,20 @@ AC_ARG_WITH(expat-lib,
   [  --with-expat-lib=DIR          Use Expat library in DIR], 
 	   expat_lib=$withval, expat_lib=yes)
 
+PKG_CHECK_MODULES(FAKEKEY, libfakekey,,
+	         AC_MSG_ERROR([*** You need to install libfakekey from MB SVN  ***]))
 
-PKG_CHECK_MODULES(LIBMB, xft libfakekey,,
-	         AC_MSG_ERROR([*** Required Librarys not found ***]))
+if test x$enable_cairo = xyes; then
+   PKG_CHECK_MODULES(CAIRO, cairo,, [enable_cairo="no"])
+fi
+
+if test x$enable_cairo = xno; then
+PKG_CHECK_MODULES(XFT, xft,,
+	         AC_MSG_ERROR([*** Required xft Librarys not found ***]))
+fi
+
+AM_CONDITIONAL(WANT_CAIRO, test x$enable_cairo = xyes)
+
 
 dnl ------ Expat ------------------------------------------------------------
 
@@ -140,14 +160,17 @@ dnl ------ GCC flags --------------------------------------------------------
 
 if test "x$GCC" = "xyes"; then
         GCC_WARNINGS="-g -Wall -fno-strict-aliasing"
-        LIBMB_CFLAGS="$GCC_WARNINGS $LIBMB_CFLAGS"
+        FAKEKEY_CFLAGS="$GCC_WARNINGS $FAKEKEY_CFLAGS"
 fi
 
 
 dnl ------ Substitute in found libs, clags to Makefiles etc -----------------
 
-AC_SUBST(LIBMB_CFLAGS)
-AC_SUBST(LIBMB_LIBS)
+AC_SUBST(FAKEKEY_CFLAGS)
+AC_SUBST(FAKEKEY_LIBS)
+
+AC_SUBST(XFT_CFLAGS)
+AC_SUBST(XFT_LIBS)
 
 AC_SUBST(EXPAT_LIBS)
 AC_SUBST(EXPAT_CFLAGS)

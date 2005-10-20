@@ -56,6 +56,7 @@ typedef struct MBKeyboardLayout MBKeyboardLayout;
 typedef struct MBKeyboardRow    MBKeyboardRow;
 typedef struct MBKeyboardKey    MBKeyboardKey;
 typedef struct MBKeyboardUI     MBKeyboardUI;
+typedef struct MBKeyboardUIBackend MBKeyboardUIBackend;
 
 typedef enum 
 {
@@ -137,6 +138,20 @@ struct MBKeyboard
 
 /**** UI ***********/
 
+struct MBKeyboardUIBackend
+{
+  MBKeyboardUIBackend*  (*init) (MBKeyboardUI *ui);
+  int  (*font_load) (MBKeyboardUI  *ui);
+  void (*redraw_key) (MBKeyboardUI  *ui, MBKeyboardKey *key);
+  void (*pre_redraw) (MBKeyboardUI  *ui);
+  int  (*resources_create) (MBKeyboardUI  *ui);
+  int  (*resize) (MBKeyboardUI  *ui, int width, int height);
+  void  (*text_extents) (MBKeyboardUI        *ui, 
+			 const unsigned char *str, 
+			 int                 *width, 
+			 int                 *height);
+};
+
 int
 mb_kbd_ui_init(MBKeyboard *kbd);
 
@@ -170,6 +185,33 @@ mb_kbd_ui_display_width(MBKeyboardUI *ui);
 
 int
 mb_kbd_ui_display_height(MBKeyboardUI *ui);
+
+MBKeyboardUIBackend*
+mb_kbd_ui_backend(MBKeyboardUI *ui);
+
+Display*
+mb_kbd_ui_x_display(MBKeyboardUI *ui);
+
+int
+mb_kbd_ui_x_screen(MBKeyboardUI *ui);
+
+Window
+mb_kbd_ui_x_win(MBKeyboardUI *ui);
+
+int
+mb_kbd_ui_x_win_height(MBKeyboardUI *ui);
+
+int
+mb_kbd_ui_x_win_width(MBKeyboardUI *ui);
+
+Window
+mb_kbd_ui_x_win_root(MBKeyboardUI *ui);
+
+Pixmap
+mb_kbd_ui_backbuffer(MBKeyboardUI *ui);
+
+MBKeyboard*
+mb_kbd_ui_kbd(MBKeyboardUI *ui);
 
 void
 mb_kbd_ui_event_loop(MBKeyboardUI *ui);
@@ -475,7 +517,12 @@ util_list_append(List *list, void *data);
 void
 util_list_foreach(List *list, ListForEachCB func, void *userdata);
 
-/* util pixbuf */
+/* Backends */
 
+#if 1
+#include "matchbox-keyboard-ui-cairo-backend.h"
+#else
+#include "matchbox-keyboard-ui-xft-backend.h"
+#endif
 
 #endif

@@ -1,6 +1,6 @@
 #include "matchbox-keyboard.h"
 
-#include <X11/Xft/Xft.h>
+
 
 #define PROP_MOTIF_WM_HINTS_ELEMENTS    5
 #define MWM_HINTS_DECORATIONS          (1L << 1)
@@ -16,6 +16,8 @@ typedef struct
 } 
 PropMotifWmHints;
 
+
+
 struct MBKeyboardUI
 {
   Display      *xdpy;
@@ -25,20 +27,11 @@ struct MBKeyboardUI
   int           dpy_width;
   int           dpy_height;
 
-  XftFont      *font;
-  XftColor      font_col; 
-
   int           xwin_width;
   int           xwin_height;
 
-  XftDraw      *xft_backbuffer;  
+
   Pixmap        backbuffer;
-  GC            xgc;
-
-  /* Crusty temp theme stuff */
-
-  XColor xcol_c5c5c5, xcol_d3d3d3, xcol_f0f0f0, xcol_f8f8f5, 
-    xcol_f4f4f4, xcol_a4a4a4;
 
   /************************* */
 
@@ -47,9 +40,9 @@ struct MBKeyboardUI
   int           base_alloc_width, base_alloc_height;
   int           base_font_pt_size;
 
-  FakeKey      *fakekey;
-
-  MBKeyboard   *kbd;
+  FakeKey             *fakekey;
+  MBKeyboardUIBackend *backend; 
+  MBKeyboard          *kbd;
 };
 
 static void
@@ -58,45 +51,6 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height);
 static int
 mb_kbd_ui_load_font(MBKeyboardUI *ui);
 
-static void 
-text_extents(MBKeyboardUI        *ui, 
-	     const unsigned char *str, 
-	     int                 *width, 
-	     int                 *height)
-{
-  XGlyphInfo  extents;
-  
-  XftTextExtentsUtf8(ui->xdpy, 
-		     ui->font,
-		     str, 
-		     strlen(str),
-		     &extents);
-
-  *width  = extents.width;
-  /* *height = extents.height; */
-  *height = ui->font->ascent + ui->font->descent;
-}
-
-void
-alloc_color(MBKeyboardUI  *ui, XColor *xcol, char *spec)
-{
-  int           result;
-
-  if (spec[0] != '#')
-    return;
-
-  if ( sscanf (spec+1, "%x", &result))
-    {
-      xcol->red   = ((result >> 16) & 0xff) << 8;
-      xcol->green = ((result >> 8) & 0xff)  << 8;
-      xcol->blue  = (result & 0xff) << 8;
-      xcol->flags = DoRed|DoGreen|DoBlue;
-
-      XAllocColor(ui->xdpy, DefaultColormap(ui->xdpy, ui->xscreen), xcol);
-    }
-  
-  return;
-}
 
 static unsigned char*
 get_current_window_manager_name (MBKeyboardUI  *ui)
@@ -290,7 +244,7 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
 		    {
 		      int str_w =0, str_h = 0;
 
-		      text_extents(ui, face_str, &str_w, &str_h);
+		      ui->backend->text_extents(ui, face_str, &str_w, &str_h);
 		      
 		      if (str_w > *width) *width = str_w;
 		      if (str_h > *height) *height = str_h;
@@ -332,7 +286,7 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
 	      
 	      face_str = mb_kbd_key_get_glyph_face(key, state);
 
-	      text_extents(ui, face_str, width, height);
+	      ui->backend->text_extents(ui, face_str, width, height);
 
 	      if (*width < max_w) *width = max_w;
 	      if (*height < max_h) *height = max_h;
@@ -527,126 +481,7 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 void
 mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 {
-  XRectangle             rect;
-  MBKeyboardKeyStateType state;
-  int                    side_pad;
-
-  if (mb_kbd_key_is_blank(key)) /* spacer */
-    return;
-
-  rect.x      = mb_kbd_key_abs_x(key); 
-  rect.y      = mb_kbd_key_abs_y(key); 
-  rect.width  = mb_kbd_key_width(key);       
-  rect.height = mb_kbd_key_height(key);       
-
-  /* clear it */
-
-  XSetForeground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
-
-  XFillRectangles(ui->xdpy, ui->backbuffer, ui->xgc, &rect, 1);
-
-  /* draw 'main border' */
-
-  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_c5c5c5.pixel);
-
-  XDrawRectangles(ui->xdpy, ui->backbuffer, ui->xgc, &rect, 1);
-
-  /* shaded bottom line */
-
-  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f4f4f4.pixel);
-  XDrawLine(ui->xdpy, ui->backbuffer, ui->xgc,
-	    rect.x + 1,
-	    rect.y + rect.height - 1,
-	    rect.x + rect.width -2 ,
-	    rect.y + rect.height - 1);
-
-  /* Corners - XXX should really use drawpoints */
-
-  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f0f0f0.pixel);
-
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y);
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y);
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y+rect.height);
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y+rect.height);
-
-  /* soften them more */
-
-  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_d3d3d3.pixel);
-
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+1, rect.y);
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y+1);
-
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width-1, rect.y);
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y+1);
-
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width-1, rect.y+rect.height);
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+rect.width, rect.y+rect.height-1);
-
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x, rect.y+rect.height-1);
-  XDrawPoint(ui->xdpy, ui->backbuffer, ui->xgc, rect.x+1, rect.y+rect.height);
-
-  /* background */
-
-  if (mb_kbd_key_is_held(ui->kbd, key))
-    XSetForeground(ui->xdpy, ui->xgc, ui->xcol_a4a4a4.pixel);
-  else
-    XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f8f8f5.pixel);
-
-  side_pad = 
-    mb_kbd_keys_border(ui->kbd)
-    + mb_kbd_keys_margin(ui->kbd)
-    + mb_kbd_keys_pad(ui->kbd);
-
-  /* Why does below need +1's ? */
-  XFillRectangle(ui->xdpy, ui->backbuffer, ui->xgc, 
-		 rect.x + side_pad,
-		 rect.y + side_pad,
-		 rect.width  - (side_pad * 2) + 1,
-		 rect.height - (side_pad * 2) + 1);
-
-  /* real code is here */
-
-  state = mb_kbd_keys_current_state(ui->kbd); 
-
-  if (mb_kbd_has_state(ui->kbd, MBKeyboardStateCaps)
-      && mb_kbd_key_get_obey_caps(key))
-    state = MBKeyboardKeyStateShifted;
-
-  if (!mb_kdb_key_has_state(key, state))
-    {
-      if (state == MBKeyboardKeyStateNormal)
-	return;  /* keys should at least have a normal state */
-      else
-        state = MBKeyboardKeyStateNormal;
-    }
-
-  if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
-  {
-    const unsigned char *face_str = mb_kbd_key_get_glyph_face(key, state);
-    int                  face_str_w, face_str_h;
-
-    if (face_str)
-      {
-	int x, y;
-
-	text_extents(ui, face_str, &face_str_w, &face_str_h);
-
-	x = mb_kbd_key_abs_x(key) + ((mb_kbd_key_width(key) - face_str_w)/2);
-
-	y = mb_kbd_key_abs_y(key) + 
-	  ( (mb_kbd_key_height(key) - (ui->font->ascent + ui->font->descent))
-	                                / 2 );
-
-	XftDrawStringUtf8(ui->xft_backbuffer,
-			  &ui->font_col,
-			  ui->font,
-			  x,
-			  y + ui->font->ascent,
-			  face_str, 
- 			  strlen(face_str));
-      }
-  }
-
+  ui->backend->redraw_key(ui, key);
 }
 
 
@@ -655,7 +490,7 @@ mb_kbd_ui_redraw_row(MBKeyboardUI  *ui, MBKeyboardRow *row)
 {
   List *key_item;
 
-  mb_kbd_row_for_each_key(row,key_item)
+  mb_kbd_row_for_each_key(row, key_item)
     {
       if (!mb_kbd_is_extended(ui->kbd) 
 	  && mb_kbd_key_get_extended(key_item->data))
@@ -678,11 +513,8 @@ mb_kbd_ui_redraw(MBKeyboardUI  *ui)
   List             *row_item;
   MBKeyboardLayout *layout;
 
-  /* Background */
-  XSetForeground(ui->xdpy, ui->xgc, ui->xcol_f4f4f4.pixel);
-  XFillRectangle(ui->xdpy, ui->backbuffer, ui->xgc,
-		 0, 0, ui->xwin_width, ui->xwin_height);
-  XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
+  /* gives backend a chance to clear everything */
+  ui->backend->pre_redraw(ui);
 
   layout = mb_kbd_get_selected_layout(ui->kbd);
 
@@ -739,7 +571,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   XSizeHints           size_hints;
   XWMHints            *wm_hints;
   XSetWindowAttributes win_attr;
-  XRenderColor         coltmp;
+
 
   unsigned char       *wm_name;
   boolean              have_matchbox_wm = False;             
@@ -913,37 +745,13 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 				 ui->xwin_height,
 				 DefaultDepth(ui->xdpy, ui->xscreen));
 
-  ui->xft_backbuffer = XftDrawCreate(ui->xdpy,
-				     ui->backbuffer,
-				     DefaultVisual(ui->xdpy, ui->xscreen),
-				     DefaultColormap(ui->xdpy, ui->xscreen));
 
+  XSetWindowBackgroundPixmap(ui->xdpy,
+			     ui->xwin, 
+			     ui->backbuffer);
 
-  /* #636262 - for text maybe */
-  coltmp.red   = coltmp.green = coltmp.blue  = 0x0000; coltmp.alpha = 0xcccc;
+  ui->backend->resources_create(ui);
 
-  XftColorAllocValue(ui->xdpy,
-		     DefaultVisual(ui->xdpy, ui->xscreen), 
-		     DefaultColormap(ui->xdpy, ui->xscreen),
-		     &coltmp,
-		     &ui->font_col);
-
-
-  ui->xgc = XCreateGC(ui->xdpy, ui->xwin, 0, NULL);
-
-  XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
-  XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
-
-  XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
-
-  /* Crusty theme stuff  */
-
-  alloc_color(ui, &ui->xcol_c5c5c5, "#c5c5c5");
-  alloc_color(ui, &ui->xcol_d3d3d3, "#d3d3d3");
-  alloc_color(ui, &ui->xcol_f0f0f0, "#f0f0f0");
-  alloc_color(ui, &ui->xcol_f8f8f5, "#f8f8f5");
-  alloc_color(ui, &ui->xcol_f4f4f4, "#f4f4f4");
-  alloc_color(ui, &ui->xcol_a4a4a4, "#a4a4a4");
 
   /* Get root size change events for rotation */
 
@@ -1139,6 +947,10 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   ui->xwin_width  = width;
   ui->xwin_height = height;
 
+
+
+  /*  */
+
   if (ui->backbuffer) /* may get called before initialised */
     {
       XFreePixmap(ui->xdpy, ui->backbuffer);
@@ -1148,12 +960,14 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 				     ui->xwin_height,
 				     DefaultDepth(ui->xdpy, ui->xscreen));
 
-      XftDrawChange (ui->xft_backbuffer, ui->backbuffer);
+      ui->backend->resize(ui, width, height);
 
       XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
 
       mb_kbd_ui_redraw(ui);
     }
+
+
 }
 
 void
@@ -1264,43 +1078,9 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 static int
 mb_kbd_ui_load_font(MBKeyboardUI *ui)
 {
-  MBKeyboard *kb = ui->kbd;
-  char desc[512];
-
-  snprintf(desc, 512, "%s-%i:%s", 
-	   kb->font_family, kb->font_pt_size, kb->font_variant);
-
-  if (ui->font != NULL)
-    XftFontClose(ui->xdpy, ui->font);
-
-  if ((ui->font = XftFontOpenName(ui->xdpy, ui->xscreen, desc)) == NULL)
-    return 0;
-  
-  return 1;
+  return ui->backend->font_load(ui);
 }
 
-int
-mb_kbd_ui_init(MBKeyboard *kbd)
-{
-  MBKeyboardUI     *ui = NULL;
-  
-  ui = kbd->ui = util_malloc0(sizeof(MBKeyboardUI));
-  
-  ui->kbd = kbd;
-
-  if ((ui->xdpy = XOpenDisplay(getenv("DISPLAY"))) == NULL)
-    return 0;
-
-  if ((ui->fakekey = fakekey_init(ui->xdpy)) == NULL)
-    return 0;
-
-  ui->xscreen   = DefaultScreen(ui->xdpy);
-  ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);   
-
-  update_display_size(ui);
-
-  return 1;
-}
 
 int
 mb_kbd_ui_display_width(MBKeyboardUI *ui)
@@ -1313,6 +1093,62 @@ mb_kbd_ui_display_height(MBKeyboardUI *ui)
 {
   return ui->dpy_height;
 }
+
+MBKeyboardUIBackend*
+mb_kbd_ui_backend(MBKeyboardUI *ui)
+{
+  return ui->backend;
+}
+
+Display*
+mb_kbd_ui_x_display(MBKeyboardUI *ui)
+{
+  return ui->xdpy;
+}
+
+int
+mb_kbd_ui_x_screen(MBKeyboardUI *ui)
+{
+  return ui->xscreen;
+}
+
+Window
+mb_kbd_ui_x_win(MBKeyboardUI *ui)
+{
+  return ui->xwin;
+}
+
+Window
+mb_kbd_ui_x_win_root(MBKeyboardUI *ui)
+{
+  return ui->xwin_root;
+}
+
+int
+mb_kbd_ui_x_win_height(MBKeyboardUI *ui)
+{
+  return ui->xwin_height;
+}
+
+int
+mb_kbd_ui_x_win_width(MBKeyboardUI *ui)
+{
+  return ui->xwin_width;
+}
+
+
+Pixmap
+mb_kbd_ui_backbuffer(MBKeyboardUI *ui)
+{
+  return ui->backbuffer;
+}
+
+MBKeyboard*
+mb_kbd_ui_kbd(MBKeyboardUI *ui)
+{
+  return ui->kbd;
+}
+
 
 int
 mb_kbd_ui_realize(MBKeyboardUI *ui)
@@ -1337,6 +1173,31 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
   mb_kbd_ui_redraw(ui);
 
   mb_kbd_ui_show(ui);
+
+  return 1;
+}
+
+int
+mb_kbd_ui_init(MBKeyboard *kbd)
+{
+  MBKeyboardUI     *ui = NULL;
+  
+  ui = kbd->ui = util_malloc0(sizeof(MBKeyboardUI));
+  
+  ui->kbd = kbd;
+
+  if ((ui->xdpy = XOpenDisplay(getenv("DISPLAY"))) == NULL)
+    return 0;
+
+  if ((ui->fakekey = fakekey_init(ui->xdpy)) == NULL)
+    return 0;
+
+  ui->xscreen   = DefaultScreen(ui->xdpy);
+  ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);   
+
+  ui->backend = MB_KBD_UI_BACKEND_INIT_FUNC(ui);
+
+  update_display_size(ui);
 
   return 1;
 }

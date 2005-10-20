@@ -1,3 +1,20 @@
+2005-10-21  Matthew Allum  <mallum@openedhand.com>
+
+	* configure.ac:
+	* src/Makefile.am:
+	* src/matchbox-keyboard-ui-cairo-backend.c:
+	* src/matchbox-keyboard-ui-cairo-backend.h:
+	* src/matchbox-keyboard-ui-xft-backend.c:
+	* src/matchbox-keyboard-ui-xft-backend.h:
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
+	* src/matchbox-keyboard.h:
+	Break out rendering backend and add optional initial cairo
+	based rendering backend ( based on patch from Tuukka Pasanen )
+
+	* layouts/Makefile.am:
+	* layouts/keyboard-fi.xml:
+	Add finish layout via  Tuukka Pasanen
+
 2005-10-10  Matthew Allum  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_event_loop):
