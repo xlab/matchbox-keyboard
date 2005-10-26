@@ -1,5 +1,11 @@
 2005-10-26  Matthew Allum  <mallum@openedhand.com>
 
+	* examples/Makefile.am:
+	* examples/matchbox-keyboard-embbed.c:
+	Rename matchbox-keyboard-embbed.c
+
+2005-10-26  Matthew Allum  <mallum@openedhand.com>
+
 	* AUTHORS:
 	Populate. 	
 	* Makefile.am:
