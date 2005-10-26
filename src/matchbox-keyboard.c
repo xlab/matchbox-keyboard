@@ -1,3 +1,22 @@
+/* 
+ *  Matchbox Keyboard - A lightweight software keyboard.
+ *
+ *  Authored By Matthew Allum <mallum@o-hand.com>
+ *
+ *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ */
+
 #include "matchbox-keyboard.h"
 
 MBKeyboard*
@@ -5,6 +24,7 @@ mb_kbd_new(int argc, char **argv)
 {
   MBKeyboard *kb = NULL;
   char       *variant = NULL; 
+  Bool        want_embedding = False;
 
   kb = util_malloc0(sizeof(MBKeyboard));
 
@@ -21,7 +41,13 @@ mb_kbd_new(int argc, char **argv)
 
   if (argc > 1) 
     {
-      variant = argv[1];
+      /* FIXME: varient should always be last argv[1] */
+      if (streq(argv[1], "-xid") || streq(argv[1], "--xid"))
+	{
+	  want_embedding = True;
+	}
+      else
+	variant = argv[1];
       DBG("varient is %s\n", variant);
     }
   else variant = getenv("MB_KBD_VARIANT");
@@ -44,8 +70,14 @@ mb_kbd_new(int argc, char **argv)
   kb->selected_layout 
     = (MBKeyboardLayout *)util_list_get_nth_data(kb->layouts, 0);
 
+  if (want_embedding)
+    mb_kbd_ui_set_embeded( kb->ui, True );
+
   if (!mb_kbd_ui_realize(kb->ui))
     return NULL;
+
+  if (want_embedding)
+    mb_kbd_ui_print_window( kb->ui );
 
   return kb;
 }

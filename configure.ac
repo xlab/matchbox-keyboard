@@ -25,15 +25,16 @@ AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_FUNC_STAT
 
-AC_ARG_ENABLE(debug,
-  [  --enable-debug    enable debug ( verbose ) build],
-     enable_debug=$enableval, enable_debug=no )
-
 AC_ARG_ENABLE(cairo,
-  [  --disable-cairo            disable Cairo support [default=auto]],
+  [  --disable-cairo    disable Cairo support [default=auto]],
    		enable_cairo=$enableval, 
 		enable_cairo=yes)	    
 
+AC_ARG_ENABLE(examples,
+  [  --enable-examples  Build embedding examples ( requires GTK ) [default=no]],
+   		enable_examples=$enableval, 
+		enable_examples=no)
+ 
 AC_ARG_ENABLE(debug,
   [  --enable-debug    enable debug ( verbose ) build],
      enable_debug=$enableval, enable_debug=no )
@@ -60,6 +61,15 @@ fi
 
 AM_CONDITIONAL(WANT_CAIRO, test x$enable_cairo = xyes)
 
+if test x$enable_cairo = xyes; then
+   AC_DEFINE_UNQUOTED(WANT_CAIRO, 1, [Use Cairo to paint libs])
+fi
+
+if test x$enable_examples = xyes; then
+   PKG_CHECK_MODULES(GTK2, gtk+-2.0,, [enable_examples="no"])
+fi
+
+AM_CONDITIONAL(WANT_EXAMPLES, test x$enable_examples = xyes)
 
 dnl ------ Expat ------------------------------------------------------------
 
@@ -175,11 +185,11 @@ AC_SUBST(XFT_LIBS)
 AC_SUBST(EXPAT_LIBS)
 AC_SUBST(EXPAT_CFLAGS)
 
-
 AC_OUTPUT([
 Makefile
 src/Makefile  
 layouts/Makefile
+examples/Makefile
 ])
 
 dnl ==========================================================================
@@ -187,9 +197,11 @@ echo "
                     Matchbox-keyboard $VERSION
                   =========================
 
-        prefix:                 ${prefix}
-        source code location:   ${srcdir}
-        compiler:               ${CC} 
+            prefix:                       ${prefix}
+            source code location:         ${srcdir}
+            compiler:                     ${CC} 
 
-        Building with Debug:    ${enable_debug}
+            Building with Debug:          ${enable_debug}
+            Building with Cairo:          ${enable_cairo}
+            Building Examples:            ${enable_examples}
 "

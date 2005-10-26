@@ -1,5 +1,30 @@
 #include "matchbox-keyboard.h"
 
+static int TrappedErrorCode = 0;
+static int (*old_error_handler) (Display *, XErrorEvent *);
+
+static int
+error_handler(Display     *xdpy,
+	      XErrorEvent *error)
+{
+  TrappedErrorCode = error->error_code;
+  return 0;
+}
+
+void
+util_trap_x_errors(void)
+{
+  TrappedErrorCode  = 0;
+  old_error_handler = XSetErrorHandler(error_handler);
+}
+
+int
+util_untrap_x_errors(void)
+{
+  XSetErrorHandler(old_error_handler);
+  return TrappedErrorCode;
+}
+
 void*
 util_malloc0(int size)
 {
@@ -56,10 +81,10 @@ util_fatal_error(char *msg)
 
 
 int
-util_utf8_char_cnt(const unsigned char *str)
+util_utf8_char_cnt(const char *str)
 {
-  const unsigned char *p = str;
-  int                      mask, len, result = 0;
+  const unsigned char *p = (unsigned char *)str;
+  int         mask, len, result = 0;
 
   /* XXX Should validate too */
 
@@ -83,3 +108,4 @@ util_file_readable(char *path)
  
  return True;
 }
+

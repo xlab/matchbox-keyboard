@@ -1,3 +1,22 @@
+/* 
+ *  Matchbox Keyboard - A lightweight software keyboard.
+ *
+ *  Authored By Matthew Allum <mallum@o-hand.com>
+ *
+ *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ */
+
 #ifndef HAVE_MB_KEYBOARD_H
 #define HAVE_MB_KEYBOARD_H
 
@@ -118,11 +137,11 @@ MBKeyboardStateType;
 struct MBKeyboard
 {
   MBKeyboardUI          *ui;
-  unsigned char         *font_family;
+  char                  *font_family;
   int                    font_pt_size;
-  unsigned char         *font_variant;
+  char                  *font_variant;
 
-  unsigned char         *config_file;
+  char                  *config_file;
 
   List                  *layouts;
   MBKeyboardLayout      *selected_layout;
@@ -146,10 +165,10 @@ struct MBKeyboardUIBackend
   void (*pre_redraw) (MBKeyboardUI  *ui);
   int  (*resources_create) (MBKeyboardUI  *ui);
   int  (*resize) (MBKeyboardUI  *ui, int width, int height);
-  void  (*text_extents) (MBKeyboardUI        *ui, 
-			 const unsigned char *str, 
-			 int                 *width, 
-			 int                 *height);
+  void  (*text_extents) (MBKeyboardUI  *ui, 
+			 const char    *str, 
+			 int           *width, 
+			 int           *height);
 };
 
 int
@@ -157,6 +176,9 @@ mb_kbd_ui_init(MBKeyboard *kbd);
 
 int
 mb_kbd_ui_realize(MBKeyboardUI  *ui);
+
+void
+mb_kbd_ui_show(MBKeyboardUI  *ui);
 
 void
 mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key);
@@ -169,7 +191,7 @@ mb_kbd_ui_swap_buffers(MBKeyboardUI  *ui);
 
 void
 mb_kbd_ui_send_press(MBKeyboardUI        *ui,
-		     const unsigned char *utf8_char_in,
+		     const char          *utf8_char_in,
 		     int                  modifiers);
 
 void
@@ -216,6 +238,22 @@ mb_kbd_ui_kbd(MBKeyboardUI *ui);
 void
 mb_kbd_ui_event_loop(MBKeyboardUI *ui);
 
+void
+mb_kbd_ui_set_embeded (MBKeyboardUI *ui, int embed);
+ 
+int
+mb_kbd_ui_embeded (MBKeyboardUI *ui);
+
+void
+mb_kbd_ui_print_window (MBKeyboardUI *ui);
+
+/*** XEmbed ***/
+
+void
+mb_kbd_xembed_init (MBKeyboardUI *ui);
+
+void
+mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent);
 
 /**** Keyboard ****/
 
@@ -412,9 +450,9 @@ mb_kdb_key_has_state(MBKeyboardKey           *key,
 void
 mb_kbd_key_set_glyph_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state,
-			  const unsigned char     *glyph);
+			  const  char             *glyph);
 
-const unsigned char*
+const char*
 mb_kbd_key_get_glyph_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state);
 
@@ -430,7 +468,7 @@ mb_kbd_key_get_face_type(MBKeyboardKey           *key,
 void
 mb_kbd_key_set_char_action(MBKeyboardKey           *key,
 			   MBKeyboardKeyStateType   state,
-			   const unsigned char     *glyphs);
+			   const char              *glyphs);
 
 void
 mb_kbd_key_set_keysym_action(MBKeyboardKey           *key,
@@ -479,6 +517,12 @@ mb_kbd_config_load(MBKeyboard *kbd, char *varient);
 #define unless(x)       if (!(x))
 #define util_abs(x)     ((x) > 0) ? (x) : -1*(x)
 
+void
+util_trap_x_errors(void);
+
+int
+util_untrap_x_errors(void);
+
 void*
 util_malloc0(int size);
 
@@ -486,7 +530,7 @@ void
 util_fatal_error(char *msg);
 
 int
-util_utf8_char_cnt(const unsigned char *str);
+util_utf8_char_cnt(const char *str);
 
 boolean 
 util_file_readable(char *path);
@@ -519,7 +563,7 @@ util_list_foreach(List *list, ListForEachCB func, void *userdata);
 
 /* Backends */
 
-#if 1
+#if WANT_CAIRO
 #include "matchbox-keyboard-ui-cairo-backend.h"
 #else
 #include "matchbox-keyboard-ui-xft-backend.h"

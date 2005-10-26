@@ -1,3 +1,22 @@
+/* 
+ *  Matchbox Keyboard - A lightweight software keyboard.
+ *
+ *  Authored By Matthew Allum <mallum@o-hand.com>
+ *
+ *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ */
+
 #include "matchbox-keyboard.h"
 
 typedef struct MBKeyboardUIBackendXft
@@ -18,7 +37,7 @@ typedef struct MBKeyboardUIBackendXft
 
 static void 
 mb_kbd_ui_xft_text_extents (MBKeyboardUI        *ui, 
-			    const unsigned char *str, 
+			    const char          *str, 
 			    int                 *width, 
 			    int                 *height)
 {
@@ -29,7 +48,7 @@ mb_kbd_ui_xft_text_extents (MBKeyboardUI        *ui,
   
   XftTextExtentsUtf8(mb_kbd_ui_x_display(ui), 
 		     xft_backend->font,
-		     str, 
+		     (unsigned char*)str, 
 		     strlen(str),
 		     &extents);
 
@@ -199,8 +218,8 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
   if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
   {
-    const unsigned char *face_str = mb_kbd_key_get_glyph_face(key, state);
-    int                  face_str_w, face_str_h;
+    const char *face_str = mb_kbd_key_get_glyph_face(key, state);
+    int         face_str_w, face_str_h;
 
     if (face_str)
       {
@@ -219,7 +238,7 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 			  xft_backend->font,
 			  x,
 			  y + xft_backend->font->ascent,
-			  face_str, 
+			  (unsigned char*)face_str, 
  			  strlen(face_str));
       }
   }
@@ -297,6 +316,7 @@ mb_kbd_ui_xft_resources_create(MBKeyboardUI  *ui)
   alloc_color(ui, &xft_backend->xcol_f4f4f4, "#f4f4f4");
   alloc_color(ui, &xft_backend->xcol_a4a4a4, "#a4a4a4");
 
+  return True;
 }
 
 static int
@@ -307,6 +327,8 @@ mb_kbd_ui_xft_resize(MBKeyboardUI  *ui, int width, int height)
   xft_backend = (MBKeyboardUIBackendXft*)mb_kbd_ui_backend(ui);
 
   XftDrawChange (xft_backend->xft_backbuffer, mb_kbd_ui_backbuffer(ui));
+
+  return True;
 }
 
 MBKeyboardUIBackend*
@@ -324,6 +346,6 @@ mb_kbd_ui_xft_init(MBKeyboardUI *ui)
   xft_backend->backend.resources_create = mb_kbd_ui_xft_resources_create;
   xft_backend->backend.resize           = mb_kbd_ui_xft_resize;
 
-  return xft_backend;
+  return (MBKeyboardUIBackend*)xft_backend;
 }
 

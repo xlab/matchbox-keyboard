@@ -2,15 +2,15 @@ PREFIXDIR  = $(prefix)
 PKGDATADIR = $(datadir)/matchbox-keyboard
 DATADIR    = $(datadir)
 
-BACEKND_C =                                                           \
-	matchbox-keyboard-ui-xft-backend.c                            \
-        matchbox-keyboard-ui-xft-backend.h
-
 
 if WANT_CAIRO
-BACKEND_C =                                                           \
+CAIRO_BACKEND_C =                                                           \
 	matchbox-keyboard-ui-cairo-backend.c                          \
         matchbox-keyboard-ui-cairo-backend.h
+else
+XFT_BACKEND_C =                                                       \
+	matchbox-keyboard-ui-xft-backend.c                            \
+        matchbox-keyboard-ui-xft-backend.h
 endif
 
 INCLUDES = -DDATADIR=\"$(DATADIR)\" -DPKGDATADIR=\"$(PKGDATADIR)\" -DPREFIX=\"$(PREFIXDIR)\" $(FAKEKEY_CFLAGS) $(XFT_CFLAGS) $(EXPAT_CFLAGS) $(CAIRO_CFLAGS)
@@ -25,8 +25,9 @@ matchbox_keyboard_SOURCES =                                          \
         matchbox-keyboard-row.c                                      \
         matchbox-keyboard-key.c                                      \
         matchbox-keyboard-ui.c                                       \
+        matchbox-keyboard-xembed.c                                   \
         config-parser.c                                              \
 	util-list.c                                                  \
         util.c                                                       \
-	$(BACKEND_C)
+	$(XFT_BACKEND_C) $(CAIRO_BACKEND_C)
 

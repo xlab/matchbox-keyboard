@@ -1,3 +1,54 @@
+2005-10-26  Matthew Allum  <mallum@openedhand.com>
+
+	* AUTHORS:
+	Populate. 	
+	* Makefile.am:
+	* configure.ac:
+	* src/Makefile.am:
+	Fix cairo build issues, 
+
+	* src/matchbox-keyboard-xembed.c:
+	Add XEMBED support for embedding keyboard in other apps.
+	
+	* examples/Makefile.am:
+	* examples/matchbox-keyboard-embbed.c:
+	Add example embedding app
+
+	* src/config-parser.c: (config_str_to_keysym),
+	(config_str_to_modtype), (config_xml_start_cb):
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_get_extended),
+	(mb_kbd_key_set_row), (mb_kdb_key_has_state),
+	(mb_kbd_key_set_glyph_face), (mb_kbd_key_get_glyph_face),
+	(mb_kbd_key_set_image_face), (mb_kbd_key_set_char_action),
+	(mb_kbd_key_press):
+	* src/matchbox-keyboard-layout.c:
+	* src/matchbox-keyboard-row.c:
+	* src/matchbox-keyboard-ui-cairo-backend.c:
+	(mb_kbd_ui_cairo_text_extents), (mb_kbd_ui_cairo_load_font),
+	(mb_kbd_ui_cairo_redraw_key), (mb_kbd_ui_cairo_pre_redraw),
+	(mb_kbd_ui_cairo_resources_create), (mb_kbd_ui_cairo_resize),
+	(mb_kbd_ui_cairo_init):
+	* src/matchbox-keyboard-ui-cairo-backend.h:
+	* src/matchbox-keyboard-ui-xft-backend.c:
+	(mb_kbd_ui_xft_text_extents), (mb_kbd_ui_xft_redraw_key),
+	(mb_kbd_ui_xft_resources_create), (mb_kbd_ui_xft_resize),
+	(mb_kbd_ui_xft_init):
+	* src/matchbox-keyboard-ui-xft-backend.h:
+	* src/matchbox-keyboard-ui.c: (get_current_window_manager_name),
+	(get_desktop_area), (get_xevent_timed),
+	(mb_kbd_ui_send_keysym_press), (mb_kbd_ui_send_release),
+	(mb_kdb_ui_unit_key_size), (mb_kbd_ui_min_key_size),
+	(mb_kbd_ui_redraw_row), (mb_kbd_ui_swap_buffers),
+	(mb_kbd_ui_redraw), (mb_kbd_ui_resources_create),
+	(mb_kbd_ui_resize), (mb_kbd_ui_event_loop), (mb_kbd_ui_realize),
+	(mb_kbd_ui_init):
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+	* src/matchbox-keyboard.h:
+	* src/util.c: (util_utf8_char_cnt), (util_file_readable):
+	Fix GCC 4 Warnings.
+	Add License to all files.
+	Improve buggy cairo backend and add gradient keys 
+
 2005-10-21  Matthew Allum  <mallum@openedhand.com>
 
 	* configure.ac:

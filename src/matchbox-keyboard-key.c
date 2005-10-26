@@ -1,3 +1,22 @@
+/* 
+ *  Matchbox Keyboard - A lightweight software keyboard.
+ *
+ *  Authored By Matthew Allum <mallum@o-hand.com>
+ *
+ *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ */
+
 #include "matchbox-keyboard.h"
 
 #define MBKB_N_KEY_STATES 5
@@ -8,8 +27,8 @@ typedef struct MBKeyboardKeyFace
 
   union
   {
-    void          *image;
-    unsigned char *str;
+    void *image;
+    char *str;
   } u;
 } 
 MBKeyboardKeyFace;
@@ -19,7 +38,7 @@ typedef struct MBKeyboardKeyAction
   MBKeyboardKeyActionType  type;
   union 
   {
-    unsigned char         *glyph;
+    char                  *glyph;
     KeySym                 keysym;
     MBKeyboardKeyModType   type;
   } u;
@@ -243,7 +262,7 @@ mb_kdb_key_has_state(MBKeyboardKey           *key,
 void
 mb_kbd_key_set_glyph_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state,
-			  const unsigned char     *glyph)
+			  const char              *glyph)
 {
   if (key->states[state] == NULL)
     _mb_kbd_key_init_state(key, state);
@@ -252,7 +271,7 @@ mb_kbd_key_set_glyph_face(MBKeyboardKey           *key,
   key->states[state]->face.u.str   = strdup(glyph);
 }
 
-const unsigned char*
+const char*
 mb_kbd_key_get_glyph_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state)
 {
@@ -280,7 +299,7 @@ mb_kbd_key_set_image_face(MBKeyboardKey           *key,
 void
 mb_kbd_key_set_char_action(MBKeyboardKey           *key,
 			   MBKeyboardKeyStateType   state,
-			   const unsigned char     *glyphs)
+			   const char              *glyphs)
 {
   if (key->states[state] == NULL)
     _mb_kbd_key_init_state(key, state);
@@ -289,7 +308,7 @@ mb_kbd_key_set_char_action(MBKeyboardKey           *key,
   key->states[state]->action.u.glyph = strdup(glyphs);
 }
 
-const unsigned char*
+const char*
 mb_kbd_key_get_char_action(MBKeyboardKey           *key,
 			   MBKeyboardKeyStateType   state)
 {
@@ -410,7 +429,7 @@ mb_kbd_key_press(MBKeyboardKey *key)
     {
     case MBKeyboardKeyActionGlyph:
       {
-	const unsigned char *key_char;
+	const char *key_char;
 
 	if ((key_char = mb_kbd_key_get_char_action(key, state)) != NULL)
 	  {
