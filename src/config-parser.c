@@ -540,7 +540,7 @@ mb_kbd_config_load(MBKeyboard *kbd, char *variant)
 
   if (variant && !strstr(kbd->config_file, variant))
     fprintf(stderr, 
-	    "matchbox-keyboard: *Warning* Unable to locate variant: %s"
+	    "matchbox-keyboard: *Warning* Unable to locate variant: %s\n"
 	    "                   falling back to %s\n",
 	    variant, kbd->config_file);
 

@@ -236,6 +236,10 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
   layout   = mb_kbd_get_selected_layout(ui->kbd);
   row_item = mb_kbd_layout_rows(layout);
 
+  /*
+   * Figure out the base size of a 'regular' single glyph key.    
+  */
+
   while (row_item != NULL)
     {
       mb_kbd_row_for_each_key(row_item->data, key_item)
@@ -264,7 +268,7 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
 		    }
 		}
 
-	      /* XXX TODO, also need to check height of image keys etc */
+	      /* TODO: also need to check height of image keys etc */
 
 	    }
 	}
@@ -281,6 +285,10 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
   const char *face_str = NULL;
   int         max_w = 0, max_h = 0, state;
 
+  /* 
+   * Figure out how small a key can really be UI wise.
+  */
+
   if (mb_kbd_key_get_req_uwidth(key) || mb_kbd_key_is_blank(key))
     {
       *width = (ui->key_uwidth * mb_kbd_key_get_req_uwidth(key)) / 1000 ;
@@ -292,17 +300,12 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
     {
       if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
 	{
-	  
-	  if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
-	    {
-	      
-	      face_str = mb_kbd_key_get_glyph_face(key, state);
+	  face_str = mb_kbd_key_get_glyph_face(key, state);
 
-	      ui->backend->text_extents(ui, face_str, width, height);
+	  ui->backend->text_extents(ui, face_str, width, height);
 
-	      if (*width < max_w) *width = max_w;
-	      if (*height < max_h) *height = max_h;
-	    }
+	  if (*width < max_w) *width = max_w;
+	  if (*height < max_h) *height = max_h;
 	}
       /* XXX else, images etc */
     }
@@ -321,9 +324,7 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
   layout = mb_kbd_get_selected_layout(ui->kbd);
 
-  /* Do an initial run to figure out a 'base' size for 
-   * single glyph keys 
-  */
+  /* Do an initial run to figure out a 'base' size for single glyph keys */
   mb_kdb_ui_unit_key_size(ui, &ui->key_uwidth, &ui->key_uheight);
 
   row_item = mb_kbd_layout_rows(layout);
@@ -332,6 +333,9 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
   max_row_width = 0;
 
+  /* 
+   * First of entire keyboard, basically get the minimum space needed
+  */
   while (row_item != NULL)
     {
       MBKeyboardRow *row = row_item->data;
@@ -382,7 +386,6 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
       if (key_x > max_row_width) /* key_x now represents row width */
 	max_row_width = key_x;
 
-
       mb_kbd_row_set_y(row, row_y);
 
       row_y += max_row_key_height + mb_kbd_row_spacing(ui->kbd);
@@ -392,11 +395,9 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
   *height = row_y; 
 
-  DBG("Handling fillers");
-
   row_item = mb_kbd_layout_rows(layout);
 
-  /* handle any fillers */
+  /* Now pass again allocating any extra space with have left over */
 
   while (row_item != NULL)
     {
@@ -471,24 +472,6 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
   
   *width = max_row_width;
 }
-
-/* 
-
-  XColor        xcol;
-#if defined (USE_XFT) || defined (USE_PANGO)
-  XftColor      xftcol;
-
-
- xcol_c5c5c5
- xcol_d3d3d3
- xcol_f0f0f0
-
- xcol_f8f8f5 - key bg ( 2px white border )
- xcol_f4f4f4 - line on bottom of key
-
- #636262 - text
-
- */
 
 void
 mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
@@ -827,7 +810,7 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
   next_row_y = mb_kbd_row_spacing(ui->kbd);
 
-  /* allocate some extra width padding to keys */
+  /* allocate the extra width we have as padding to keys */
 
   while (row_item != NULL)
     {
@@ -1178,6 +1161,9 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
   if (want_extended(ui))
     mb_kbd_set_extended(ui->kbd, True);
 
+  /* 
+   * figure out how small this keyboard can be..
+  */
   mb_kbd_ui_allocate_ui_layout(ui, 
 			       &ui->base_alloc_width, &ui->base_alloc_height);
 

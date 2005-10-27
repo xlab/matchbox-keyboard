@@ -1,3 +1,15 @@
+2005-10-27  Matthew Allum  <mallum@openedhand.com>
+
+	* README:
+	Update with current info
+	* src/config-parser.c: (mb_kbd_config_load):
+	* src/matchbox-keyboard-ui.c: (mb_kdb_ui_unit_key_size),
+	(mb_kbd_ui_min_key_size), (mb_kbd_ui_allocate_ui_layout),
+	(mb_kbd_ui_resize), (mb_kbd_ui_realize):
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+	Minor cleanups. Improve cmd line option parsing and add
+	a usage() func. 
+
 2005-10-26  Matthew Allum  <mallum@openedhand.com>
 
 	* examples/Makefile.am:

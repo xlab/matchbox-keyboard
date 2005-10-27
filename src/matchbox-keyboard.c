@@ -19,12 +19,24 @@
 
 #include "matchbox-keyboard.h"
 
+static void
+mb_kbd_usage (char *progname)
+{
+  fprintf(stderr, "Usage:\n   %s [Options ] [ Layout Variant ]\n", progname);
+  fprintf(stderr, "\nOptions are;\n"
+	  "   -xid,--xid            Print window ID to stdout ( for embedding )\n");
+  fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2005 Matthew Allum, OpenedHand Ltd.\n", VERSION);
+
+  exit(-1);
+}
+
 MBKeyboard*
-mb_kbd_new(int argc, char **argv)
+mb_kbd_new (int argc, char **argv)
 {
   MBKeyboard *kb = NULL;
   char       *variant = NULL; 
   Bool        want_embedding = False;
+  int         i;
 
   kb = util_malloc0(sizeof(MBKeyboard));
 
@@ -39,18 +51,22 @@ mb_kbd_new(int argc, char **argv)
   kb->font_pt_size = 6;
   kb->font_variant = strdup("bold");
 
-  if (argc > 1) 
+  for (i = 1; i < argc; i++) 
     {
-      /* FIXME: varient should always be last argv[1] */
-      if (streq(argv[1], "-xid") || streq(argv[1], "--xid"))
+      if (streq ("-xid", argv[i]) || streq ("--xid", argv[i])) 
 	{
 	  want_embedding = True;
+	  continue;
 	}
+
+      if (i == (argc-1) && argv[i][0] != '-')
+	variant = argv[i];
       else
-	variant = argv[1];
-      DBG("varient is %s\n", variant);
+	mb_kbd_usage(argv[0]);
     }
-  else variant = getenv("MB_KBD_VARIANT");
+
+  if (variant == NULL)
+    variant = getenv("MB_KBD_VARIANT");
 
   if (!mb_kbd_ui_init(kb))
     return NULL;
@@ -61,7 +77,7 @@ mb_kbd_new(int argc, char **argv)
       kb->key_pad      = 0;
       kb->col_spacing  = 0;
       kb->row_spacing  = 0;
-      kb->font_pt_size = 10;
+      kb->font_pt_size = 6;
     }
 
   if (!mb_kbd_config_load(kb, variant))

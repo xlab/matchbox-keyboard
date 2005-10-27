@@ -11,7 +11,7 @@ phones to tablet PCs running X Windows.
 It aims to 'just work' supporting localised, easy to write XML layout
 configuration files.
 
-It is made available under the GPL.
+Its made available under the GPL.
 
 
 Rational
@@ -20,7 +20,7 @@ Rational
 I wrote 'xkbd' a few years back which tried to do the same thing. It
 was the first xlib app I wrote and the first bit of C Id coded in
 quite a few years. It was a mess but basically worked, though with
-some problems.
+a few problems.
 
 matchbox-keyboard is my much promised rewrite. The code is cleaner 
 and it hopefully addresses much of the previous short comings of xkbd.
@@ -33,7 +33,9 @@ Do the usual autotool jig of ./configure, make, make install. ( If
 building from SVN you'll need to run ./autogen.sh before this).
 
 matchbox-keyboard needs xlibs, xft, libfakekey and expat to build -
-The configure script will detect these.
+The configure script will detect these. Also optionally there is
+experimental cairo support for rendering the keys and example
+embeddeding code.
 
 
 Running
@@ -41,10 +43,11 @@ Running
 
 Do;
 
-  matchbox-keyboard [optional variant name]
+  matchbox-keyboard [Options..] [optional variant name]
 
 and start typing. The config file will be selected based on locale
-setting and supplied variant name.
+setting and supplied variant name. The onlu current option is -xid,
+used for embedding ( see below ).
 
 The following Environmental Variables are also used, if set;
 
@@ -65,15 +68,23 @@ The following Environmental Variables are also used, if set;
    wanting a Dutch keyboard but an English locale - or the other way 
    round ).
 
+Embedding
+===
+
+You can embed matchbox-keyboard into other applications with toolkits
+that support the XEMBED protocol ( GTK2 for example ). 
+
+See examples/matchbox-keyboard-gtk-embed.c for how its done. 
 
 Making your own keyboard layouts
 ===
 
-Keyboard layout files are UTF8 XML files. They are loaded from the
-directory $PREFIX/share/matchbox-keyboard and are named in the format
+Keyboard layout files are UTF8 XML files ( Make sure they are saved
+with this encoding! ). They are loaded from the directory
+$PREFIX/share/matchbox-keyboard and are named in the format
 keyboard[-locale][-variant].xml. This can be overridden by setting
-MB_KBD_CONFIG environment variable to a valid config file path or by creating
-$HOME/.matchbox/keyboard.xml.
+MB_KBD_CONFIG environment variable to a valid config file path or by
+creating $HOME/.matchbox/keyboard.xml.
 
 The basic layout of the file looks like;
 
@@ -185,26 +196,16 @@ Misc Notes
 Todo
 ===
 
+ * Fix layout engine on small on displays.
+
  * Images on keys
 
- Only text on key faces is currently supported. Images shouldn't't be too
- hard to add, but It'll likely need a basic Image processing library.
- LibMatchbox would do the job, but I'm planning to re jig that a bit into
- small separate libs ( with a nicer API ) and Id like to do that first.
+ Only text on key faces is currently supported. Probably do this via XRender
+ and libPNG ( or just cairo for cairo backend ).
 
  * Themeing.
 
- Again needs an image lib.
-
- * Dynamic Extended keys 
-
- Some how have certain keys limit themselves to only being displayed if 
- width is avialable.
- This would work hopefull work well for screen rotation. 
-
- * Embedding. 
-
- Should be quite easy to add.
+ Needs thought... 
 
 
 
