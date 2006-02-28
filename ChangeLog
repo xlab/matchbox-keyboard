@@ -1,5 +1,10 @@
 2006-02-28  Matthew Allum  <mallum@openedhand.com>
 
+	* src/config-parser.c: (config_load_file):
+	Use ~/.matchbox not ~/matchbox
+
+2006-02-28  Matthew Allum  <mallum@openedhand.com>
+
 	* configure.ac:
 	Make version 0.1. Make cairo usage explicit.
 

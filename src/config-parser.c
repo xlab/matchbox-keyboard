@@ -217,7 +217,7 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
 
   if (getenv("HOME"))
     {
-      snprintf(path, 1024, "%s/matchbox/keyboard.xml", getenv("HOME"));
+      snprintf(path, 1024, "%s/.matchbox/keyboard.xml", getenv("HOME"));
 
       DBG("checking %s\n", path);
 
