@@ -1,3 +1,22 @@
+2006-02-28  Matthew Allum  <mallum@openedhand.com>
+
+	* configure.ac:
+	Make version 0.1. Make cairo usage explicit.
+
+	* layouts/Makefile.am:
+	* layouts/keyboard-numpad.xml:
+	New Layout.
+
+	* src/matchbox-keyboard-ui-xft-backend.c:
+	(mb_kbd_ui_xft_redraw_key):
+	* src/matchbox-keyboard-ui.c: (mb_kdb_ui_unit_key_size),
+	(mb_kbd_ui_allocate_ui_layout), (mb_kbd_ui_handle_configure),
+	(mb_kbd_ui_event_loop):
+	* src/matchbox-keyboard.c: (mb_kbd_new):
+	Fixups for layout on small screens and improvements for high
+	DPI layouts.
+
+
 2005-10-27  Matthew Allum  <mallum@openedhand.com>
 
 	* README:

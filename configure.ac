@@ -1,5 +1,5 @@
 AC_PREREQ(2.53)
-AC_INIT([matchbox-keyboard], 0.0.0, [mallum@handhelds.org])
+AC_INIT([matchbox-keyboard], 0.1, [mallum@handhelds.org])
 AC_CONFIG_SRCDIR([src/matchbox-keyboard.c])
 
 AM_INIT_AUTOMAKE()
@@ -26,9 +26,9 @@ AC_TYPE_SIGNAL
 AC_FUNC_STAT
 
 AC_ARG_ENABLE(cairo,
-  [  --disable-cairo    disable Cairo support [default=auto]],
+  [  --enable-cairo    enable experimental Cairo support [default=no]],
    		enable_cairo=$enableval, 
-		enable_cairo=yes)	    
+		enable_cairo=no)	    
 
 AC_ARG_ENABLE(examples,
   [  --enable-examples  Build embedding examples ( requires GTK ) [default=no]],

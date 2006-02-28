@@ -274,6 +274,13 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
 	}
       row_item = util_list_next(row_item);
     }
+
+  /* FIXME: hack for small displays */
+  if (mb_kbd_ui_display_height(ui) <= 320)
+    {
+      *height += 4;
+    }
+
 }
 
 static void
@@ -410,7 +417,9 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 	      && mb_kbd_key_get_extended(key_item->data))
 	    continue;
 
-	  if (mb_kbd_key_get_fill(key_item->data))
+	  if (mb_kbd_key_get_fill(key_item->data)
+	      || mb_kbd_ui_display_height(ui) <= 320
+	      || mb_kbd_ui_display_width(ui) <= 320 )
 	      n_fillers++;
 	}
 
@@ -425,7 +434,9 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 	      && mb_kbd_key_get_extended(key_item->data))
 	    continue;
 
-	  if (mb_kbd_key_get_fill(key_item->data))
+	  if (mb_kbd_key_get_fill(key_item->data)
+	      || mb_kbd_ui_display_height(ui) <= 320
+	      || mb_kbd_ui_display_width(ui) <= 320 )
 	    {
 	      int   old_w;
 	      List *nudge_key_item = util_list_next(key_item);
@@ -1007,8 +1018,8 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
   struct timeval tvt;
 
   /* Key repeat - values for standard xorg install ( xset q) */
-  int repeat_delay = 500 * 10000;
-  int repeat_rate  = 30  * 10000;
+  int repeat_delay = 100 * 10000;
+  int repeat_rate  = 30  * 1000;
 
   tvt.tv_sec  = 0;
   tvt.tv_usec = repeat_delay;
@@ -1026,23 +1037,25 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 		key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
 		if (key)
 		  {
-		    /* Hack if we never go a release event */
+		    /* Hack if we never get a release event */
 		    if (key != mb_kbd_get_held_key(ui->kbd))
 		      {
-			mb_kbd_key_release(ui->kbd);	 
+			mb_kbd_key_release(ui->kbd);
 			tvt.tv_usec = repeat_delay;   
 		      }
+		    else
+		      tvt.tv_usec = repeat_rate;
 
 		    DBG("found key for press");
 		    mb_kbd_key_press(key);
-		    tvt.tv_usec = repeat_rate;
+
 		  }
 		break;
 	      case ButtonRelease:
 		if (mb_kbd_get_held_key(ui->kbd) != NULL)
 		  {
 		    mb_kbd_key_release(ui->kbd);	 
-		    tvt.tv_usec = repeat_delay;   
+		    tvt.tv_usec = repeat_delay;
 		  }
 		break;
 	      case ConfigureNotify:

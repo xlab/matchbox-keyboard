@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="defualt keyboard">
+
+  <row>
+
+    <space width="500" extended="true"/>
+
+    <key>
+	  <default display="9" />                
+    </key>
+    <key>
+	  <default display="8" />                
+    </key>
+    <key>
+	  <default display="7" />
+    </key>
+
+  </row>
+  <row>
+    <space width="500" extended="true"/>
+    <key>
+	  <default display="6" />
+    </key>
+    <key>
+	  <default display="5" />
+    </key>
+    <key>
+	  <default display="4" />
+    </key>
+  </row>
+  <row>
+    <space width="500" extended="true"/>
+    <key>
+	  <default display="3" />
+    </key>
+
+    <key>
+	  <default display="2" />
+    </key>
+    <key>
+	  <default display="1" />
+    </key>
+  </row>
+  <row>
+    <space width="500" extended="true"/>
+    <key>
+	  <default display="0" />
+    </key>
+  </row>
+
+</layout>
+
+
+</keyboard>

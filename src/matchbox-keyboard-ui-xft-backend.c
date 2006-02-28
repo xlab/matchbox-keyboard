@@ -135,6 +135,14 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   rect.width  = mb_kbd_key_width(key);       
   rect.height = mb_kbd_key_height(key);       
 
+  /* Hacky clip to work around issues with off by ones in layout code :( */
+
+  if (rect.x + rect.width >= mb_kbd_ui_x_win_width(ui)) 
+    rect.width  = mb_kbd_ui_x_win_width(ui) - rect.x - 1;
+
+  if (rect.y + rect.height >= mb_kbd_ui_x_win_height(ui)) 
+    rect.height  = mb_kbd_ui_x_win_height(ui) - rect.y - 1;
+
   /* clear it */
 
   XSetForeground(xdpy, xft_backend->xgc, WhitePixel(xdpy, xscreen));
