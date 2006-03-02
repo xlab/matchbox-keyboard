@@ -1,3 +1,9 @@
+2006-03-02  Matthew Allum  <mallum@openedhand.com>
+
+	* layouts/Makefile.am:
+	* layouts/keyboard-us.xml:
+	Add US layout from Matt Reimer
+
 2006-02-28  Matthew Allum  <mallum@openedhand.com>
 
 	* src/config-parser.c: (config_load_file):
