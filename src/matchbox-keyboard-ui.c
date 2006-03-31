@@ -1021,6 +1021,8 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
   int repeat_delay = 100 * 10000;
   int repeat_rate  = 30  * 1000;
 
+  int press_x = 0, press_y = 0; 
+
   tvt.tv_sec  = 0;
   tvt.tv_usec = repeat_delay;
 
@@ -1033,6 +1035,7 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 	    switch (xev.type) 
 	      {
 	      case ButtonPress:
+		press_x = xev.xbutton.x; press_y = xev.xbutton.y;
 		DBG("got button bress at %i,%i", xev.xbutton.x, xev.xbutton.y);
 		key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
 		if (key)
@@ -1056,6 +1059,28 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 		  {
 		    mb_kbd_key_release(ui->kbd);	 
 		    tvt.tv_usec = repeat_delay;
+
+		    /* Gestures */
+
+		    /* FIXME: check time first */
+		    if ( (press_x - xev.xbutton.x) > ui->key_uwidth )
+		      {
+			/* <-- slide back ...backspace */
+			fakekey_press_keysym(ui->fakekey, XK_BackSpace, 0);
+			fakekey_repeat(ui->fakekey);
+			fakekey_release(ui->fakekey);
+			/* FIXME: add <-- --> <-- --> support */
+		      }
+		    else if ( (xev.xbutton.y - press_y) > ui->key_uheight )
+		      {
+			/* V slide down ...return  */
+			fakekey_press_keysym(ui->fakekey, XK_BackSpace, 0);
+			fakekey_release(ui->fakekey);
+			fakekey_press_keysym(ui->fakekey, XK_Return, 0);
+			fakekey_release(ui->fakekey);
+		      }
+		    /* TODO ^ caps support */
+
 		  }
 		break;
 	      case ConfigureNotify:
