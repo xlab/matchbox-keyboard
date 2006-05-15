@@ -32,6 +32,11 @@
     <key fill="true">
 	  <default display="Esc" action="escape" />
     </key>
+<!--
+    <key>
+      <default display="image:/usr/share/pixmaps/sync_icon.png" action="a"/>
+    </key>  
+-->
     <key>
 	  <default display="`" />
     </key>

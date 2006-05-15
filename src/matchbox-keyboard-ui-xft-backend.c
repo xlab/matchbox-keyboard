@@ -225,31 +225,53 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
     }
 
   if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
-  {
-    const char *face_str = mb_kbd_key_get_glyph_face(key, state);
-    int         face_str_w, face_str_h;
+    {
+      const char *face_str = mb_kbd_key_get_glyph_face(key, state);
+      int         face_str_w, face_str_h;
+      
+      if (face_str)
+	{
+	  int x, y;
+	  
+	  mb_kbd_ui_xft_text_extents(ui, face_str, &face_str_w, &face_str_h);
+	  
+	  x = mb_kbd_key_abs_x(key) + ((mb_kbd_key_width(key) - face_str_w)/2);
+	  
+	  y = mb_kbd_key_abs_y(key) + 
+	    ( (mb_kbd_key_height(key) 
+                 - (xft_backend->font->ascent + xft_backend->font->descent))
+	                             / 2 );
+	  
+	  XftDrawStringUtf8(xft_backend->xft_backbuffer,
+			    &xft_backend->font_col,
+			    xft_backend->font,
+			    x,
+			    y + xft_backend->font->ascent,
+			    (unsigned char*)face_str, 
+			    strlen(face_str));
+	}
+    }
+  else if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceImage)
+    {
+      int x, y, w, h;
+      MBKeyboardImage *img;
 
-    if (face_str)
-      {
-	int x, y;
+      img = mb_kbd_key_get_image_face(key, state);
 
-	mb_kbd_ui_xft_text_extents(ui, face_str, &face_str_w, &face_str_h);
+      w = mb_kbd_image_width (img);
+      h = mb_kbd_image_height (img);
 
-	x = mb_kbd_key_abs_x(key) + ((mb_kbd_key_width(key) - face_str_w)/2);
+      x = mb_kbd_key_abs_x(key) + ((mb_kbd_key_width(key) - w) / 2);
+      y = mb_kbd_key_abs_y(key) + ((mb_kbd_key_height(key) - h ) / 2);
 
-	y = mb_kbd_key_abs_y(key) + 
-	  ( (mb_kbd_key_height(key) - (xft_backend->font->ascent + xft_backend->font->descent))
-	                                / 2 );
 
-	XftDrawStringUtf8(xft_backend->xft_backbuffer,
-			  &xft_backend->font_col,
-			  xft_backend->font,
-			  x,
-			  y + xft_backend->font->ascent,
-			  (unsigned char*)face_str, 
- 			  strlen(face_str));
-      }
-  }
+      XRenderComposite(xdpy,
+		       PictOpOver, 
+		       mb_kbd_image_render_picture (img), 
+		       None, 
+		       XftDrawPicture (xft_backend->xft_backbuffer), 
+		       0, 0, 0, 0, x, y, w, h);
+    }
 }
 
 void

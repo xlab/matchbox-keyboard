@@ -267,9 +267,18 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
 
 		    }
 		}
+	      else if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceImage)
+		{
+		  MBKeyboardImage *img;
 
-	      /* TODO: also need to check height of image keys etc */
+		  img = mb_kbd_key_get_image_face(key, state);
 
+		  if (mb_kbd_image_width (img) > *width) 
+		    *width = mb_kbd_image_width (img);
+
+		  if (mb_kbd_image_height (img) > *height) 
+		    *height = mb_kbd_image_height (img);
+		}
 	    }
 	}
       row_item = util_list_next(row_item);
@@ -314,7 +323,20 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
 	  if (*width < max_w) *width = max_w;
 	  if (*height < max_h) *height = max_h;
 	}
-      /* XXX else, images etc */
+      else if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceImage)
+	{
+	  /*
+	  MBKeyboardImage *img;
+
+	  img = mb_kbd_key_get_image_face(key, state);
+
+	  if (*width < mb_kbd_image_width (img) < max_w) 
+	    *width = mb_kbd_image_width (img);
+
+	  if (mb_kbd_image_height (img) > *height) 
+	    *height = mb_kbd_image_height (img);
+	    */
+	}
     }
 
 }

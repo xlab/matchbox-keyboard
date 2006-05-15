@@ -1,3 +1,19 @@
+2006-05-15  Matthew Allum  <mallum@openedhand.com>
+
+	* configure.ac:
+	* layouts/keyboard.xml:
+	* src/Makefile.am:
+	* src/config-parser.c: (config_handle_key_subtag):
+	* src/matchbox-keyboard-image.c:
+	* src/matchbox-keyboard-key.c: (mb_kbd_key_set_image_face):
+	* src/matchbox-keyboard-ui-xft-backend.c:
+	(mb_kbd_ui_xft_redraw_key):
+	* src/matchbox-keyboard-ui.c: (mb_kdb_ui_unit_key_size),
+	(mb_kbd_ui_min_key_size):
+	* src/matchbox-keyboard.h:
+	Add initial support for defineable PNG images on keys.
+	Keys with images sizing a little borked atm.
+
 2006-03-31  Matthew Allum  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_event_loop):

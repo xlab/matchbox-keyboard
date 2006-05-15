@@ -341,8 +341,26 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
       return;
     }
 
-  mb_kbd_key_set_glyph_face(state->current_key, keystate, 
-			    attr_get_val("display", attr));
+  if (!strncmp(val, "image:", 6))
+    {
+      MBKeyboardImage *img;
+
+      img = mb_kbd_image_new (state->keyboard, &val[6]);
+
+      if (!img)
+	{
+	  /* FIXME: add a message here */
+	  fprintf(stderr, "Failed to load '%s'\n", &val[6]);
+	  state->error = True;
+	  return;
+	}
+      mb_kbd_key_set_image_face(state->current_key, keystate, img);
+    }
+  else
+    {
+      mb_kbd_key_set_glyph_face(state->current_key, keystate, 
+				attr_get_val("display", attr));
+    }
 
   if ((val = attr_get_val("action", attr)) != NULL)
     {

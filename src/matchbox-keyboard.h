@@ -30,6 +30,8 @@
 #include <fcntl.h>
 #include <time.h>
 
+#include <png.h>
+
 #include <locale.h>
 
 #include <expat.h>
@@ -76,6 +78,7 @@ typedef struct MBKeyboardRow    MBKeyboardRow;
 typedef struct MBKeyboardKey    MBKeyboardKey;
 typedef struct MBKeyboardUI     MBKeyboardUI;
 typedef struct MBKeyboardUIBackend MBKeyboardUIBackend;
+typedef struct MBKeyboardImage  MBKeyboardImage;
 
 typedef enum 
 {
@@ -104,7 +107,7 @@ typedef enum
 {
   MBKeyboardKeyFaceNone  = 0,
   MBKeyboardKeyFaceGlyph = 1,
-  MBKeyboardKeyFaceImage,
+  MBKeyboardKeyFaceImage = 2,
 
 } MBKeyboardKeyFaceType;
 
@@ -246,6 +249,20 @@ mb_kbd_ui_embeded (MBKeyboardUI *ui);
 
 void
 mb_kbd_ui_print_window (MBKeyboardUI *ui);
+
+/*** Images ***/
+
+MBKeyboardImage*
+mb_kbd_image_new (MBKeyboard *kbd, const char *filename);
+
+int
+mb_kbd_image_width (MBKeyboardImage *img);
+
+int
+mb_kbd_image_height (MBKeyboardImage *img);
+
+void
+mb_kbd_image_destroy (MBKeyboardImage *img);
 
 /*** XEmbed ***/
 
@@ -459,7 +476,12 @@ mb_kbd_key_get_glyph_face(MBKeyboardKey           *key,
 void
 mb_kbd_key_set_image_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state,
-			  void                    *image);
+			  MBKeyboardImage         *image);
+
+MBKeyboardImage*
+mb_kbd_key_get_image_face(MBKeyboardKey           *key,
+			  MBKeyboardKeyStateType   state);
+
 
 MBKeyboardKeyFaceType
 mb_kbd_key_get_face_type(MBKeyboardKey           *key,
@@ -567,6 +589,10 @@ util_list_foreach(List *list, ListForEachCB func, void *userdata);
 #include "matchbox-keyboard-ui-cairo-backend.h"
 #else
 #include "matchbox-keyboard-ui-xft-backend.h"
+
+Picture
+mb_kbd_image_render_picture (MBKeyboardImage *img);
+
 #endif
 
 #endif

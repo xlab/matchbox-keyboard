@@ -27,8 +27,8 @@ typedef struct MBKeyboardKeyFace
 
   union
   {
-    void *image;
-    char *str;
+    MBKeyboardImage *image;
+    char            *str;
   } u;
 } 
 MBKeyboardKeyFace;
@@ -286,7 +286,7 @@ mb_kbd_key_get_glyph_face(MBKeyboardKey           *key,
 void
 mb_kbd_key_set_image_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state,
-			  void                    *image)
+			  MBKeyboardImage         *image)
 {
 
   if (key->states[state] == NULL)
@@ -294,6 +294,18 @@ mb_kbd_key_set_image_face(MBKeyboardKey           *key,
 
   key->states[state]->face.type    = MBKeyboardKeyFaceImage;
   key->states[state]->face.u.image = image;
+}
+
+MBKeyboardImage*
+mb_kbd_key_get_image_face(MBKeyboardKey           *key,
+			  MBKeyboardKeyStateType   state)
+{
+  if (key->states[state] 
+      && key->states[state]->face.type == MBKeyboardKeyFaceImage)
+    {
+      return key->states[state]->face.u.image;
+    }
+  return NULL;
 }
 
 void
