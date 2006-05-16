@@ -299,7 +299,7 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
 		       int           *height)
 {
   const char *face_str = NULL;
-  int         max_w = 0, max_h = 0, state;
+  int         max_w = 0, max_h = 0, state, kw, kh;
 
   /* 
    * Figure out how small a key can really be UI wise.
@@ -318,27 +318,24 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
 	{
 	  face_str = mb_kbd_key_get_glyph_face(key, state);
 
-	  ui->backend->text_extents(ui, face_str, width, height);
+	  ui->backend->text_extents(ui, face_str, &kw, &kh);
 
-	  if (*width < max_w) *width = max_w;
-	  if (*height < max_h) *height = max_h;
+	  if (kw > max_w) max_w = kw;
+	  if (kh > max_h) max_h = kh;
 	}
       else if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceImage)
 	{
-	  /*
 	  MBKeyboardImage *img;
 
 	  img = mb_kbd_key_get_image_face(key, state);
 
-	  if (*width < mb_kbd_image_width (img) < max_w) 
-	    *width = mb_kbd_image_width (img);
+	  if (mb_kbd_image_width (img) > max_w) 
+	    max_w = mb_kbd_image_width (img);
 
-	  if (mb_kbd_image_height (img) > *height) 
-	    *height = mb_kbd_image_height (img);
-	    */
+	  if (mb_kbd_image_height (img) > max_h) 
+	    max_h = mb_kbd_image_height (img);
 	}
     }
-
 }
 
 void
@@ -375,7 +372,7 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
       mb_kbd_row_for_each_key(row, key_item)
 	{
-	  int            key_w, key_h;          
+	  int            key_w = 0, key_h = 0;          
 	  MBKeyboardKey *key = key_item->data;
 
 	  mb_kbd_key_set_extra_height_pad(key, 0);

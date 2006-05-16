@@ -1,3 +1,14 @@
+2006-05-16  Matthew Allum  <mallum@openedhand.com>
+
+	* src/config-parser.c: (config_handle_key_subtag):
+	Try and load relative image filenaes
+	* src/matchbox-keyboard-image.c: (png_file_load),
+	(mb_kbd_image_new):
+	Force an alpha channel into PNG images without one.
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_min_key_size),
+	(mb_kbd_ui_allocate_ui_layout):
+	Fix a layout issue in mb_kbd_ui_min_key_size() lieing.
+
 2006-05-15  Matthew Allum  <mallum@openedhand.com>
 
 	* configure.ac:

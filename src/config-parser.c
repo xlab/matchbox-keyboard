@@ -345,12 +345,24 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
     {
       MBKeyboardImage *img;
 
-      img = mb_kbd_image_new (state->keyboard, &val[6]);
+
+      if (val[6] != '/')
+	{
+	  /* Relative, rather than absolute path, try pkddatadir and home */
+	  char buf[512];
+	  snprintf(buf, 512, "%s/%s", PKGDATADIR, &val[6]);
+
+	  if (!util_file_readable(buf))
+	    snprintf(buf, 512, "%s/.matchbox/%s", getenv("HOME"), &val[6]);
+
+	  img = mb_kbd_image_new (state->keyboard, buf);
+	}
+      else
+	img = mb_kbd_image_new (state->keyboard, &val[6]);
 
       if (!img)
 	{
-	  /* FIXME: add a message here */
-	  fprintf(stderr, "Failed to load '%s'\n", &val[6]);
+	  fprintf(stderr, "matchbox-keyboard: Failed to load '%s'\n", &val[6]);
 	  state->error = True;
 	  return;
 	}

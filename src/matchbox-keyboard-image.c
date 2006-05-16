@@ -30,8 +30,7 @@ struct MBKeyboardImage
 static unsigned char* 
 png_file_load (const char *file, 
 	       int        *width, 
-	       int        *height, 
-	       int        *has_alpha ) 
+	       int        *height)
 {
   FILE *fd;
   unsigned char *data;
@@ -79,31 +78,24 @@ png_file_load (const char *file,
   *width = (int) png_width;
   *height = (int) png_height;
 
-  if (( color_type == PNG_COLOR_TYPE_PALETTE )||
-      ( png_get_valid( png_ptr, info_ptr, PNG_INFO_tRNS )))
-    png_set_expand(png_ptr);
-
-  if (( color_type == PNG_COLOR_TYPE_GRAY )||
-      ( color_type == PNG_COLOR_TYPE_GRAY_ALPHA ))
-    png_set_gray_to_rgb(png_ptr);
- 
-  if ( info_ptr->color_type == PNG_COLOR_TYPE_RGB_ALPHA 
-       || info_ptr->color_type == PNG_COLOR_TYPE_GRAY_ALPHA
-       )
-    *has_alpha = 1;
-  else
-    *has_alpha = 0;
-
-  /* 8 bits */
   if ( bit_depth == 16 )
     png_set_strip_16(png_ptr);
 
   if (bit_depth < 8)
     png_set_packing(png_ptr);
 
-  /* not needed as data will be RGB not RGBA and have_alpha will reflect this
-    png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
-  */
+  if (( color_type == PNG_COLOR_TYPE_GRAY ) ||
+            ( color_type == PNG_COLOR_TYPE_GRAY_ALPHA ))
+    png_set_gray_to_rgb(png_ptr);
+
+  /* Add alpha */
+  if (( color_type == PNG_COLOR_TYPE_GRAY ) ||
+      ( color_type == PNG_COLOR_TYPE_RGB ))
+    png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER); /* req 1.2.7 */
+
+  if (( color_type == PNG_COLOR_TYPE_PALETTE )||
+      ( png_get_valid( png_ptr, info_ptr, PNG_INFO_tRNS )))
+    png_set_expand(png_ptr);
 
   png_read_update_info( png_ptr, info_ptr);
 
@@ -111,7 +103,6 @@ png_file_load (const char *file,
   rowbytes = png_get_rowbytes( png_ptr, info_ptr);
   data = (unsigned char *) malloc( (rowbytes*(*height + 1)));
   row_pointers = (png_bytep *) malloc( (*height)*sizeof(png_bytep));
-
 
   if (( data == NULL )||( row_pointers == NULL )) {
     png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
@@ -134,12 +125,12 @@ png_file_load (const char *file,
 }
 
 MBKeyboardImage*
-mb_kbd_image_new (MBKeyboard *kbd, const char* filename)
+mb_kbd_image_new (MBKeyboard *kbd, const char *filename)
 {
   MBKeyboardUI            *ui;
   MBKeyboardImage         *img;
   unsigned char           *data, *p;
-  int                      width, height, has_alpha, x, y;
+  int                      width, height, x, y;
   XRenderPictFormat       *ren_fmt;
   XRenderPictureAttributes ren_attr;
   GC                       gc;
@@ -147,13 +138,11 @@ mb_kbd_image_new (MBKeyboard *kbd, const char* filename)
 
   ui = kbd->ui;
   
-  data = png_file_load (filename, &width, &height, &has_alpha);
+  data = png_file_load (filename, &width, &height);
 
   if (data == NULL || width == 0 || height == 0)
     {
-      if (data)
-	free(data);
-
+      if (data) free(data);
       return NULL;
     }
 
@@ -162,13 +151,8 @@ mb_kbd_image_new (MBKeyboard *kbd, const char* filename)
   img->width  = width;
   img->height = height;
 
-  if (has_alpha)
-    ren_fmt = XRenderFindStandardFormat(mb_kbd_ui_x_display(ui), 
-					PictStandardARGB32);
-  else
-    ren_fmt = XRenderFindStandardFormat(mb_kbd_ui_x_display(ui), 
-					PictStandardRGB24);
-  
+  ren_fmt = XRenderFindStandardFormat(mb_kbd_ui_x_display(ui), 
+				      PictStandardARGB32);
   img->xdraw = XCreatePixmap(mb_kbd_ui_x_display(ui), 
 			     mb_kbd_ui_x_win_root(ui),
 			     width, height, 
@@ -209,7 +193,7 @@ mb_kbd_image_new (MBKeyboard *kbd, const char* filename)
       {
 	unsigned char a, r, g, b;
 	r = *p++; g = *p++; b = *p++; a = *p++; 
-	r = (r * (a + 1)) / 256;
+	r = (r * (a + 1)) / 256; /* premult */
 	g = (g * (a + 1)) / 256;
 	b = (b * (a + 1)) / 256;
 	XPutPixel(ximg, x, y, (a << 24) | (r << 16) | (g << 8) | b);
