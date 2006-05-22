@@ -250,6 +250,10 @@ mb_kdb_ui_unit_key_size(MBKeyboardUI *ui, int *width, int *height)
 	      && mb_kbd_key_get_extended(key))
 	    continue;
 
+	  /* Ignore keys whose width is forced */
+	  if (mb_kbd_key_get_req_uwidth(key))
+	    continue;
+
 	  mb_kdb_key_foreach_state(key, state)
 	    {
 	      if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceGlyph)
