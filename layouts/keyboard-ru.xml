@@ -305,7 +305,7 @@
 	  <default display="äëö" action="modifier:mod1"/>                
     </key>
     <key>
-	  <default display="EN" action="modifier:layout1"/>                
+	  <default display="EN" action="modifier:mod2"/>                
     </key>
 
     <key fill="true">

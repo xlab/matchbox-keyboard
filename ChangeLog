@@ -1,3 +1,12 @@
+2006-07-20  Matthew Allum  <mallum@openedhand.com>
+
+	* layouts/keyboard-ru.xml:
+	* src/config-parser.c: (config_handle_key_subtag),
+	(config_handle_layout_tag), (config_xml_start_cb),
+	(mb_kbd_config_load):
+	Apply patches from Paul Sokolovsky for Russian layout
+	improvements and more error messages from config parser.
+
 2006-05-22  Matthew Allum  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (mb_kdb_ui_unit_key_size):

@@ -35,10 +35,10 @@
 	     fill="true"    // Set width to available space
 	     
              >
-	  <defualt
+	  <default
 	     display="a"                
 	     display="image:" 
-	     action="utf8char"     // optional, action defulats to this    
+	     action="utf8char"     // optional, action defaults to this    
 	     action="string"       // from lookup below
 	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps"
 	     action="xkeysym:XK_BLAH"
@@ -124,8 +124,18 @@ typedef struct MBKeyboardConfigState
   MBKeyboardKey    *current_key;
   Bool              error;
   char             *error_msg;
+  int               error_lineno;
+  XML_Parser        parser;
 }
 MBKeyboardConfigState;
+
+void 
+set_error(MBKeyboardConfigState *state, char *msg)
+{
+  state->error = True;
+  state->error_lineno = XML_GetCurrentLineNumber(state->parser);
+  state->error_msg = msg;
+}
 
 KeySym
 config_str_to_keysym(const char* str)
@@ -331,13 +341,13 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
     }
   else
     {
-      state->error = True;
+      set_error(state, "Unknown key subtag");
       return;
     }
 
   if ((val = attr_get_val("display", attr)) == NULL)
     {
-      state->error = True;
+      set_error(state, "Attribute 'display' is required");
       return;
     }
 
@@ -399,7 +409,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	    }
 	  else
 	    {
-	      state->error = True;
+              set_error(state, "Unknown modifier");
 	      return;
 	    }
 	  
@@ -419,7 +429,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	  else 
 	    {
 	      /* Should this error really be terminal */
-	      state->error = True;
+              set_error(state, "Unknown keysym");
 	      return;
 	    }
 	}
@@ -463,7 +473,7 @@ config_handle_layout_tag(MBKeyboardConfigState *state, const char **attr)
 
   if ((val = attr_get_val("id", attr)) == NULL)
     {
-      state->error = True;
+      set_error(state, "Attribute 'id' is required");
       return;
     }
 
@@ -548,6 +558,8 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
 
   if (state->error)
     {
+      fprintf(stderr, "matchbox-keyboard:%s:%d: %s\n", state->keyboard->config_file, 
+                                              state->error_lineno, state->error_msg);
       util_fatal_error("Error parsing\n");
     }
 }
@@ -577,6 +589,7 @@ mb_kbd_config_load(MBKeyboard *kbd, char *variant)
   state = util_malloc0(sizeof(MBKeyboardConfigState));
 
   state->keyboard = kbd;
+  state->parser = p;
 
   XML_SetElementHandler(p, config_xml_start_cb, NULL);
 
@@ -586,10 +599,10 @@ mb_kbd_config_load(MBKeyboard *kbd, char *variant)
 
   if (! XML_Parse(p, data, strlen(data), 1)) {
     fprintf(stderr, 
-	    "matchbox-keyboard: XML Parse error at line %d:\n%s\n of %s",
+	    "matchbox-keyboard:%s:%d: XML Parse error:%s\n",
+	    kbd->config_file,
 	    XML_GetCurrentLineNumber(p),
-	    XML_ErrorString(XML_GetErrorCode(p)),
-	    kbd->config_file);
+	    XML_ErrorString(XML_GetErrorCode(p)));
     util_fatal_error("XML Parse failed.\n");
   }
 
