@@ -57,7 +57,7 @@
 		<Version>
 			<name>matchbox-keyboard-0.1</name>
 			<created>2006-07-04</created>
-			<revision>0.1</revisio>
+			<revision>0.1</revision>
 			<file-release rdf:resource="http://projects.o-hand.com/matchbox/sources/matchbox-keyboard/0.1/matchbox-keyboard-0.1.tar.gz" />
 		</Version>
 	</release>
