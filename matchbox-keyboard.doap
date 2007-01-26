@@ -1,0 +1,65 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	 xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	 xmlns="http://usefulinc.com/ns/doap#">
+
+	 <name>Matchbox Keyboard</name>
+	 <shortname>matchbox-keyboard</shortname>
+	 <created>2007-01-02</created>
+
+	 <shortdesc xml:lang="en">Matchbox Keyboard is an on screen virtual keyboard </shortdesc>
+
+	 <description xml:lang="en"> 
+
+         Matchbox-keyboard is an on screen 'virtual' or 'software'
+         keyboard. It will hopefully work well on various touchscreen
+         devices from mobile phones to tablet PCs running X Windows.
+
+         It aims to 'just work' supporting localised, easy to write
+         XML layout configuration files.
+
+	</description>
+
+	<homepage rdf:resource="http://matchbox-project.org/" />
+        <download-page rdf:resource="http://matchbox-project.org/sources/" />
+	<license rdf:resource="http://usefulinc.com/doap/licenses/gpl" />
+
+        <bug-database rdf:resource="http://bugzilla.o-hand.com/enter_bug.cgi?product=matchbox-keyboard"/>
+
+        <os>linux</os>
+        <programming-language>C</programming-language>
+        <mailing-list rdf:resource="mailto:matchbox+subscribe@o-hand.com" />
+
+        <category rdf:resource="http://labs.o-hand.com/doap/category/embedded"/>
+        <category rdf:resource="http://labs.o-hand.com/doap/category/x11"/>
+        <category rdf:resource="http://labs.o-hand.com/doap/category/matchbox"/>
+	<maintainer>
+		<foaf:Person>
+			<foaf:name>Matthew Allum</foaf:name>
+			<foaf:mbox rdf:resource="mailto:mallum@o-hand.com"/>
+		</foaf:Person>
+	</maintainer>
+
+	<author>
+		<foaf:Person>
+			<foaf:name>Matthew Allum</foaf:name>
+                        <foaf:mbox rdf:resource="mailto:mallum@o-hand.com"/>
+		</foaf:Person>
+	</author>
+
+        <repository>
+		<SVNRepository>
+			<browse rdf:resource="http://svn.o-hand.com/view/matchbox/trunk/matchbox-keyboard"/>
+			<location rdf:resource="http://svn.o-hand.com/repos/matchbox/trunk/matchbox-keyboard"/>
+		</SVNRepository>
+        </repository>
+
+	<release>
+		<Version>
+			<name>matchbox-keyboard-0.1</name>
+			<created>2006-07-04</created>
+			<revision>0.1</revisio>
+			<file-release rdf:resource="http://projects.o-hand.com/matchbox/sources/matchbox-keyboard/0.1/matchbox-keyboard-0.1.tar.gz" />
+		</Version>
+	</release>
+
+</Project>
