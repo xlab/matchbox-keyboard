@@ -7,9 +7,12 @@ AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 AC_GNU_SOURCE
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
 AC_PROG_CC
 AC_HEADER_DIRENT
 AC_HEADER_STDC
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -33,7 +36,14 @@ AC_ARG_ENABLE(examples,
   [  --enable-examples  Build embedding examples ( requires GTK ) [default=no]],
    		enable_examples=$enableval, 
 		enable_examples=no)
+AM_CONDITIONAL(WANT_EXAMPLES, test x$enable_examples = xyes)
  
+AC_ARG_ENABLE(gtk-im,
+  [  --enable-gtk-im    enable GTK+ IM support [default=no]],
+   		enable_im=$enableval, 
+		enable_im=no)	    
+AM_CONDITIONAL(WANT_IM, test x$enable_im = xyes)
+
 AC_ARG_ENABLE(debug,
   [  --enable-debug    enable debug ( verbose ) build],
      enable_debug=$enableval, enable_debug=no )
@@ -64,11 +74,12 @@ if test x$enable_cairo = xyes; then
    AC_DEFINE_UNQUOTED(WANT_CAIRO, 1, [Use Cairo to paint libs])
 fi
 
-if test x$enable_examples = xyes; then
-   PKG_CHECK_MODULES(GTK2, gtk+-2.0,, [enable_examples="no"])
+if test x$enable_examples = xyes || test x$enable_im = xyes; then
+   PKG_CHECK_MODULES(GTK2, gtk+-2.0)
+   GTK_VERSION=`$PKG_CONFIG --variable=gtk_binary_version gtk+-2.0`
+   AC_SUBST(GTK_VERSION)
 fi
 
-AM_CONDITIONAL(WANT_EXAMPLES, test x$enable_examples = xyes)
 
 dnl ------ Expat ------------------------------------------------------------
 
@@ -212,6 +223,7 @@ Makefile
 src/Makefile  
 layouts/Makefile
 examples/Makefile
+gtk-im/Makefile
 ])
 
 dnl ==========================================================================
@@ -226,4 +238,5 @@ echo "
             Building with Debug:          ${enable_debug}
             Building with Cairo:          ${enable_cairo}
             Building Examples:            ${enable_examples}
+            Building GTK+ Input Method:   ${enable_im}
 "

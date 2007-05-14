@@ -1,6 +1,16 @@
 2007-05-14  Ross Burton  <ross@openedhand.com>
 
 	* configure.ac:
+	* Makefile.am:
+	Add --enable-gtk-im, and use libtool.
+
+	* gtk-im/:
+	Add *very* simple GTK+ Input Method that sends an X client message
+	to the root window when the keyboard should be displayed.
+
+2007-05-14  Ross Burton  <ross@openedhand.com>
+
+	* configure.ac:
 	Remove AM_MAINTAINER_MODE.
 
 2006-07-20  Matthew Allum  <mallum@openedhand.com>

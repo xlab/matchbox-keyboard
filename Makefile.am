@@ -4,6 +4,10 @@ if WANT_EXAMPLES
 SUBDIRS += examples
 endif
 
+if WANT_IM
+SUBDIRS += gtk-im
+endif 
+
 EXTRA_DIST = matchbox-keyboard.desktop matchbox-keyboard.png
 
 desktopdir = $(datadir)/applications/inputmethods
