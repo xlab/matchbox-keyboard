@@ -1,3 +1,9 @@
+2007-05-14  Ross Burton  <ross@openedhand.com>
+
+	* gtk-im/im-context.[ch]:
+	Derive from GtkIMContextSimple so that editing actually works, and
+	chain up the focus in/out methods.
+	
 2007-05-14  Matthew Allum  <mallum@openedhand.com>
 
 	* src/Makefile.am:

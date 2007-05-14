@@ -1,4 +1,4 @@
-#include <gtk/gtkimcontext.h>
+#include <gtk/gtkimcontextsimple.h>
 
 #include "im-context.h"
 #include "im-protocol.h"
@@ -9,15 +9,19 @@ static GType im_context_type = 0;
 static void
 mb_im_context_focus_in (GtkIMContext *context)
 {
-  g_debug (__FUNCTION__);
   protocol_send_event (INVOKE_KBD_SHOW);
+
+  if (GTK_IM_CONTEXT_CLASS (parent_class)->focus_in)
+    GTK_IM_CONTEXT_CLASS (parent_class)->focus_in (context);
 }
 
 static void
 mb_im_context_focus_out (GtkIMContext *context)
 {
-  g_debug (__FUNCTION__);
   protocol_send_event (INVOKE_KBD_HIDE);
+
+  if (GTK_IM_CONTEXT_CLASS (parent_class)->focus_out)
+    GTK_IM_CONTEXT_CLASS (parent_class)->focus_out (context);
 }
 
 static void
@@ -51,7 +55,7 @@ mb_im_context_register_type (GTypeModule *module)
       0,
       (GInstanceInitFunc) mb_im_context_init,
     };
-    im_context_type = g_type_module_register_type (module, GTK_TYPE_IM_CONTEXT,
+    im_context_type = g_type_module_register_type (module, GTK_TYPE_IM_CONTEXT_SIMPLE,
                                                    "MbIMContext", &im_context_info, 0);
   }
 }

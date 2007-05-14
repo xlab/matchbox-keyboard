@@ -1,16 +1,16 @@
-#include <gtk/gtkimcontext.h>
+#include <gtk/gtkimcontextsimple.h>
 
 typedef struct _MbIMContext MbIMContext;
 typedef struct _MbIMContextClass MbIMContextClass;
 
 struct _MbIMContext
 {
-  GtkIMContext context;
+  GtkIMContextSimple context;
 };
 
 struct _MbIMContextClass
 {
-  GtkIMContextClass parent_class;
+  GtkIMContextSimpleClass parent_class;
 };
 
 void mb_im_context_register_type (GTypeModule *module);
