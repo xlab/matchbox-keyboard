@@ -28,32 +28,32 @@ AC_TYPE_SIGNAL
 AC_FUNC_STAT
 
 AC_ARG_ENABLE(cairo,
-  [  --enable-cairo    enable experimental Cairo support [default=no]],
+  AC_HELP_STRING([--enable-cairo],[enable experimental Cairo support [default=no]]),
    		enable_cairo=$enableval, 
 		enable_cairo=no)	    
 
 AC_ARG_ENABLE(examples,
-  [  --enable-examples  Build embedding examples ( requires GTK ) [default=no]],
+  AC_HELP_STRING([--enable-examples], [Build embedding examples (requires GTK) [default=no]]),
    		enable_examples=$enableval, 
 		enable_examples=no)
 AM_CONDITIONAL(WANT_EXAMPLES, test x$enable_examples = xyes)
  
 AC_ARG_ENABLE(gtk-im,
-  [  --enable-gtk-im    enable GTK+ IM support [default=no]],
+  AC_HELP_STRING([--enable-gtk-im], [enable GTK+ IM support [default=no]]),
    		enable_im=$enableval, 
 		enable_im=no)	    
 AM_CONDITIONAL(WANT_IM, test x$enable_im = xyes)
 
 AC_ARG_ENABLE(debug,
-  [  --enable-debug    enable debug ( verbose ) build],
+  AC_HELP_STRING([--enable-debug], [enable debug (verbose) build]),,
      enable_debug=$enableval, enable_debug=no )
 
 AC_ARG_WITH(expat-includes,    
-  [  --with-expat-includes=DIR     Use Expat includes in DIR], 
+  AC_HELP_STRING([--with-expat-includes=DIR], [Use Expat includes in DIR]),
 	   expat_includes=$withval, expat_includes=yes)
 
 AC_ARG_WITH(expat-lib,         
-  [  --with-expat-lib=DIR          Use Expat library in DIR], 
+  AC_HELP_STRING([--with-expat-lib=DIR], [Use Expat library in DIR]),
 	   expat_lib=$withval, expat_lib=yes)
 
 PKG_CHECK_MODULES(FAKEKEY, libfakekey,,
@@ -65,7 +65,7 @@ fi
 
 if test x$enable_cairo = xno; then
 PKG_CHECK_MODULES(XFT, xft,,
-	         AC_MSG_ERROR([*** Required xft Librarys not found ***]))
+	         AC_MSG_ERROR([*** Required Xft Library not found ***]))
 fi
 
 AM_CONDITIONAL(WANT_CAIRO, test x$enable_cairo = xyes)

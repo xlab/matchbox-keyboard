@@ -1,6 +1,11 @@
 2007-05-14  Ross Burton  <ross@openedhand.com>
 
 	* configure.ac:
+	Use AC_HELP_STRING to make --help look pretty.
+
+2007-05-14  Ross Burton  <ross@openedhand.com>
+
+	* configure.ac:
 	* Makefile.am:
 	Add --enable-gtk-im, and use libtool.
 
