@@ -184,6 +184,9 @@ void
 mb_kbd_ui_show(MBKeyboardUI  *ui);
 
 void
+mb_kbd_ui_hide(MBKeyboardUI  *ui);
+
+void
 mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key);
 
 void
@@ -243,6 +246,9 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui);
 
 void
 mb_kbd_ui_set_embeded (MBKeyboardUI *ui, int embed);
+
+void
+mb_kbd_ui_set_daemon (MBKeyboardUI *ui, int value);
  
 int
 mb_kbd_ui_embeded (MBKeyboardUI *ui);
@@ -271,6 +277,14 @@ mb_kbd_xembed_init (MBKeyboardUI *ui);
 
 void
 mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent);
+
+/*** Remote ***/
+
+void
+mb_kbd_remote_init (MBKeyboardUI *ui);
+
+void
+mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent);
 
 /**** Keyboard ****/
 

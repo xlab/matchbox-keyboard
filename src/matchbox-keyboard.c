@@ -24,8 +24,9 @@ mb_kbd_usage (char *progname)
 {
   fprintf(stderr, "Usage:\n   %s [Options ] [ Layout Variant ]\n", progname);
   fprintf(stderr, "\nOptions are;\n"
-	  "   -xid,--xid            Print window ID to stdout ( for embedding )\n");
-  fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2005 Matthew Allum, OpenedHand Ltd.\n", VERSION);
+	  "   -xid,--xid            Print window ID to stdout ( for embedding )\n"
+	  "   -d,--daemon           Run in 'daemon' mode (for remote control)\n");
+  fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);
 
   exit(-1);
 }
@@ -35,7 +36,7 @@ mb_kbd_new (int argc, char **argv)
 {
   MBKeyboard *kb = NULL;
   char       *variant = NULL; 
-  Bool        want_embedding = False;
+  Bool        want_embedding = False, want_daemon = False;
   int         i;
 
   kb = util_malloc0(sizeof(MBKeyboard));
@@ -56,6 +57,12 @@ mb_kbd_new (int argc, char **argv)
       if (streq ("-xid", argv[i]) || streq ("--xid", argv[i])) 
 	{
 	  want_embedding = True;
+	  continue;
+	}
+
+      if (streq ("-d", argv[i]) || streq ("--daemon", argv[i])) 
+	{
+	  want_daemon = True;
 	  continue;
 	}
 
@@ -87,13 +94,16 @@ mb_kbd_new (int argc, char **argv)
     = (MBKeyboardLayout *)util_list_get_nth_data(kb->layouts, 0);
 
   if (want_embedding)
-    mb_kbd_ui_set_embeded( kb->ui, True );
+    mb_kbd_ui_set_embeded (kb->ui, True);
+
+  if (want_daemon)
+    mb_kbd_ui_set_daemon (kb->ui, True);
 
   if (!mb_kbd_ui_realize(kb->ui))
     return NULL;
 
   if (want_embedding)
-    mb_kbd_ui_print_window( kb->ui );
+    mb_kbd_ui_print_window (kb->ui);
 
   return kb;
 }

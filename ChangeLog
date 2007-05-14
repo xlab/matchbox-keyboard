@@ -1,3 +1,13 @@
+2007-05-14  Matthew Allum  <mallum@openedhand.com>
+
+	* src/Makefile.am:
+	* src/matchbox-keyboard-remote.c:
+	* src/matchbox-keyboard-ui.c:
+	* src/matchbox-keyboard.c:
+	* src/matchbox-keyboard.h:
+	Add a mechansim for remotely enabling/disabling the keyboard
+	(as used by gtk-im). '-d' option enables.
+
 2007-05-14  Ross Burton  <ross@openedhand.com>
 
 	* configure.ac:

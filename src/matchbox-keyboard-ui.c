@@ -51,6 +51,7 @@ struct MBKeyboardUI
   int                 base_font_pt_size;
 
   Bool                want_embedding;
+  Bool                is_daemon;
 
   FakeKey             *fakekey;
   MBKeyboardUIBackend *backend; 
@@ -568,6 +569,13 @@ mb_kbd_ui_show(MBKeyboardUI  *ui)
 {
   XMapWindow(ui->xdpy, ui->xwin);
 }
+
+void
+mb_kbd_ui_hide(MBKeyboardUI  *ui)
+{
+  XUnmapWindow(ui->xdpy, ui->xwin);
+}
+
 			  
 static int
 mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
@@ -1122,6 +1130,10 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 	      }
 	    if (ui->want_embedding)
 	      mb_kbd_xembed_process_xevents (ui, &xev);
+
+	    if (ui->is_daemon)
+	      mb_kbd_remote_process_xevents (ui, &xev);
+
 	  }
 	else
 	  {
@@ -1235,8 +1247,16 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
 
   unless (mb_kbd_ui_embeded(ui))
     {
-      mb_kbd_ui_show(ui);
-      mb_kbd_ui_redraw(ui);
+      if (ui->is_daemon)
+	{
+	  /* Dont map daemon to begin with */
+	  mb_kbd_remote_init (ui);
+	}
+      else
+	{
+	  mb_kbd_ui_show(ui);
+	  mb_kbd_ui_redraw(ui);
+	}
     }
   else
     mb_kbd_xembed_init (ui);
@@ -1288,4 +1308,12 @@ mb_kbd_ui_print_window (MBKeyboardUI *ui)
 {
   fprintf(stdout, "%li\n", mb_kbd_ui_x_win(ui));
   fflush(stdout);
+}
+
+/* Remote */
+
+void
+mb_kbd_ui_set_daemon (MBKeyboardUI *ui, int value)
+{
+  ui->is_daemon = value;
 }
