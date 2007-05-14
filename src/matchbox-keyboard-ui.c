@@ -669,6 +669,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			   CWOverrideRedirect|CWEventMask,
 			   &win_attr);
 
+  XSelectInput (ui->xdpy,  ui->xwin_root, PropertyChangeMask);
 
   wm_hints = XAllocWMHints();
 
