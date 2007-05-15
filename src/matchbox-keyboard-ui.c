@@ -568,6 +568,7 @@ void
 mb_kbd_ui_show(MBKeyboardUI  *ui)
 {
   XMapWindow(ui->xdpy, ui->xwin);
+  mb_kbd_ui_redraw (ui);
 }
 
 void
@@ -669,7 +670,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			   CWOverrideRedirect|CWEventMask,
 			   &win_attr);
 
-  XSelectInput (ui->xdpy,  ui->xwin_root, PropertyChangeMask);
+  XSelectInput (ui->xdpy,  ui->xwin_root, SubstructureNotifyMask);
 
   wm_hints = XAllocWMHints();
 

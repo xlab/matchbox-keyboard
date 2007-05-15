@@ -24,8 +24,8 @@ protocol_send_event (InvokerEvent e)
 
   XSendEvent (GDK_DISPLAY (), 
 	      gdk_x11_get_default_root_xwindow (), 
-	      False, 
-	      NoEventMask, 
+	      False,
+	      SubstructureRedirectMask | SubstructureNotifyMask,
 	      &event);
 
   XSync (GDK_DISPLAY(), False);

@@ -1,3 +1,13 @@
+2007-05-15  Ross Burton  <ross@openedhand.com>
+
+	* gtk-im/im-protocol.c:
+	Send the event with a mask specified.  I'm not entirely sure why,
+	but everyone else does it.
+
+	* src/matchbox-keyboard-ui.c:
+	Listen for events with the same mask.  Also redraw the keyboard
+	when it is shown.
+
 2007-05-14  Matthew Allum  <mallum@openedhand.com>
 
 	* gtk-im/im-protocol.c: (protocol_send_event):
