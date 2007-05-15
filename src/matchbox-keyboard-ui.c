@@ -568,7 +568,6 @@ void
 mb_kbd_ui_show(MBKeyboardUI  *ui)
 {
   XMapWindow(ui->xdpy, ui->xwin);
-  mb_kbd_ui_redraw (ui);
 }
 
 void
@@ -991,7 +990,6 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   ui->xwin_width  = width;
   ui->xwin_height = height;
 
-
   if (ui->backbuffer) /* may get called before initialised */
     {
       XFreePixmap(ui->xdpy, ui->backbuffer);
@@ -1041,6 +1039,7 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 			       &ui->base_alloc_width, &ui->base_alloc_height);
 
   mb_kbd_ui_resize(ui, width, height); 
+
 
 }
 
@@ -1117,11 +1116,15 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 		  }
 		break;
 	      case ConfigureNotify:
-		if (xev.xconfigure.width != ui->xwin_width
-		    || xev.xconfigure.height != ui->xwin_height)
-		  mb_kbd_ui_handle_configure(ui,
-					     xev.xconfigure.width,
-					     xev.xconfigure.height);
+		if (xev.xconfigure.window == ui->xwin 
+		    &&  (xev.xconfigure.width != ui->xwin_width
+			 || xev.xconfigure.height != ui->xwin_height))
+		  {
+		    mb_kbd_ui_handle_configure(ui,
+					       xev.xconfigure.width,
+					       xev.xconfigure.height);
+		  }
+		    
 		break;
 	      case MappingNotify: 
 		fakekey_reload_keysyms(ui->fakekey);

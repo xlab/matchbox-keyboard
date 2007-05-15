@@ -31,11 +31,16 @@ mb_kbd_remote_init (MBKeyboardUI *ui)
 void
 mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
 {
+  DBG("got a message\n");
+
   switch (xevent->type)
     {
     case ClientMessage:
+      DBG("is a Client Message\n");
       if (xevent->xclient.message_type == Atom_MB_IM_INVOKER_COMMAND)
 	{
+	  DBG("got a message of type _MB_IM_INVOKER_COMMAND, val %i\n",
+	      xevent->xclient.data.l[0]);
 	  if (xevent->xclient.data.l[0] == 1)
 	      mb_kbd_ui_show (ui);
 	  else
