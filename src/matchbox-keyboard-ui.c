@@ -33,8 +33,6 @@ typedef struct
 } 
 PropMotifWmHints;
 
-
-
 struct MBKeyboardUI
 {
   Display            *xdpy;
@@ -52,10 +50,13 @@ struct MBKeyboardUI
 
   Bool                want_embedding;
   Bool                is_daemon;
-
+  Bool                visible;
   FakeKey             *fakekey;
   MBKeyboardUIBackend *backend; 
   MBKeyboard          *kbd;
+
+  MBKeyboardDisplayOrientation dpy_orientation;
+  MBKeyboardDisplayOrientation valid_orientation;
 };
 
 static void
@@ -152,6 +153,15 @@ update_display_size(MBKeyboardUI *ui)
 
   ui->dpy_width  = winattr.width;
   ui->dpy_height = winattr.height;
+
+  if (ui->dpy_width > ui->dpy_height)
+    ui->dpy_orientation = MBKeyboardDisplayLandscape;
+  else
+    ui->dpy_orientation = MBKeyboardDisplayPortrait;
+
+  if (ui->valid_orientation 
+      && ui->dpy_orientation != ui->valid_orientation)
+    mb_kbd_ui_hide (ui);
 
   return;
 }
@@ -567,16 +577,29 @@ mb_kbd_ui_redraw(MBKeyboardUI  *ui)
 void
 mb_kbd_ui_show(MBKeyboardUI  *ui)
 {
+  if (ui->visible)
+    return;
+
+  if (ui->valid_orientation 
+      && ui->dpy_orientation != ui->valid_orientation)
+    return;
+
   XMapWindow(ui->xdpy, ui->xwin);
   mb_kbd_ui_redraw (ui);
+
+  ui->visible = True;
 }
 
 void
 mb_kbd_ui_hide(MBKeyboardUI  *ui)
 {
-  XUnmapWindow(ui->xdpy, ui->xwin);
-}
+  if (!ui->visible)
+    return;
 
+  XUnmapWindow(ui->xdpy, ui->xwin);
+
+  ui->visible = False;
+}
 			  
 static int
 mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
@@ -1322,4 +1345,11 @@ void
 mb_kbd_ui_set_daemon (MBKeyboardUI *ui, int value)
 {
   ui->is_daemon = value;
+}
+
+void
+mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui, 
+			     MBKeyboardDisplayOrientation orientation)
+{
+  ui->valid_orientation = orientation;
 }

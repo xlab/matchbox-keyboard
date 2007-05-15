@@ -136,6 +136,13 @@ typedef enum
 } 
 MBKeyboardStateType;
 
+typedef enum 
+{
+  MBKeyboardDisplayAny      = 0,
+  MBKeyboardDisplayPortrait,
+  MBKeyboardDisplayLandscape
+} 
+MBKeyboardDisplayOrientation;
 
 struct MBKeyboard
 {
@@ -143,17 +150,12 @@ struct MBKeyboard
   char                  *font_family;
   int                    font_pt_size;
   char                  *font_variant;
-
   char                  *config_file;
-
   List                  *layouts;
   MBKeyboardLayout      *selected_layout;
-
   int                    key_border, key_pad, key_margin;
   int                    row_spacing, col_spacing;
-
   boolean                extended; /* are we showing extended keys ? */
-
   MBKeyboardKey         *held_key;
   MBKeyboardStateType    keys_state;
 };

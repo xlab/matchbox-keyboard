@@ -25,7 +25,9 @@ mb_kbd_usage (char *progname)
   fprintf(stderr, "Usage:\n   %s [Options ] [ Layout Variant ]\n", progname);
   fprintf(stderr, "\nOptions are;\n"
 	  "   -xid,--xid            Print window ID to stdout ( for embedding )\n"
-	  "   -d,--daemon           Run in 'daemon' mode (for remote control)\n");
+	  "   -d,--daemon           Run in 'daemon' mode (for remote control)\n"
+	  "   -o,--orientation <portrait|landscape>\n"
+          "                         Use to limit visibility with screen orientation \n");
   fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);
 
   exit(-1);
@@ -38,6 +40,7 @@ mb_kbd_new (int argc, char **argv)
   char       *variant = NULL; 
   Bool        want_embedding = False, want_daemon = False;
   int         i;
+  MBKeyboardDisplayOrientation orientation = MBKeyboardDisplayAny;
 
   kb = util_malloc0(sizeof(MBKeyboard));
 
@@ -63,6 +66,24 @@ mb_kbd_new (int argc, char **argv)
       if (streq ("-d", argv[i]) || streq ("--daemon", argv[i])) 
 	{
 	  want_daemon = True;
+	  continue;
+	}
+
+      if (streq ("-o", argv[i]) || streq ("--orientation", argv[i])) 
+	{
+	  if (++i>=argc) mb_kbd_usage (argv[0]);
+
+	  if (streq(argv[i], "portrait"))
+	    {
+	      orientation = MBKeyboardDisplayPortrait;	      
+	    }
+	  else if (streq(argv[i], "landscape"))
+	    {
+	      orientation = MBKeyboardDisplayLandscape;	      
+	    }
+	  else 
+	    mb_kbd_usage (argv[0]);
+
 	  continue;
 	}
 
@@ -97,13 +118,19 @@ mb_kbd_new (int argc, char **argv)
     mb_kbd_ui_set_embeded (kb->ui, True);
 
   if (want_daemon)
-    mb_kbd_ui_set_daemon (kb->ui, True);
+    {
+      mb_kbd_ui_set_daemon (kb->ui, True);
+      if (orientation != MBKeyboardDisplayAny)
+	mb_kbd_ui_limit_orientation (kb->ui, orientation);
+    }
 
   if (!mb_kbd_ui_realize(kb->ui))
     return NULL;
 
   if (want_embedding)
     mb_kbd_ui_print_window (kb->ui);
+
+
 
   return kb;
 }
