@@ -568,6 +568,7 @@ void
 mb_kbd_ui_show(MBKeyboardUI  *ui)
 {
   XMapWindow(ui->xdpy, ui->xwin);
+  mb_kbd_ui_redraw (ui);
 }
 
 void
