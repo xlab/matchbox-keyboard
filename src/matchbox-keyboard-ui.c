@@ -147,6 +147,8 @@ update_display_size(MBKeyboardUI *ui)
 {
   XWindowAttributes winattr;
 
+  MARK();
+
   XGetWindowAttributes(ui->xdpy, ui->xwin_root, &winattr);
 
   /* XXX should actually trap an X error here */
@@ -162,6 +164,8 @@ update_display_size(MBKeyboardUI *ui)
   if (ui->valid_orientation 
       && ui->dpy_orientation != ui->valid_orientation)
     mb_kbd_ui_hide (ui);
+
+  DBG("#### Orientation know '%i'", ui->dpy_orientation);
 
   return;
 }
@@ -693,7 +697,8 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 			   CWOverrideRedirect|CWEventMask,
 			   &win_attr);
 
-  XSelectInput (ui->xdpy,  ui->xwin_root, SubstructureNotifyMask);
+  XSelectInput (ui->xdpy,  ui->xwin_root, 
+		SubstructureNotifyMask|StructureNotifyMask);
 
   wm_hints = XAllocWMHints();
 
@@ -1148,7 +1153,8 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 					       xev.xconfigure.width,
 					       xev.xconfigure.height);
 		  }
-		    
+		if (xev.xconfigure.window == ui->xwin_root)		    
+		    update_display_size(ui);
 		break;
 	      case MappingNotify: 
 		fakekey_reload_keysyms(ui->fakekey);
