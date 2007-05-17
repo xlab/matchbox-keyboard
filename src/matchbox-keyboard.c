@@ -69,19 +69,19 @@ mb_kbd_new (int argc, char **argv)
 	  continue;
 	}
 
-      if (streq ("-o", argv[i]) || streq ("--orientation", argv[i])) 
+      if (streq ("-o", argv[i]) || streq ("--orientation", argv[i]))
 	{
 	  if (++i>=argc) mb_kbd_usage (argv[0]);
 
 	  if (streq(argv[i], "portrait"))
 	    {
-	      orientation = MBKeyboardDisplayPortrait;	      
+	      orientation = MBKeyboardDisplayPortrait;
 	    }
 	  else if (streq(argv[i], "landscape"))
 	    {
-	      orientation = MBKeyboardDisplayLandscape;	      
+	      orientation = MBKeyboardDisplayLandscape;
 	    }
-	  else 
+	  else
 	    mb_kbd_usage (argv[0]);
 
 	  continue;
