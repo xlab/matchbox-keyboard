@@ -10,5 +10,5 @@ libmb_im_invoker_la_LIBADD = @GTK2_LIBS@
 
 libmb_im_invoker_la_SOURCES = \
 	im-module.c \
-	im-context.c \
-	im-protocol.c
+	im-context.h im-context.c \
+	im-protocol.h im-protocol.c
