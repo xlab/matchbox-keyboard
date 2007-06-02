@@ -44,6 +44,12 @@ AC_ARG_ENABLE(gtk-im,
 		enable_im=no)	    
 AM_CONDITIONAL(WANT_IM, test x$enable_im = xyes)
 
+AC_ARG_ENABLE(applet,
+  AC_HELP_STRING([--enable-applet], [enable panel applet [default=no]]),
+   		enable_applet=$enableval, 
+		enable_applet=no)	    
+AM_CONDITIONAL(WANT_APPLET, test x$enable_applet = xyes)
+
 AC_ARG_ENABLE(debug,
   AC_HELP_STRING([--enable-debug], [enable debug (verbose) build]),,
      enable_debug=$enableval, enable_debug=no )
@@ -78,6 +84,10 @@ if test x$enable_examples = xyes || test x$enable_im = xyes; then
    PKG_CHECK_MODULES(GTK2, gtk+-2.0)
    GTK_VERSION=`$PKG_CONFIG --variable=gtk_binary_version gtk+-2.0`
    AC_SUBST(GTK_VERSION)
+fi
+
+if test x$enable_applet = xyes; then
+   PKG_CHECK_MODULES(APPLET, matchbox-panel)
 fi
 
 
@@ -224,6 +234,7 @@ src/Makefile
 layouts/Makefile
 examples/Makefile
 gtk-im/Makefile
+applet/Makefile
 ])
 
 dnl ==========================================================================
@@ -239,4 +250,5 @@ echo "
             Building with Cairo:          ${enable_cairo}
             Building Examples:            ${enable_examples}
             Building GTK+ Input Method:   ${enable_im}
+            Building panel applet:        ${enable_applet}
 "

@@ -8,6 +8,10 @@ if WANT_IM
 SUBDIRS += gtk-im
 endif 
 
+if WANT_APPLET
+SUBDIRS += applet
+endif 
+
 EXTRA_DIST = matchbox-keyboard.desktop matchbox-keyboard.png
 
 desktopdir = $(datadir)/applications/inputmethods

@@ -1,5 +1,13 @@
 2007-06-02  Ross Burton  <ross@openedhand.com>
 
+	* configure.ac:
+	* Makefile.am:
+	* applet/Makefile.am:
+	* applet/applet.c:
+	Add matchbox-panel-2 applet to show and hide the keyboard.
+
+2007-06-02  Ross Burton  <ross@openedhand.com>
+
 	* gtk-im/Makefile.am:
 	Fix distcheck.
 
