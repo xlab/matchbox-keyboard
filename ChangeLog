@@ -1,5 +1,12 @@
 2007-06-02  Ross Burton  <ross@openedhand.com>
 
+	* Makefile.am:
+	* layouts/Makefile.am:
+	Make distcheck build the examples, GTK+ IM, and panel applet. Also
+	clean up dist rules.
+
+2007-06-02  Ross Burton  <ross@openedhand.com>
+
 	* configure.ac:
 	* Makefile.am:
 	* applet/Makefile.am:
