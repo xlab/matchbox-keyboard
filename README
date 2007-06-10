@@ -197,22 +197,26 @@ Misc Notes
    ( possibly even Non X11 ) just by hacking matchbox-keyboard-ui.c . 
    ( If you do either of these, please send patches ). 
 
+ * There is an applet and experiemental GTK-IM module included in the source
+   for launching the keyboard. The IM module allows for the keyboard to
+   automatically mapped / unmapped on 'demand'. For this to work;
+  
+   - The IM must be added to your gtk setup (See /etc/gtk-2.0/gtk.immodules,
+     gtk-query-immodules-2.0 )
+
+   - Matchbox-keyboard must be run with the '--daemon' option. You can also
+     use the --orientation switch so it is only mapped when the display is
+     in a certain orientation.
 
 Todo
 ===
 
  * Fix layout engine on small on displays.
 
- * Images on keys
-
- Only text on key faces is currently supported. Probably do this via XRender
- and libPNG ( or just cairo for cairo backend ).
-
  * Themeing.
 
  Needs thought... 
 
 
-
-Matthew Allum 2005.
+Matthew Allum 2007.
 <mallum@openedhand.com>

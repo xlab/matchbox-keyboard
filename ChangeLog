@@ -1,3 +1,8 @@
+2007-06-10  Matthew Allum  <mallum@openedhand.com>
+
+	* README:
+	Update syncing TODO and adding info about GTK IM method.
+
 2007-06-02  Ross Burton  <ross@openedhand.com>
 
 	* Makefile.am:
