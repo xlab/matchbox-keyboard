@@ -1,3 +1,9 @@
+2007-07-04  Matthew Allum  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):
+	Hack to avoid starting before EWMH window manager is started
+	(only in daemon mode)
+
 2007-06-10  Matthew Allum  <mallum@openedhand.com>
 
 	* README:

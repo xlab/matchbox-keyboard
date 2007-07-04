@@ -679,10 +679,25 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
     {
       have_ewmh_wm = True; 	/* basically assumed to be Metacity
 				   or at least only tested with mcity */
-
-      if (streq(wm_name, "matchbox"))
-	have_matchbox_wm = True;
     }
+  else
+    {
+      if (ui->is_daemon)
+	{
+	  /* Hack to avoid starting before the WM. Needed only in daemon mode
+	  */
+	  while (wm_name == NULL)
+	    {
+	      sleep(1);
+	      wm_name = get_current_window_manager_name(ui);
+	    }
+
+	  have_ewmh_wm = True;
+	}
+    }
+
+  if (wm_name && streq(wm_name, "matchbox"))
+    have_matchbox_wm = True;
 
   win_attr.override_redirect = False; /* Set to true for extreme case */
   win_attr.event_mask 
