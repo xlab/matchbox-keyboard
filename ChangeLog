@@ -1,3 +1,8 @@
+2007-09-17  Matthew Allum  <mallum@openedhand.com>
+
+	* src/matchbox-keyboard-key.c: 
+	Dont set uneeded shift flag in libfakekey (Daniel Willmann)
+
 2007-07-04  Matthew Allum  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_resources_create):

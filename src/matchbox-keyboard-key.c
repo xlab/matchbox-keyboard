@@ -420,9 +420,6 @@ mb_kbd_key_press(MBKeyboardKey *key)
 
   /* XXX below fakekey mods probably better in ui */
 
-  if (state == MBKeyboardKeyStateShifted)
-    flags |= FAKEKEYMOD_SHIFT; 	/* does fakekey actually need this ? */
-
   if (mb_kbd_has_state(key->kbd, MBKeyboardStateControl))
     flags |= FAKEKEYMOD_CONTROL;
 
