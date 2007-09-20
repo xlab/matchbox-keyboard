@@ -144,6 +144,14 @@ typedef enum
 } 
 MBKeyboardDisplayOrientation;
 
+typedef enum
+{
+  MBKeyboardRemoteShow,
+  MBKeyboardRemoteHide,
+  MBKeyboardRemoteNone,
+}
+MBKeyboardRemoteOperation;
+
 struct MBKeyboard
 {
   MBKeyboardUI          *ui;
@@ -178,6 +186,10 @@ struct MBKeyboardUIBackend
 
 int
 mb_kbd_ui_init(MBKeyboard *kbd);
+
+void
+mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui, 
+			     MBKeyboardDisplayOrientation orientation);
 
 int
 mb_kbd_ui_realize(MBKeyboardUI  *ui);
@@ -285,7 +297,7 @@ mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent);
 void
 mb_kbd_remote_init (MBKeyboardUI *ui);
 
-void
+MBKeyboardRemoteOperation
 mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent);
 
 /**** Keyboard ****/

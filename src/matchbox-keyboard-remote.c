@@ -28,7 +28,7 @@ mb_kbd_remote_init (MBKeyboardUI *ui)
 					   "_MB_IM_INVOKER_COMMAND", False);
 }
 
-void
+MBKeyboardRemoteOperation
 mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
 {
   DBG("got a message\n");
@@ -39,12 +39,13 @@ mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
       DBG("is a Client Message\n");
       if (xevent->xclient.message_type == Atom_MB_IM_INVOKER_COMMAND)
 	{
-	  DBG("got a message of type _MB_IM_INVOKER_COMMAND, val %i\n",
+	  DBG("got a message of type _MB_IM_INVOKER_COMMAND, val %lu\n",
 	      xevent->xclient.data.l[0]);
 	  if (xevent->xclient.data.l[0] == 1)
-	      mb_kbd_ui_show (ui);
+	    return MBKeyboardRemoteShow;
 	  else
-	      mb_kbd_ui_hide (ui);
+	    return MBKeyboardRemoteHide;
 	}
     }
+  return MBKeyboardRemoteNone;
 }

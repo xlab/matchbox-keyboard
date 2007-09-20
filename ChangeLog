@@ -1,3 +1,19 @@
+2007-09-20  Ross Burton  <ross@openedhand.com>
+
+	* src/matchbox-keyboard.h:
+	* src/matchbox-keyboard-remote.c:
+	Change mb_kbd_remote_process_xevents to return
+	MBKeyboardRemoteOperation instead of performing the operation.
+	Also Declare mb_kbd_ui_limit_orientation.
+
+	* src/matchbox-keyboard-ui.c:
+	Action the operation reutrned returned by process_xevents, and if
+	we receive a Hide command wait for 100ms before hiding the
+	keyboard, so that if we immediately receive a Show the keyboard
+	doesn't flicker.
+
+	Based on a patch by Daniel Willmann <daniel@totalueberwachung.de>.
+
 2007-09-17  Matthew Allum  <mallum@openedhand.com>
 
 	* src/matchbox-keyboard-key.c: 

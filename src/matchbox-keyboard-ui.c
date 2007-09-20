@@ -1096,6 +1096,8 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
   /* Key repeat - values for standard xorg install ( xset q) */
   int repeat_delay = 100 * 10000;
   int repeat_rate  = 30  * 1000;
+  int hide_delay = 100 * 1000;
+  int to_hide = 0;
 
   int press_x = 0, press_y = 0; 
 
@@ -1182,11 +1184,42 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 	      mb_kbd_xembed_process_xevents (ui, &xev);
 
 	    if (ui->is_daemon)
-	      mb_kbd_remote_process_xevents (ui, &xev);
-
-	  }
+      {
+	      switch (mb_kbd_remote_process_xevents (ui, &xev))
+        {
+        case MBKeyboardRemoteHide:
+          if (to_hide == 1) {
+            mb_kbd_ui_hide(ui);
+          }
+          tvt.tv_usec = hide_delay;
+          to_hide = 1;
+          break;
+        case MBKeyboardRemoteShow:
+          mb_kbd_ui_show(ui);
+          tvt.tv_usec = repeat_delay;
+          to_hide = 0;
+          break;
+        case MBKeyboardRemoteNone:
+          if (to_hide == 1) {
+            mb_kbd_ui_hide(ui);
+            tvt.tv_usec = repeat_delay;
+            to_hide = 0;
+          }
+          break;
+        }
+      }
+          }
 	else
 	  {
+      /* Hide timed out */
+      if (to_hide)
+      {
+        DBG("Hide timed out, calling mb_kbd_ui_hide");
+        mb_kbd_ui_hide(ui);
+        tvt.tv_usec = repeat_delay;
+        to_hide = 0;
+      }
+
 	    /* Keyrepeat */
 	    if (mb_kbd_get_held_key(ui->kbd) != NULL)
 	      {
