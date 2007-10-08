@@ -1199,6 +1199,14 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
           tvt.tv_usec = repeat_delay;
           to_hide = 0;
           break;
+        case MBKeyboardRemoteToggle:
+          to_hide = 0;
+          tvt.tv_usec = repeat_delay;
+          if (ui->visible)
+            mb_kbd_ui_hide(ui);
+          else
+            mb_kbd_ui_show(ui);
+          break;
         case MBKeyboardRemoteNone:
           if (to_hide == 1) {
             mb_kbd_ui_hide(ui);

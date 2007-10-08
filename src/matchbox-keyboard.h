@@ -148,6 +148,7 @@ typedef enum
 {
   MBKeyboardRemoteShow,
   MBKeyboardRemoteHide,
+  MBKeyboardRemoteToggle,
   MBKeyboardRemoteNone,
 }
 MBKeyboardRemoteOperation;

@@ -38,13 +38,11 @@ mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
     case ClientMessage:
       DBG("is a Client Message\n");
       if (xevent->xclient.message_type == Atom_MB_IM_INVOKER_COMMAND)
-	{
+        {
 	  DBG("got a message of type _MB_IM_INVOKER_COMMAND, val %lu\n",
 	      xevent->xclient.data.l[0]);
-	  if (xevent->xclient.data.l[0] == 1)
-	    return MBKeyboardRemoteShow;
-	  else
-	    return MBKeyboardRemoteHide;
+	  if (xevent->xclient.data.l[0] < MBKeyboardRemoteNone)
+	    return xevent->xclient.data.l[0];
 	}
     }
   return MBKeyboardRemoteNone;
