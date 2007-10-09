@@ -27,6 +27,7 @@ matchbox_keyboard_SOURCES =                                          \
         matchbox-keyboard-ui.c                                       \
         matchbox-keyboard-xembed.c                                   \
         matchbox-keyboard-remote.c                                   \
+        matchbox-keyboard-remote.h                                   \
         config-parser.c                                              \
 	util-list.c                                                  \
         util.c                                                       \

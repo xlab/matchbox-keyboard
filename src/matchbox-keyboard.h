@@ -48,6 +48,8 @@
 #include "config.h"
 #endif
 
+#include "matchbox-keyboard-remote.h"
+
 #if (WANT_DEBUG)
 #define DBG(x, a...) \
  fprintf (stderr,  __FILE__ ":%d,%s() " x "\n", __LINE__, __func__, ##a)
@@ -143,15 +145,6 @@ typedef enum
   MBKeyboardDisplayLandscape
 } 
 MBKeyboardDisplayOrientation;
-
-typedef enum
-{
-  MBKeyboardRemoteShow,
-  MBKeyboardRemoteHide,
-  MBKeyboardRemoteToggle,
-  MBKeyboardRemoteNone,
-}
-MBKeyboardRemoteOperation;
 
 struct MBKeyboard
 {

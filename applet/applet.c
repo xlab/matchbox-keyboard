@@ -25,7 +25,7 @@
 static void
 on_toggled (GtkWidget *event_box, GdkEventButton *event, gpointer user_data)
 {
-  protocol_send_event (INVOKE_KBD_TOGGLE);
+  protocol_send_event (MBKeyboardRemoteToggle);
 }
 
 G_MODULE_EXPORT GtkWidget *

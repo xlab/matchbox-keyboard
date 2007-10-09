@@ -1,3 +1,20 @@
+2007-10-09  Ross Burton  <ross@openedhand.com>
+
+	* src/matchbox-keyboard.h:
+	* src/matchbox-keyboard-remote.c:
+	* src/matchbox-keyboard-remote.h:
+	* src/Makefile.am:
+	Move the remote operations into a separate header.
+	
+	* gtk-im/im-protocol.c:
+	* gtk-im/im-context.c:
+	* gtk-im/Makefile.am:
+	* gtk-im/im-protocol.h:
+	* applet/applet.c:
+	* applet/Makefile.am:
+	Use src/matchbox-keyboard-remote.h instead of a copy of the enum,
+	to avoid stupid bugs.  Thanks to Daniel Willmann for noticing.
+
 2007-10-08  Ross Burton  <ross@openedhand.com>
 
 	* src/matchbox-keyboard.h:

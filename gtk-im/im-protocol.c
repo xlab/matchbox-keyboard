@@ -7,7 +7,7 @@
 #include "im-protocol.h"
 
 void
-protocol_send_event (InvokerEvent e)
+protocol_send_event (MBKeyboardRemoteOperation op)
 {
   XEvent event;
   int xerror;
@@ -18,7 +18,7 @@ protocol_send_event (InvokerEvent e)
   event.xclient.window = gdk_x11_get_default_root_xwindow ();
   event.xclient.message_type = gdk_x11_get_xatom_by_name ("_MB_IM_INVOKER_COMMAND");
   event.xclient.format = 32;
-  event.xclient.data.l[0] = e;
+  event.xclient.data.l[0] = op;
 
   gdk_error_trap_push ();
 

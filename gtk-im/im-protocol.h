@@ -1,7 +1,3 @@
-typedef enum {
-  INVOKE_KBD_HIDE,
-  INVOKE_KBD_SHOW,
-  INVOKE_KBD_TOGGLE,
-} InvokerEvent;
+#include "matchbox-keyboard-remote.h"
 
-void protocol_send_event (InvokerEvent e);
+void protocol_send_event (MBKeyboardRemoteOperation op);

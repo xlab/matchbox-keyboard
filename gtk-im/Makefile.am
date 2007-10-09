@@ -4,7 +4,7 @@ imdir = @libdir@/gtk-2.0/@GTK_VERSION@/immodules/
 im_LTLIBRARIES = libmb-im-invoker.la
 # TODO: remove lib prefix
 
-libmb_im_invoker_la_CPPFLAGS = @GTK2_CFLAGS@
+libmb_im_invoker_la_CPPFLAGS = @GTK2_CFLAGS@ -I${top_srcdir}/src
 libmb_im_invoker_la_LDFLAGS = -avoid-version
 libmb_im_invoker_la_LIBADD = @GTK2_LIBS@
 

@@ -9,7 +9,7 @@ static GType im_context_type = 0;
 static void
 mb_im_context_focus_in (GtkIMContext *context)
 {
-  protocol_send_event (INVOKE_KBD_SHOW);
+  protocol_send_event (MBKeyboardRemoteShow);
 
   if (GTK_IM_CONTEXT_CLASS (parent_class)->focus_in)
     GTK_IM_CONTEXT_CLASS (parent_class)->focus_in (context);
@@ -18,7 +18,7 @@ mb_im_context_focus_in (GtkIMContext *context)
 static void
 mb_im_context_focus_out (GtkIMContext *context)
 {
-  protocol_send_event (INVOKE_KBD_HIDE);
+  protocol_send_event (MBKeyboardRemoteHide);
 
   if (GTK_IM_CONTEXT_CLASS (parent_class)->focus_out)
     GTK_IM_CONTEXT_CLASS (parent_class)->focus_out (context);
