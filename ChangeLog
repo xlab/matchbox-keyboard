@@ -1,3 +1,10 @@
+2007-10-12  Matthew Allum  <mallum@openedhand.com>
+
+	* layouts/keyboard.xml:
+	Add UTF8 arrow keys (thanks to pippin)
+	* src/matchbox-keyboard-ui.c: (mb_kbd_ui_event_loop):
+	Disable gestures at least fo now.
+
 2007-10-09  Ross Burton  <ross@openedhand.com>
 
 	* src/matchbox-keyboard.h:

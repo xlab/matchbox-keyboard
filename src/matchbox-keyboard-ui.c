@@ -1139,7 +1139,7 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 		    tvt.tv_usec = repeat_delay;
 
 		    /* Gestures */
-
+#if 0
 		    /* FIXME: check time first */
 		    if ( (press_x - xev.xbutton.x) > ui->key_uwidth )
 		      {
@@ -1157,6 +1157,7 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 			fakekey_press_keysym(ui->fakekey, XK_Return, 0);
 			fakekey_release(ui->fakekey);
 		      }
+#endif
 		    /* TODO ^ caps support */
 
 		  }

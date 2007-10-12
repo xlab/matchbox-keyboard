@@ -92,7 +92,8 @@
     </key>
 
     <key fill="true">
-	  <default display="Bksp" action="backspace"/>
+	 <!-- <default display="⌫" action="backspace"/> -->
+         <default display="Bksp" action="backspace"/>
     </key>
 
     <space width="500" extended="true"/>
@@ -114,7 +115,8 @@
     <space width="500" extended="true"/>
 
     <key fill="true">
-	  <default display="Tab" action="tab"/>                
+	  <!-- <default display="↹" action="tab"/> -->
+          <default display="Tab" action="tab"/>
     </key>
     <key obey-caps='true'>
 	  <default display="q" />                
@@ -234,7 +236,8 @@
 	  <shifted display="~" />
     </key>
     <key fill="true">
-	  <default display="Ret" action="return"/>
+	  <!-- <default display="◀┛" action="return"/> -->
+          <default display="Ret" action="return"/>
     </key>
 
     <space width="500" extended="true"/>
@@ -346,16 +349,16 @@
     </key>
 
     <key>
-	  <default display="^" action="up" />                
+	  <default display="↑" action="up" />                
     </key>
     <key>
-	  <default display="V" action="down" />                
+	  <default display="↓" action="down" />                
     </key>
     <key>
-	  <default display="&lt;" action="left" />                
+	  <default display="←" action="left" />                
     </key>
     <key>
-	  <default display="&gt;" action="right" />                
+	  <default display="→" action="right" />                
     </key>
 
     <space width="500" extended="true"/>
