@@ -51,7 +51,7 @@ AC_ARG_ENABLE(applet,
 AM_CONDITIONAL(WANT_APPLET, test x$enable_applet = xyes)
 
 AC_ARG_ENABLE(debug,
-  AC_HELP_STRING([--enable-debug], [enable debug (verbose) build]),,
+  AC_HELP_STRING([--enable-debug], [enable debug (verbose) build]),
      enable_debug=$enableval, enable_debug=no )
 
 AC_ARG_WITH(expat-includes,    

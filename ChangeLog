@@ -1,4 +1,9 @@
-2007-11-07  Ross Burton  <ross@openedhand.com.com>
+2007-11-07  Ross Burton  <ross@openedhand.com>
+
+	* configure.ac:
+	Fix typo resulting in debug always being on.
+
+2007-11-07  Ross Burton  <ross@openedhand.com>
 
 	* gtk-im/*.[ch]:
 	Add copyright headers.
