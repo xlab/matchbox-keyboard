@@ -1,3 +1,11 @@
+2007-11-14  Richard Purdie  <rpurdie@opened.com>
+ 
+	* configure.ac:
+	Add --enable-expat and --disable-expat options.
+	Stop -L/lib being added to compiler commandline and breaking builds
+	when --enable-expat and --disable-expat options aren't used and 
+	$expat is empty.
+
 2007-11-07  Ross Burton  <ross@openedhand.com>
 
 	* configure.ac:
