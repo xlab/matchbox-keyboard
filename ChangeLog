@@ -1,4 +1,9 @@
-2007-11-14  Richard Purdie  <rpurdie@opened.com>
+2008-02-07  Richard Purdie  <rpurdie@openedhand.com>
+
+	* src/matchbox-keyboard-ui.c:
+	Stop the keyboard scaling beyond a sensible height on wide screens
+
+2007-11-14  Richard Purdie  <rpurdie@openedhand.com>
  
 	* configure.ac:
 	Stop -L/lib being added to compiler commandline and breaking builds

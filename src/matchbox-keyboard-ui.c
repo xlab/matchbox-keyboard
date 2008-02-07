@@ -859,6 +859,10 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
   MARK();
 
+  /* Don't scale beyond a sensible height on wide screens */
+  if (height > (ui->dpy_height / 3))
+    height = ui->dpy_height / 3;
+
   width_diff  = width  - ui->base_alloc_width; 
   height_diff = height - ui->base_alloc_height; 
 
