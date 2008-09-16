@@ -18,6 +18,7 @@
  */
 
 #include "matchbox-keyboard.h"
+#include <X11/extensions/Xrender.h>
 
 struct MBKeyboardImage
 {

@@ -1,3 +1,8 @@
+2008-09-16  Ross Burton  <ross@linux.intel.com>
+
+	* src/matchbox-keyboard-image.c:
+	Include render headers.
+
 2008-02-07  Richard Purdie  <rpurdie@openedhand.com>
 
 	* src/matchbox-keyboard-ui.c:
