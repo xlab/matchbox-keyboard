@@ -70,7 +70,7 @@ if test x$enable_cairo = xyes; then
 fi
 
 if test x$enable_cairo = xno; then
-PKG_CHECK_MODULES(XFT, xft,,
+PKG_CHECK_MODULES(XFT, xft xrender,,
 	         AC_MSG_ERROR([*** Required Xft Library not found ***]))
 fi
 
