@@ -866,8 +866,17 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   width_diff  = width  - ui->base_alloc_width; 
   height_diff = height - ui->base_alloc_height; 
 
+#if 0
+  /* FIXME -- this was well intentioned, but it does not work like that because
+   * if we do not resize here, we end up with a wrong size of a backing pixmap
+   * attached to the window, and all kind of weird things happen (especially
+   * when the pixmap is smaller in one axis then the window!)
+   *
+   * We simply have to respect this request.
+   */
   if (width_diff < 0 || height_diff < 0)
     return;  /* dont go smaller than our int request - get clipped */
+#endif
 
   layout   = mb_kbd_get_selected_layout(ui->kbd);
   row_item = mb_kbd_layout_rows(layout);
