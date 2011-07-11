@@ -4,6 +4,7 @@
  *  Authored By Matthew Allum <mallum@o-hand.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -859,8 +860,8 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   MARK();
 
   /* Don't scale beyond a sensible height on wide screens */
-  if (height > (ui->dpy_height / 3))
-    height = ui->dpy_height / 3;
+  if (height > (ui->dpy_height * 2 / 5))
+    height = ui->dpy_height * 2 / 5;
 
   width_diff  = width  - ui->base_alloc_width; 
   height_diff = height - ui->base_alloc_height; 
