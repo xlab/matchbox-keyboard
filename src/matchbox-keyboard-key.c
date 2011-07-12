@@ -4,6 +4,7 @@
  *  Authored By Matthew Allum <mallum@o-hand.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -29,19 +30,19 @@ typedef struct MBKeyboardKeyFace
     MBKeyboardImage *image;
     char            *str;
   } u;
-} 
+}
 MBKeyboardKeyFace;
 
 typedef struct MBKeyboardKeyAction
 {
   MBKeyboardKeyActionType  type;
-  union 
+  union
   {
     char                  *glyph;
     KeySym                 keysym;
     MBKeyboardKeyModType   type;
   } u;
-} 
+}
 MBKeyboardKeyAction;
 
 
@@ -166,39 +167,39 @@ mb_kbd_key_set_geometry(MBKeyboardKey  *key,
     key->alloc_height = height;
 }
 
-int 
-mb_kbd_key_abs_x(MBKeyboardKey *key) 
-{ 
+int
+mb_kbd_key_abs_x(MBKeyboardKey *key)
+{
   return mb_kbd_row_x(key->row) + key->alloc_x;
 }
 
-int 
-mb_kbd_key_abs_y(MBKeyboardKey *key) 
-{ 
+int
+mb_kbd_key_abs_y(MBKeyboardKey *key)
+{
   return mb_kbd_row_y(key->row) + key->alloc_y;
 }
 
-int 
-mb_kbd_key_x(MBKeyboardKey *key) 
-{ 
+int
+mb_kbd_key_x(MBKeyboardKey *key)
+{
   return key->alloc_x;
 }
 
-int 
-mb_kbd_key_y(MBKeyboardKey *key) 
-{ 
+int
+mb_kbd_key_y(MBKeyboardKey *key)
+{
   return key->alloc_y;
 }
 
-int 
-mb_kbd_key_width(MBKeyboardKey *key) 
-{ 
+int
+mb_kbd_key_width(MBKeyboardKey *key)
+{
   return key->alloc_width;
 }
 
-int 
-mb_kbd_key_height(MBKeyboardKey *key) 
-{ 
+int
+mb_kbd_key_height(MBKeyboardKey *key)
+{
   return key->alloc_height;
 }
 
@@ -244,9 +245,9 @@ mb_kbd_key_get_extended(MBKeyboardKey  *key)
 
 
 /* URG Nasty - some stuf should be public-ish */
-void 
-mb_kbd_key_set_row(MBKeyboardKey *key, MBKeyboardRow *row) 
-{ 
+void
+mb_kbd_key_set_row(MBKeyboardKey *key, MBKeyboardRow *row)
+{
   key->row = row;
 }
 
@@ -274,7 +275,7 @@ const char*
 mb_kbd_key_get_glyph_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state)
 {
-  if (key->states[state] 
+  if (key->states[state]
       && key->states[state]->face.type == MBKeyboardKeyFaceGlyph)
     {
       return key->states[state]->face.u.str;
@@ -299,7 +300,7 @@ MBKeyboardImage*
 mb_kbd_key_get_image_face(MBKeyboardKey           *key,
 			  MBKeyboardKeyStateType   state)
 {
-  if (key->states[state] 
+  if (key->states[state]
       && key->states[state]->face.type == MBKeyboardKeyFaceImage)
     {
       return key->states[state]->face.u.image;
@@ -314,7 +315,7 @@ mb_kbd_key_set_char_action(MBKeyboardKey           *key,
 {
   if (key->states[state] == NULL)
     _mb_kbd_key_init_state(key, state);
-  
+
   key->states[state]->action.type = MBKeyboardKeyActionGlyph;
   key->states[state]->action.u.glyph = strdup(glyphs);
 }
@@ -323,7 +324,7 @@ const char*
 mb_kbd_key_get_char_action(MBKeyboardKey           *key,
 			   MBKeyboardKeyStateType   state)
 {
-  if (key->states[state] 
+  if (key->states[state]
       && key->states[state]->action.type == MBKeyboardKeyActionGlyph)
     return key->states[state]->action.u.glyph;
 
@@ -346,7 +347,7 @@ KeySym
 mb_kbd_key_get_keysym_action(MBKeyboardKey           *key,
 			     MBKeyboardKeyStateType   state)
 {
-  if (key->states[state] 
+  if (key->states[state]
       && key->states[state]->action.type == MBKeyboardKeyActionXKeySym)
     return key->states[state]->action.u.keysym;
 
@@ -366,11 +367,11 @@ mb_kbd_key_set_modifer_action(MBKeyboardKey          *key,
   key->states[state]->action.u.type   = type;
 }
 
-MBKeyboardKeyModType 
+MBKeyboardKeyModType
 mb_kbd_key_get_modifer_action(MBKeyboardKey          *key,
 			      MBKeyboardKeyStateType  state)
 {
-  if (key->states[state] 
+  if (key->states[state]
       && key->states[state]->action.type == MBKeyboardKeyActionModifier)
     return key->states[state]->action.u.type;
 
@@ -382,7 +383,7 @@ MBKeyboardKeyFaceType
 mb_kbd_key_get_face_type(MBKeyboardKey           *key,
 			 MBKeyboardKeyStateType   state)
 {
-  if (key->states[state]) 
+  if (key->states[state])
     return key->states[state]->face.type;
 
   return 0;
@@ -393,7 +394,7 @@ MBKeyboardKeyActionType
 mb_kbd_key_get_action_type(MBKeyboardKey           *key,
 			   MBKeyboardKeyStateType   state)
 {
-  if (key->states[state]) 
+  if (key->states[state])
     return key->states[state]->action.type;
 
   return 0;
@@ -460,7 +461,7 @@ mb_kbd_key_press(MBKeyboardKey *key)
       }
     case MBKeyboardKeyActionModifier:
       {
-	
+
 	switch ( mb_kbd_key_get_modifer_action(key, state) )
 	  {
 	  case MBKeyboardKeyModShift:
@@ -494,9 +495,9 @@ mb_kbd_key_press(MBKeyboardKey *key)
 	    break;
 	  }
 
-	/* we dont actually have to send a key sym here - but should we ? 
+	/* we dont actually have to send a key sym here - but should we ?
          *
-         * Also we dont set a held key, as we've changed the keyboard 
+         * Also we dont set a held key, as we've changed the keyboard
          * state instead.
 	*/
 	break;
@@ -504,15 +505,15 @@ mb_kbd_key_press(MBKeyboardKey *key)
 
     default:
       break;
-    }  
-  
+    }
+
   if (queue_full_kbd_redraw)
     mb_kbd_redraw(key->kbd);
   else
     mb_kbd_redraw_key(key->kbd, key);
 }
 
-boolean 
+boolean
 mb_kbd_key_is_held(MBKeyboard *kbd, MBKeyboardKey *key)
 {
   MBKeyboardKeyStateType  state;
@@ -522,7 +523,7 @@ mb_kbd_key_is_held(MBKeyboard *kbd, MBKeyboardKey *key)
 
   /* XXX below should probably go into own func */
 
-  state = mb_kbd_keys_current_state(kbd); 
+  state = mb_kbd_keys_current_state(kbd);
 
   if (!mb_kdb_key_has_state(key, state))
     {
@@ -618,7 +619,7 @@ mb_kbd_key_dump_key(MBKeyboardKey *key)
       /* MBKeyboardKeyStateShifted */ "Shifted" ,
       /* MBKeyboardKeyStateMod1,    */ "Mod1" ,
       /* MBKeyboardKeyStateMod2,    */ "Mod2" ,
-      /* MBKeyboardKeyStateMod3,    */ "Mod3" 
+      /* MBKeyboardKeyStateMod3,    */ "Mod3"
     };
 
   fprintf(stderr, "-------------------------------\n");
@@ -633,13 +634,13 @@ mb_kbd_key_dump_key(MBKeyboardKey *key)
 
 	  if (mb_kbd_key_get_face_type(key, i) == MBKeyboardKeyFaceGlyph)
 	    {
-	      fprintf(stderr, ", showing '%s'", 
+	      fprintf(stderr, ", showing '%s'",
 		      mb_kbd_key_get_glyph_face(key , i));
 	    }
 
 	  fprintf(stderr, "\n");
 
-	  fprintf(stderr, "\taction type %i\n", 
+	  fprintf(stderr, "\taction type %i\n",
 		  mb_kbd_key_get_action_type(key, i));
 
 	}

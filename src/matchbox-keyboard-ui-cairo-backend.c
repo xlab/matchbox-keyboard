@@ -4,6 +4,7 @@
  *  Authored By Matthew Allum <mallum@o-hand.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -17,6 +18,11 @@
  */
 
 #include "matchbox-keyboard.h"
+#include <math.h>
+
+#define PAD 1
+#define RAD 2
+#define R(x) (M_PI * (double)x / 180.)
 
 typedef struct MBKeyboardUIBackendCario
 {
@@ -29,21 +35,34 @@ typedef struct MBKeyboardUIBackendCario
 
 } MBKeyboardUIBackendCairo;
 
-static void 
-mb_kbd_ui_cairo_text_extents (MBKeyboardUI  *ui, 
-			      const  char   *str, 
-			      int           *width, 
+static void
+mb_kbd_ui_cairo_text_extents (MBKeyboardUI  *ui,
+			      const  char   *str,
+			      int           *width,
 			      int           *height)
 {
   MBKeyboardUIBackendCairo *cairo_backend = NULL;
-  cairo_text_extents_t      extents;
+  cairo_font_extents_t      font_extents;
+  cairo_text_extents_t      text_extents;
+  int                       w_t, h_t, h_f;
 
   cairo_backend = (MBKeyboardUIBackendCairo*)mb_kbd_ui_backend(ui);
 
-  cairo_text_extents (cairo_backend->cr, str, &extents);
+  /*
+   * This function is used to calculate nominal key sizes -- never allow the
+   * reported height to be smaller than the font height, otherwise keys that
+   * stretch stretch below the base line will end up drawn partially, or even
+   * completely, of the key.
+   */
+  cairo_text_extents (cairo_backend->cr, str, &text_extents);
+  cairo_font_extents (cairo_backend->cr, &font_extents);
 
-  *width  = extents.width;
-  *height = extents.height;
+  w_t = round (text_extents.width  + 2 * PAD);
+  h_t = round (text_extents.height + 2 * PAD);
+  h_f = round (font_extents.ascent + font_extents.descent + 2 * PAD);
+
+  *width  = w_t;
+  *height = h_t > h_f ? h_t : h_f;
 }
 
 static int
@@ -62,117 +81,99 @@ mb_kbd_ui_cairo_load_font(MBKeyboardUI *ui)
 			  CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_NORMAL);
 
-  mm_per_pixel = (double)DisplayHeightMM(mb_kbd_ui_x_display(ui), 
+  mm_per_pixel = (double)DisplayHeightMM(mb_kbd_ui_x_display(ui),
 					 mb_kbd_ui_x_screen(ui))
-                   / DisplayHeight(mb_kbd_ui_x_display(ui), 
+                   / DisplayHeight(mb_kbd_ui_x_display(ui),
 					 mb_kbd_ui_x_screen(ui));
 
   /* 1 millimeter = 0.0393700787 inches */
-  
+
   /* 1 inch = 72 PostScript points */
 
-  pixel_size = (double)kb->font_pt_size / ( (double)mm_per_pixel * 0.03 * 72 );
-  
+  pixel_size = (double)kb->font_pt_size / ( (double)mm_per_pixel * 0.039 * 72 );
+
   cairo_set_font_size (cairo_backend->cr, pixel_size);
-  
+
   return 1;
 }
-
 
 void
 mb_kbd_ui_cairo_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 {
   MBKeyboardUIBackendCairo *cairo_backend = NULL;
 
-  XRectangle             rect;
   MBKeyboardKeyStateType state;
-  Display               *xdpy;
-  int                    xscreen;
-  Pixmap                 backbuffer;
   MBKeyboard            *kbd;
   cairo_pattern_t       *pat;
+  double                 x, y, w, h;
+  double                 x1p, x2p, y1p, y2p;
 
   if (mb_kbd_key_is_blank(key)) /* spacer */
     return;
 
   cairo_backend = (MBKeyboardUIBackendCairo*)mb_kbd_ui_backend(ui);
 
-  xdpy        = mb_kbd_ui_x_display(ui);
-  xscreen     = mb_kbd_ui_x_screen(ui);
-  backbuffer  = mb_kbd_ui_backbuffer(ui);
-  kbd         = mb_kbd_ui_kbd(ui);
+  kbd = mb_kbd_ui_kbd(ui);
 
-  rect.x      = mb_kbd_key_abs_x(key); 
-  rect.y      = mb_kbd_key_abs_y(key); 
-  rect.width  = mb_kbd_key_width(key);       
-  rect.height = mb_kbd_key_height(key);       
+  x = mb_kbd_key_abs_x(key);
+  y = mb_kbd_key_abs_y(key);
+  w = mb_kbd_key_width(key);
+  h = mb_kbd_key_height(key);
 
+  x1p = x + PAD;
+  y1p = y + PAD;
+  x2p = x + w - 2*PAD;
+  y2p = y + h - 2*PAD;
 
   /* clear it */
-
   cairo_set_line_width (cairo_backend->cr, 0.04);
-  cairo_set_source_rgb(cairo_backend->cr, 0.9, 0.9, 0.8);
+  cairo_set_source_rgb(cairo_backend->cr, 0.7686, 0.8314, 0.8549);
 
   cairo_stroke( cairo_backend->cr );
 
-  pat = cairo_pattern_create_linear (0, rect.y, 0, rect.y + rect.height);
+  pat = cairo_pattern_create_linear (0, y, 0, y + h);
 
-  cairo_pattern_add_color_stop_rgb (pat, 1, 0.2, 0.2, 0.2 );
-  cairo_pattern_add_color_stop_rgb (pat, 0, 0.7, 0.7, 0.7 );
-
+  /* cairo_pattern_add_color_stop_rgb (pat, 1, 0.9, 0.9, 0.9); */
+  cairo_pattern_add_color_stop_rgb (pat, 1, 0.7686, 0.8314, 0.8549);
+  cairo_pattern_add_color_stop_rgb (pat, 0, 0.7686, 0.8314, 0.8549);
   cairo_set_source (cairo_backend->cr, pat);
 
-  cairo_rectangle( cairo_backend->cr, 
-		   rect.x, rect.y, 
-		   rect.width, rect.height);
+  cairo_arc (cairo_backend->cr, x1p + RAD, y1p + RAD, RAD, R(180), R(270));
+  cairo_arc (cairo_backend->cr, x2p - RAD, y1p + RAD, RAD, R(270), R(360));
+  cairo_arc (cairo_backend->cr, x2p - RAD, y2p - RAD, RAD, R(0), R(90));
+  cairo_arc (cairo_backend->cr, x1p + RAD, y2p - RAD, RAD, R(90), R(180));
+  cairo_close_path (cairo_backend->cr);
 
   cairo_fill (cairo_backend->cr);
-
   cairo_pattern_destroy (pat);
 
-
   /* border */
-
-  cairo_move_to(cairo_backend->cr,
-                rect.x + 1,
-                (mb_kbd_key_abs_y(key) + mb_kbd_key_height(key)) - 1);
-
-  cairo_rel_line_to(cairo_backend->cr,
-                    rect.width - 2,
-                    0);
-
-  cairo_rel_line_to(cairo_backend->cr,
-                    0,
-                    -rect.height);
-
-  cairo_set_source_rgba(cairo_backend->cr, 0, 0, 0, 0.2);
-
-  cairo_move_to(cairo_backend->cr,
-                rect.x,
-                rect.y + rect.height - 1);
-
-  cairo_rel_line_to(cairo_backend->cr,
-                     0,
-                    - rect.height);
-
-  cairo_rel_line_to(cairo_backend->cr,
-                    rect.width - 1,
-                    0);
-
+  /* bottom - right */
+  cairo_set_line_width (cairo_backend->cr, 1);
+  cairo_set_source_rgba (cairo_backend->cr, 0.0, 0.0, 0.0, 0.2);
+  cairo_move_to (cairo_backend->cr, x1p + 1 + RAD, y2p - 1);
+  cairo_line_to (cairo_backend->cr, x2p - 1 - RAD, y2p - 1);
+  cairo_move_to (cairo_backend->cr, x2p - 1, y2p - 1 - RAD);
+  cairo_line_to(cairo_backend->cr, x2p - 1, y1p + 1 + RAD);
   cairo_stroke ( cairo_backend->cr );
 
-  cairo_set_source_rgb(cairo_backend->cr, 0, 0, 0);
+  cairo_arc (cairo_backend->cr, x2p - RAD - 1, y2p - RAD - 1, RAD, R(0), R(90));
+  cairo_stroke ( cairo_backend->cr );
 
-  cairo_set_line_width (cairo_backend->cr, 1);
+  /* letf - top */
+  cairo_set_source_rgba(cairo_backend->cr, 1.0, 1.0, 1.0, 0.5);
+  cairo_move_to(cairo_backend->cr, x1p + 1, y2p - 1 - RAD);
+  cairo_line_to(cairo_backend->cr, x1p + 1, y1p + 1 + RAD);
+  cairo_move_to(cairo_backend->cr, x1p + 1 + RAD, y1p + 1);
+  cairo_line_to(cairo_backend->cr, x2p - 1 - RAD, y1p + 1);
+  cairo_stroke ( cairo_backend->cr );
 
-  cairo_rectangle( cairo_backend->cr,
-                   rect.x, rect.y, rect.width, rect.height);
-
-  cairo_stroke(cairo_backend->cr);
+  cairo_arc (cairo_backend->cr, x1p + RAD + 1, y1p + RAD + 1, RAD, R(180), R(270));
+  cairo_stroke ( cairo_backend->cr );
 
   /* Handle state related painting */
 
-  state = mb_kbd_keys_current_state(kbd); 
+  state = mb_kbd_keys_current_state(kbd);
 
   if (mb_kbd_has_state(kbd, MBKeyboardStateCaps)
       && mb_kbd_key_get_obey_caps(key))
@@ -194,30 +195,41 @@ mb_kbd_ui_cairo_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
     if (face_str)
       {
-        double x, y;
-	int    face_width, face_height;
+        double x1, y1;
 	cairo_font_extents_t font_extents;
+        cairo_text_extents_t text_extents;
 
-	/* FIXME: Below is borked */
-	mb_kbd_ui_cairo_text_extents (ui, face_str, &face_width, &face_height);
-
+        cairo_text_extents (cairo_backend->cr, face_str, &text_extents);
 	cairo_font_extents (cairo_backend->cr, &font_extents);
-	
-	DBG(" %i - %i = %i", 
-	    rect.width, face_width,
-	    (rect.width - face_width) );
 
-        x = rect.x + ( (rect.width - face_width) / 2.0);
+        x1 = x + round (((w - text_extents.width) / 2.0) -
+                        text_extents.x_bearing) - PAD;
 
-        y = rect.y + ( (rect.height - (font_extents.ascent + font_extents.descent)) / 2.0 ) + font_extents.ascent;
+        y1 = y + round ((h - font_extents.ascent -
+                         font_extents.descent) / 2.0  + font_extents.ascent) -
+          PAD;
 
-	/* DBG("draw text to %d,%d", __func__, x, y); */
-
-        cairo_move_to(cairo_backend->cr, x, y);
+        cairo_move_to(cairo_backend->cr, x1, y1);
         cairo_show_text (cairo_backend->cr, face_str);
-
       }
   }
+  else if (mb_kbd_key_get_face_type(key, state) == MBKeyboardKeyFaceImage)
+    {
+      double x1, y1, w1, h1;
+      cairo_surface_t *img;
+
+      img = mb_kbd_key_get_image_face(key, state);
+
+      w1 = cairo_image_surface_get_width (img);
+      h1 = cairo_image_surface_get_height (img);
+
+      x1 = mb_kbd_key_abs_x(key) + ((mb_kbd_key_width(key) - w1) / 2.0);
+      y1 = mb_kbd_key_abs_y(key) + ((mb_kbd_key_height(key) - h1 ) / 2.0);
+
+      cairo_set_source_surface (cairo_backend->cr, img, x1, y1);
+      cairo_rectangle (cairo_backend->cr, x1, y1, w1, h1);
+      cairo_fill (cairo_backend->cr);
+    }
 
   if ( mb_kbd_key_is_held(kbd, key) )
     {
@@ -226,14 +238,18 @@ mb_kbd_ui_cairo_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 			    0,
 			    0,
 			    0.2);
-      
-      cairo_rectangle(cairo_backend->cr,
-		      rect.x,
-		      rect.y,
-		      rect.width,
-		      rect.height );
-      
-      cairo_fill( cairo_backend->cr );
+
+      cairo_rectangle (cairo_backend->cr,
+                       x + 1 + PAD, y + 1 + PAD,
+                       w - 2 - 2*PAD, h - 2 - 2*PAD);
+
+      cairo_arc (cairo_backend->cr, x1p+1+RAD, y1p+1+RAD, RAD, R(180), R(270));
+      cairo_arc (cairo_backend->cr, x2p-1-RAD, y1p+1+RAD, RAD, R(270), R(360));
+      cairo_arc (cairo_backend->cr, x2p-1-RAD, y2p-1-RAD, RAD, R(0), R(90));
+      cairo_arc (cairo_backend->cr, x1p+1+RAD, y2p-1-RAD, RAD, R(90), R(180));
+      cairo_close_path (cairo_backend->cr);
+
+      cairo_fill (cairo_backend->cr);
     }
 
   // cairo_show_page(cairo_backend->cr);
@@ -249,7 +265,7 @@ mb_kbd_ui_cairo_pre_redraw(MBKeyboardUI  *ui)
 
   cairo_backend = (MBKeyboardUIBackendCairo*)mb_kbd_ui_backend(ui);
 
-  cairo_set_source_rgb (cairo_backend->cr, 0.95, 0.95, 0.95);
+  cairo_set_source_rgb (cairo_backend->cr, 0.3255, 0.3255, 0.3255);
 
   cairo_rectangle( cairo_backend->cr,
                    0,
@@ -270,14 +286,14 @@ mb_kbd_ui_cairo_resources_create(MBKeyboardUI  *ui)
   cairo_backend = (MBKeyboardUIBackendCairo*)mb_kbd_ui_backend(ui);
 
   /* switch now to 'real' drawable */
-  cairo_xlib_surface_set_drawable (cairo_backend->surface, 
+  cairo_xlib_surface_set_drawable (cairo_backend->surface,
 				   mb_kbd_ui_backbuffer(ui),
 				   mb_kbd_ui_x_win_width(ui),
 				   mb_kbd_ui_x_win_height(ui));
 
   XFreePixmap(mb_kbd_ui_x_display(ui),  cairo_backend->foo_pxm);
 
-  cairo_xlib_surface_set_size (cairo_backend->surface, 
+  cairo_xlib_surface_set_size (cairo_backend->surface,
 			       mb_kbd_ui_x_win_width(ui),
 			       mb_kbd_ui_x_win_height(ui));
 
@@ -293,16 +309,16 @@ mb_kbd_ui_cairo_resize(MBKeyboardUI  *ui, int width, int height)
 
   if (cairo_backend->cr != NULL) /* may get called before initialised */
     {
-      cairo_xlib_surface_set_size (cairo_get_target(cairo_backend->cr), 
+      cairo_xlib_surface_set_size (cairo_get_target(cairo_backend->cr),
 				   mb_kbd_ui_x_win_width(ui),
 				   mb_kbd_ui_x_win_height(ui));
 
-      cairo_xlib_surface_set_drawable (cairo_backend->surface, 
+      cairo_xlib_surface_set_drawable (cairo_backend->surface,
 				       mb_kbd_ui_backbuffer(ui),
 				       mb_kbd_ui_x_win_width(ui),
 				       mb_kbd_ui_x_win_height(ui));
       /*
-      cairo_scale (cairo_get_target(cairo_backend->cr), 
+      cairo_scale (cairo_get_target(cairo_backend->cr),
 		   mb_kbd_ui_x_win_width(ui),
 		   mb_kbd_ui_x_win_height(ui));
       */
@@ -337,10 +353,10 @@ mb_kbd_ui_cairo_init(MBKeyboardUI *ui)
 					 DefaultDepth(mb_kbd_ui_x_display(ui),
 						      mb_kbd_ui_x_screen(ui)));
 
-  cairo_backend->surface 
+  cairo_backend->surface
     = cairo_xlib_surface_create (mb_kbd_ui_x_display(ui),
 				 cairo_backend->foo_pxm,
-				 DefaultVisual(mb_kbd_ui_x_display(ui), 
+				 DefaultVisual(mb_kbd_ui_x_display(ui),
 					       mb_kbd_ui_x_screen(ui)),
 				 10, 10);
 

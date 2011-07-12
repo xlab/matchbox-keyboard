@@ -4,6 +4,7 @@
  *  Authored By Matthew Allum <mallum@o-hand.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -18,7 +19,7 @@
 
 #include "matchbox-keyboard.h"
 
-/* 
+/*
     <keyboard>
 
     <options>
@@ -32,20 +33,20 @@
         <key id="optional-id" obey-caps='true|false'
 	     width="1000"   // 1/1000's of a unit key size
 	     fill="true"    // Set width to available space
-	     
+
              >
 	  <default
-	     display="a"                
-	     display="image:" 
-	     action="utf8char"     // optional, action defaults to this    
+	     display="a"
+	     display="image:"
+	     action="utf8char"     // optional, action defaults to this
 	     action="string"       // from lookup below
 	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps"
 	     action="xkeysym:XK_BLAH"
-	  <shifted 
+	  <shifted
 	     ...... >
 	  <mod1
 	     ...... >
-	     
+
 	/>
         <key ... />
 	<key ... />
@@ -59,27 +60,27 @@
 
 struct _keysymlookup
 {
-  KeySym keysym;   char *name;  
-} 
+  KeySym keysym;   char *name;
+}
 MBKeyboardKeysymLookup[] =
 {
  { XK_BackSpace,   "backspace" },
  { XK_Tab,	   "tab"       },
  { XK_Linefeed,    "linefeed"  },
- { XK_Clear,       "clear"     },	
+ { XK_Clear,       "clear"     },
  { XK_Return,      "return"    },
- { XK_Pause,       "pause" },	
- { XK_Scroll_Lock, "scrolllock" },	
+ { XK_Pause,       "pause" },
+ { XK_Scroll_Lock, "scrolllock" },
  { XK_Sys_Req,     "sysreq" },
- { XK_Escape,      "escape" },	
- { XK_Delete,      "delete" },	
+ { XK_Escape,      "escape" },
+ { XK_Delete,      "delete" },
  { XK_Home,        "home" },
  { XK_Left,        "left" },
  { XK_Up,          "up"   },
  { XK_Right,       "right" },
  { XK_Down,        "down"  },
- { XK_Prior,       "prior" },		
- { XK_Page_Up,     "pageup" },	
+ { XK_Prior,       "prior" },
+ { XK_Page_Up,     "pageup" },
  { XK_Next,        "next"   },
  { XK_Page_Down,   "pagedown" },
  { XK_End,         "end" },
@@ -128,7 +129,7 @@ typedef struct MBKeyboardConfigState
 }
 MBKeyboardConfigState;
 
-void 
+void
 set_error(MBKeyboardConfigState *state, char *msg)
 {
   state->error = True;
@@ -168,13 +169,13 @@ config_str_to_modtype(const char* str)
 }
 
 
-static char* 
+static char*
 config_load_file(MBKeyboard *kbd, char *variant_in)
 {
   struct stat    stat_info;
   FILE*          fp;
   char          *result;
-  char          *country  = NULL;  
+  char          *country  = NULL;
   char          *variant  = NULL;
   char          *lang     = NULL;
   int            n = 0, i = 0;
@@ -235,13 +236,13 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
     }
 
   /* Hmmm :/ */
- 
+
   snprintf(path, 1024, PKGDATADIR "/keyboard%s%s.xml",
 	   country == NULL ? "" : country,
 	   variant == NULL ? "" : variant);
 
   DBG("checking %s\n", path);
-  
+
   if (util_file_readable(path))
     goto load;
 
@@ -262,7 +263,7 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
     goto load;
 
   snprintf(path, 1024, PKGDATADIR "/keyboard.xml");
-  
+
   DBG("checking %s\n", path);
 
   if (!util_file_readable(path))
@@ -270,10 +271,10 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
 
  load:
 
-  if (stat(path, &stat_info)) 
+  if (stat(path, &stat_info))
     return NULL;
 
-  if ((fp = fopen(path, "rb")) == NULL) 
+  if ((fp = fopen(path, "rb")) == NULL)
     return NULL;
 
   DBG("loading %s\n", path);
@@ -285,7 +286,7 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
   n = fread(result, 1, stat_info.st_size, fp);
 
   if (n >= 0) result[n] = '\0';
-  
+
   fclose(fp);
 
   return result;
@@ -295,14 +296,14 @@ static const char *
 attr_get_val (char *key, const char **attr)
 {
   int i = 0;
-  
+
   while (attr[i] != NULL)
     {
       if (!strcmp(attr[i], key))
 	return attr[i+1];
       i += 2;
     }
-  
+
   return NULL;
 }
 
@@ -316,7 +317,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
   const char            *val;
   KeySym                 found_keysym;
 
-  /* TODO: Fix below with a lookup table 
+  /* TODO: Fix below with a lookup table
    */
   if (streq(tag, "normal") || streq(tag, "default"))
     {
@@ -364,10 +365,18 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	  if (!util_file_readable(buf))
 	    snprintf(buf, 512, "%s/.matchbox/%s", getenv("HOME"), &val[6]);
 
+#ifdef WANT_CAIRO
+          img = cairo_image_surface_create_from_png (buf);
+#else
 	  img = mb_kbd_image_new (state->keyboard, buf);
+#endif
 	}
       else
+#ifdef WANT_CAIRO
+        img = cairo_image_surface_create_from_png (&val[6]);
+#else
 	img = mb_kbd_image_new (state->keyboard, &val[6]);
+#endif
 
       if (!img)
 	{
@@ -379,17 +388,17 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
     }
   else
     {
-      mb_kbd_key_set_glyph_face(state->current_key, keystate, 
+      mb_kbd_key_set_glyph_face(state->current_key, keystate,
 				attr_get_val("display", attr));
     }
 
   if ((val = attr_get_val("action", attr)) != NULL)
     {
       /*
-	     action="utf8char"     // optional, action defulats to this    
+	     action="utf8char"     // optional, action defulats to this
 	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps"
 	     action="xkeysym:XK_BLAH"
-	     action="control:">    // return etc - not needed use lookup 
+	     action="control:">    // return etc - not needed use lookup
       */
 
       if (!strncmp(val, "modifier:", 9))
@@ -411,7 +420,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
               set_error(state, "Unknown modifier");
 	      return;
 	    }
-	  
+
 	}
       else if (!strncmp(val, "xkeysym:", 8))
 	{
@@ -421,11 +430,11 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 
 	  if (found_keysym)
 	    {
-	      mb_kbd_key_set_keysym_action(state->current_key, 
+	      mb_kbd_key_set_keysym_action(state->current_key,
 					   keystate,
 					   found_keysym);
 	    }
-	  else 
+	  else
 	    {
 	      /* Should this error really be terminal */
               set_error(state, "Unknown keysym");
@@ -439,14 +448,14 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	  if (strlen(val) > 1  	/* match backspace, return etc */
 	      && ((found_keysym  = config_str_to_keysym(val)) != 0))
 	    {
-	      mb_kbd_key_set_keysym_action(state->current_key, 
+	      mb_kbd_key_set_keysym_action(state->current_key,
 					   keystate,
 					   found_keysym);
 	    }
 	  else
 	    {
 	      /* XXX We should actually check its a single UTF8 Char here */
-	      mb_kbd_key_set_char_action(state->current_key, 
+	      mb_kbd_key_set_char_action(state->current_key,
 					 keystate, val);
 	    }
 	}
@@ -454,12 +463,12 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
   else /* fallback to reusing whats displayed  */
     {
 
-      /* display could be an image in which case we should throw an error 
+      /* display could be an image in which case we should throw an error
        * or summin.
       */
 
-      mb_kbd_key_set_char_action(state->current_key, 
-				 keystate, 
+      mb_kbd_key_set_char_action(state->current_key,
+				 keystate,
 				 attr_get_val("display", attr));
     }
 
@@ -523,7 +532,7 @@ config_handle_key_tag(MBKeyboardConfigState *state, const char **attr)
   mb_kbd_row_append_key(state->current_row, state->current_key);
 }
 
-static void 
+static void
 config_xml_start_cb(void *data, const char *tag, const char **attr)
 {
   MBKeyboardConfigState *state = (MBKeyboardConfigState *)data;
@@ -545,7 +554,7 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
       config_handle_key_tag(state, attr);
       mb_kbd_key_set_blank(state->current_key, True);
     }
-  else if (streq(tag, "normal") 
+  else if (streq(tag, "normal")
 	   || streq(tag, "default")
 	   || streq(tag, "shifted")
 	   || streq(tag, "mod1")
@@ -557,7 +566,7 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
 
   if (state->error)
     {
-      fprintf(stderr, "matchbox-keyboard:%s:%d: %s\n", state->keyboard->config_file, 
+      fprintf(stderr, "matchbox-keyboard:%s:%d: %s\n", state->keyboard->config_file,
                                               state->error_lineno, state->error_msg);
       util_fatal_error("Error parsing\n");
     }
@@ -576,11 +585,11 @@ mb_kbd_config_load(MBKeyboard *kbd, char *variant)
 
   p = XML_ParserCreate(NULL);
 
-  if (!p) 
+  if (!p)
     util_fatal_error("Couldn't allocate memory for XML parser\n");
 
   if (variant && !strstr(kbd->config_file, variant))
-    fprintf(stderr, 
+    fprintf(stderr,
 	    "matchbox-keyboard: *Warning* Unable to locate variant: %s\n"
 	    "                   falling back to %s\n",
 	    variant, kbd->config_file);
@@ -597,7 +606,7 @@ mb_kbd_config_load(MBKeyboard *kbd, char *variant)
   XML_SetUserData(p, (void *)state);
 
   if (! XML_Parse(p, data, strlen(data), 1)) {
-    fprintf(stderr, 
+    fprintf(stderr,
 	    "matchbox-keyboard:%s:%d: XML Parse error:%s\n",
 	    kbd->config_file,
 	    XML_GetCurrentLineNumber(p),

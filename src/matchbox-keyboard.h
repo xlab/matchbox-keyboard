@@ -1,9 +1,10 @@
-/* 
+/*
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -18,6 +19,11 @@
 
 #ifndef HAVE_MB_KEYBOARD_H
 #define HAVE_MB_KEYBOARD_H
+
+#ifdef WANT_CAIRO
+#include <cairo/cairo.h>
+#define MBKeyboardImage cairo_surface_t
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,7 +73,7 @@ typedef struct List List;
 
 typedef void (*ListForEachCB) (void *data, void *userdata);
 
-struct List 
+struct List
 {
   List *next, *prev;
   void *data;
@@ -81,7 +87,7 @@ typedef struct MBKeyboardUI     MBKeyboardUI;
 typedef struct MBKeyboardUIBackend MBKeyboardUIBackend;
 typedef struct MBKeyboardImage  MBKeyboardImage;
 
-typedef enum 
+typedef enum
 {
   MBKeyboardKeyActionNone  = 0,
   MBKeyboardKeyActionGlyph,
@@ -90,7 +96,7 @@ typedef enum
 
 } MBKeyboardKeyActionType;
 
-typedef enum 
+typedef enum
 {
   MBKeyboardKeyModUnknown,
   MBKeyboardKeyModShift,
@@ -104,7 +110,7 @@ typedef enum
 
 } MBKeyboardKeyModType;
 
-typedef enum 
+typedef enum
 {
   MBKeyboardKeyFaceNone  = 0,
   MBKeyboardKeyFaceGlyph = 1,
@@ -112,7 +118,7 @@ typedef enum
 
 } MBKeyboardKeyFaceType;
 
-typedef enum 
+typedef enum
 {
   MBKeyboardKeyStateNormal = 0,
   MBKeyboardKeyStateShifted,
@@ -120,10 +126,10 @@ typedef enum
   MBKeyboardKeyStateMod2,
   MBKeyboardKeyStateMod3,
   N_MBKeyboardKeyStateTypes
-} 
+}
 MBKeyboardKeyStateType;
 
-typedef enum 
+typedef enum
 {
   MBKeyboardStateNormal = 0,
   MBKeyboardStateShifted = (1<<1),
@@ -134,15 +140,15 @@ typedef enum
   MBKeyboardStateControl = (1<<6),
   MBKeyboardStateAlt     = (1<<7),
   N_MBKeyboardStateTypes
-} 
+}
 MBKeyboardStateType;
 
-typedef enum 
+typedef enum
 {
   MBKeyboardDisplayAny      = 0,
   MBKeyboardDisplayPortrait,
   MBKeyboardDisplayLandscape
-} 
+}
 MBKeyboardDisplayOrientation;
 
 struct MBKeyboard
@@ -171,9 +177,9 @@ struct MBKeyboardUIBackend
   void (*pre_redraw) (MBKeyboardUI  *ui);
   int  (*resources_create) (MBKeyboardUI  *ui);
   int  (*resize) (MBKeyboardUI  *ui, int width, int height);
-  void  (*text_extents) (MBKeyboardUI  *ui, 
-			 const char    *str, 
-			 int           *width, 
+  void  (*text_extents) (MBKeyboardUI  *ui,
+			 const char    *str,
+			 int           *width,
 			 int           *height);
 };
 
@@ -181,7 +187,7 @@ int
 mb_kbd_ui_init(MBKeyboard *kbd);
 
 void
-mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui, 
+mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui,
 			     MBKeyboardDisplayOrientation orientation);
 
 int
@@ -256,13 +262,17 @@ mb_kbd_ui_set_embeded (MBKeyboardUI *ui, int embed);
 
 void
 mb_kbd_ui_set_daemon (MBKeyboardUI *ui, int value);
- 
+
 int
 mb_kbd_ui_embeded (MBKeyboardUI *ui);
 
 void
 mb_kbd_ui_print_window (MBKeyboardUI *ui);
 
+#ifdef WANT_CAIRO
+#define mb_kbd_image_width(x) cairo_image_surface_get_width (x)
+#define mb_kbd_image_height(x) cairo_image_surface_get_height (x)
+#else
 /*** Images ***/
 
 MBKeyboardImage*
@@ -276,6 +286,7 @@ mb_kbd_image_height (MBKeyboardImage *img);
 
 void
 mb_kbd_image_destroy (MBKeyboardImage *img);
+#endif
 
 /*** XEmbed ***/
 
@@ -380,19 +391,19 @@ mb_kbd_row_set_x(MBKeyboardRow *row, int x);
 void
 mb_kbd_row_set_y(MBKeyboardRow *row, int y);
 
-int 
+int
 mb_kbd_row_x (MBKeyboardRow *row) ;
 
-int 
+int
 mb_kbd_row_y(MBKeyboardRow *row) ;
 
-int 
+int
 mb_kbd_row_height(MBKeyboardRow *row);
 
-int 
+int
 mb_kbd_row_width(MBKeyboardRow *row);
 
-int 
+int
 mb_kbd_row_base_width(MBKeyboardRow *row);
 
 void
@@ -404,7 +415,7 @@ mb_kdb_row_keys(MBKeyboardRow *row);
 #define mb_kbd_row_for_each_key(r,k)            \
       for ((k) = mb_kdb_row_keys((r));          \
 	   (k) != NULL;                         \
-	   (k) = util_list_next((k))) 
+	   (k) = util_list_next((k)))
 
 
 /**** Keys ******/
@@ -436,7 +447,7 @@ mb_kbd_key_set_blank(MBKeyboardKey  *key, boolean blank);
 boolean
 mb_kbd_key_is_blank(MBKeyboardKey  *key);
 
-void 
+void
 mb_kbd_key_set_row(MBKeyboardKey *key, MBKeyboardRow *row);
 
 void
@@ -445,22 +456,22 @@ mb_kbd_key_set_geometry(MBKeyboardKey  *key,
 			int y,
 			int width,
 			int height);
-int 
+int
 mb_kbd_key_abs_x(MBKeyboardKey *key) ;
 
-int 
+int
 mb_kbd_key_abs_y(MBKeyboardKey *key) ;
 
-int 
+int
 mb_kbd_key_x(MBKeyboardKey *key) ;
 
-int 
+int
 mb_kbd_key_y(MBKeyboardKey *key);
 
-int 
+int
 mb_kbd_key_width(MBKeyboardKey *key) ;
 
-int 
+int
 mb_kbd_key_height(MBKeyboardKey *key);
 
 void
@@ -527,11 +538,11 @@ mb_kbd_key_set_modifer_action(MBKeyboardKey          *key,
 			      MBKeyboardKeyStateType  state,
 			      MBKeyboardKeyModType    type);
 
-MBKeyboardKeyModType 
+MBKeyboardKeyModType
 mb_kbd_key_get_modifer_action(MBKeyboardKey          *key,
 			      MBKeyboardKeyStateType  state);
 
-boolean 
+boolean
 mb_kbd_key_is_held(MBKeyboard *kbd, MBKeyboardKey *key);
 
 void
@@ -575,7 +586,7 @@ util_fatal_error(char *msg);
 int
 util_utf8_char_cnt(const char *str);
 
-boolean 
+boolean
 util_file_readable(char *path);
 
 /* Util list */
