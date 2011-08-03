@@ -2,8 +2,10 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -26,5 +28,6 @@ MBKeyboardUIBackend*
 mb_kbd_ui_xft_init(MBKeyboardUI *ui);
 
 #define MB_KBD_UI_BACKEND_INIT_FUNC(ui)  mb_kbd_ui_xft_init((ui))
+#define MB_KBD_UI_BACKEND_DESTROY_FUNC(ui)  mb_kbd_ui_xft_destroy((ui))
 
 #endif

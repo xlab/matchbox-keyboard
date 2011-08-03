@@ -2,6 +2,7 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
  *  Copyright (c) 2012 Vernier Software & Technology
@@ -613,6 +614,8 @@ mb_kbd_config_load(MBKeyboard *kbd, char *variant)
 	    XML_ErrorString(XML_GetErrorCode(p)));
     util_fatal_error("XML Parse failed.\n");
   }
+
+  XML_ParserFree (p);
 
   return 1;
 }

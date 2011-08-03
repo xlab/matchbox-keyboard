@@ -2,6 +2,7 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
  *  Copyright (c) 2012 Vernier Software & Technology
@@ -20,9 +21,12 @@
 #ifndef HAVE_MB_KEYBOARD_H
 #define HAVE_MB_KEYBOARD_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef WANT_CAIRO
-#include <cairo/cairo.h>
-#define MBKeyboardImage cairo_surface_t
+#include <cairo.h>
 #endif
 
 #include <stdio.h>
@@ -48,10 +52,6 @@
 #include <X11/keysym.h>
 
 #include <fakekey/fakekey.h>
-
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "matchbox-keyboard-remote.h"
 
@@ -85,7 +85,12 @@ typedef struct MBKeyboardRow    MBKeyboardRow;
 typedef struct MBKeyboardKey    MBKeyboardKey;
 typedef struct MBKeyboardUI     MBKeyboardUI;
 typedef struct MBKeyboardUIBackend MBKeyboardUIBackend;
+
+#ifdef WANT_CAIRO
+typedef cairo_surface_t MBKeyboardImage;
+#else
 typedef struct MBKeyboardImage  MBKeyboardImage;
+#endif
 
 typedef enum
 {
@@ -187,6 +192,9 @@ int
 mb_kbd_ui_init(MBKeyboard *kbd);
 
 void
+mb_kbd_ui_destroy (MBKeyboardUI *ui);
+
+void
 mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui,
 			     MBKeyboardDisplayOrientation orientation);
 
@@ -268,6 +276,9 @@ mb_kbd_ui_embeded (MBKeyboardUI *ui);
 
 void
 mb_kbd_ui_print_window (MBKeyboardUI *ui);
+
+void
+mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev);
 
 #ifdef WANT_CAIRO
 #define mb_kbd_image_width(x) cairo_image_surface_get_width (x)
@@ -373,6 +384,9 @@ MBKeyboardLayout*
 mb_kbd_layout_new(MBKeyboard *kbd, const char *id);
 
 void
+mb_kbd_layout_destroy (MBKeyboardLayout *layout);
+
+void
 mb_kbd_layout_append_row(MBKeyboardLayout *layout,
 			 MBKeyboardRow    *row);
 
@@ -384,6 +398,9 @@ mb_kbd_layout_rows(MBKeyboardLayout *layout);
 
 MBKeyboardRow*
 mb_kbd_row_new(MBKeyboard *kbd);
+
+void
+mb_kbd_row_destroy (MBKeyboardRow *row);
 
 void
 mb_kbd_row_set_x(MBKeyboardRow *row, int x);
@@ -422,6 +439,9 @@ mb_kdb_row_keys(MBKeyboardRow *row);
 
 MBKeyboardKey*
 mb_kbd_key_new(MBKeyboard *kbd);
+
+void
+mb_kbd_key_destroy (MBKeyboardKey *key);
 
 void
 mb_kbd_key_set_obey_caps(MBKeyboardKey  *key, boolean obey);

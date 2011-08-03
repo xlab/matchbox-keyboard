@@ -2,6 +2,7 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
  *  Copyright (c) 2012 Vernier Software & Technology
@@ -95,6 +96,38 @@ mb_kbd_key_new(MBKeyboard *kbd)
     key->states[i] = NULL;
 
   return key;
+}
+
+void
+mb_kbd_key_destroy (MBKeyboardKey *key)
+{
+  int i;
+
+  for (i=0; i<N_MBKeyboardKeyStateTypes; i++)
+    if (key->states[i])
+      {
+        if (key->states[i]->action.type == MBKeyboardKeyActionGlyph &&
+            key->states[i]->action.u.glyph)
+          free (key->states[i]->action.u.glyph);
+
+        if (key->states[i]->face.type == MBKeyboardKeyFaceGlyph &&
+            key->states[i]->face.u.str)
+          free (key->states[i]->face.u.str);
+
+        if (key->states[i]->face.type == MBKeyboardKeyFaceImage &&
+            key->states[i]->face.u.image)
+          {
+#ifdef WANT_CAIRO
+            cairo_surface_destroy (key->states[i]->face.u.image);
+#else
+            mb_kbd_image_destroy (key->states[i]->face.u.image);
+#endif
+          }
+
+        free (key->states[i]);
+      }
+
+  free (key);
 }
 
 void

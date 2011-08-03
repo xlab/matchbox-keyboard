@@ -2,8 +2,10 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -24,31 +26,31 @@ typedef struct MBKeyboardUIBackendXft
   MBKeyboardUIBackend backend;
 
   XftFont            *font;
-  XftColor            font_col; 
-  XftDraw            *xft_backbuffer;  
+  XftColor            font_col;
+  XftDraw            *xft_backbuffer;
   GC                  xgc;
 
   /* Our theme */
 
-  XColor xcol_c5c5c5, xcol_d3d3d3, xcol_f0f0f0, xcol_f8f8f5, 
+  XColor xcol_c5c5c5, xcol_d3d3d3, xcol_f0f0f0, xcol_f8f8f5,
     xcol_f4f4f4, xcol_a4a4a4;
 
 } MBKeyboardUIBackendXft;
 
-static void 
-mb_kbd_ui_xft_text_extents (MBKeyboardUI        *ui, 
-			    const char          *str, 
-			    int                 *width, 
+static void
+mb_kbd_ui_xft_text_extents (MBKeyboardUI        *ui,
+			    const char          *str,
+			    int                 *width,
 			    int                 *height)
 {
   XGlyphInfo  extents;
   MBKeyboardUIBackendXft *xft_backend = NULL;
 
   xft_backend = (MBKeyboardUIBackendXft*)mb_kbd_ui_backend(ui);
-  
-  XftTextExtentsUtf8(mb_kbd_ui_x_display(ui), 
+
+  XftTextExtentsUtf8(mb_kbd_ui_x_display(ui),
 		     xft_backend->font,
-		     (unsigned char*)str, 
+		     (unsigned char*)str,
 		     strlen(str),
 		     &extents);
 
@@ -72,12 +74,12 @@ alloc_color(MBKeyboardUI  *ui, XColor *xcol, char *spec)
       xcol->blue  = (result & 0xff) << 8;
       xcol->flags = DoRed|DoGreen|DoBlue;
 
-      XAllocColor(mb_kbd_ui_x_display(ui), 
-		  DefaultColormap(mb_kbd_ui_x_display(ui), 
-				  mb_kbd_ui_x_screen(ui)), 
+      XAllocColor(mb_kbd_ui_x_display(ui),
+		  DefaultColormap(mb_kbd_ui_x_display(ui),
+				  mb_kbd_ui_x_screen(ui)),
 		  xcol);
     }
-  
+
   return;
 }
 
@@ -93,17 +95,17 @@ mb_kbd_ui_xft_load_font(MBKeyboardUI *ui)
 
   /* load_font */
 
-  snprintf(desc, 512, "%s-%i:%s", 
+  snprintf(desc, 512, "%s-%i:%s",
 	   kb->font_family, kb->font_pt_size, kb->font_variant);
 
   if (xft_backend->font != NULL)
     XftFontClose(mb_kbd_ui_x_display(ui), xft_backend->font);
 
-  if ((xft_backend->font = XftFontOpenName(mb_kbd_ui_x_display(ui), 
-					   mb_kbd_ui_x_screen(ui), 
+  if ((xft_backend->font = XftFontOpenName(mb_kbd_ui_x_display(ui),
+					   mb_kbd_ui_x_screen(ui),
 					   desc)) == NULL)
     return 0;
-  
+
   return 1;
 }
 
@@ -130,17 +132,17 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   kbd         = mb_kbd_ui_kbd(ui);
 
 
-  rect.x      = mb_kbd_key_abs_x(key); 
-  rect.y      = mb_kbd_key_abs_y(key); 
-  rect.width  = mb_kbd_key_width(key);       
-  rect.height = mb_kbd_key_height(key);       
+  rect.x      = mb_kbd_key_abs_x(key);
+  rect.y      = mb_kbd_key_abs_y(key);
+  rect.width  = mb_kbd_key_width(key);
+  rect.height = mb_kbd_key_height(key);
 
   /* Hacky clip to work around issues with off by ones in layout code :( */
 
-  if (rect.x + rect.width >= mb_kbd_ui_x_win_width(ui)) 
+  if (rect.x + rect.width >= mb_kbd_ui_x_win_width(ui))
     rect.width  = mb_kbd_ui_x_win_width(ui) - rect.x - 1;
 
-  if (rect.y + rect.height >= mb_kbd_ui_x_win_height(ui)) 
+  if (rect.y + rect.height >= mb_kbd_ui_x_win_height(ui))
     rect.height  = mb_kbd_ui_x_win_height(ui) - rect.y - 1;
 
   /* clear it */
@@ -196,13 +198,13 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   else
     XSetForeground(xdpy, xft_backend->xgc, xft_backend->xcol_f8f8f5.pixel);
 
-  side_pad = 
+  side_pad =
     mb_kbd_keys_border(kbd)
     + mb_kbd_keys_margin(kbd)
     + mb_kbd_keys_pad(kbd);
 
   /* Why does below need +1's ? */
-  XFillRectangle(xdpy, backbuffer, xft_backend->xgc, 
+  XFillRectangle(xdpy, backbuffer, xft_backend->xgc,
 		 rect.x + side_pad,
 		 rect.y + side_pad,
 		 rect.width  - (side_pad * 2) + 1,
@@ -210,7 +212,7 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
   /* real code is here */
 
-  state = mb_kbd_keys_current_state(kbd); 
+  state = mb_kbd_keys_current_state(kbd);
 
   if (mb_kbd_has_state(kbd, MBKeyboardStateCaps)
       && mb_kbd_key_get_obey_caps(key))
@@ -228,26 +230,26 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
     {
       const char *face_str = mb_kbd_key_get_glyph_face(key, state);
       int         face_str_w, face_str_h;
-      
+
       if (face_str)
 	{
 	  int x, y;
-	  
+
 	  mb_kbd_ui_xft_text_extents(ui, face_str, &face_str_w, &face_str_h);
-	  
+
 	  x = mb_kbd_key_abs_x(key) + ((mb_kbd_key_width(key) - face_str_w)/2);
-	  
-	  y = mb_kbd_key_abs_y(key) + 
-	    ( (mb_kbd_key_height(key) 
+
+	  y = mb_kbd_key_abs_y(key) +
+	    ( (mb_kbd_key_height(key)
                  - (xft_backend->font->ascent + xft_backend->font->descent))
 	                             / 2 );
-	  
+
 	  XftDrawStringUtf8(xft_backend->xft_backbuffer,
 			    &xft_backend->font_col,
 			    xft_backend->font,
 			    x,
 			    y + xft_backend->font->ascent,
-			    (unsigned char*)face_str, 
+			    (unsigned char*)face_str,
 			    strlen(face_str));
 	}
     }
@@ -266,10 +268,10 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
 
 
       XRenderComposite(xdpy,
-		       PictOpOver, 
-		       mb_kbd_image_render_picture (img), 
-		       None, 
-		       XftDrawPicture (xft_backend->xft_backbuffer), 
+		       PictOpOver,
+		       mb_kbd_image_render_picture (img),
+		       None,
+		       XftDrawPicture (xft_backend->xft_backbuffer),
 		       0, 0, 0, 0, x, y, w, h);
     }
 }
@@ -282,19 +284,19 @@ mb_kbd_ui_xft_pre_redraw(MBKeyboardUI  *ui)
   xft_backend = (MBKeyboardUIBackendXft*)mb_kbd_ui_backend(ui);
 
   /* Background */
-  XSetForeground(mb_kbd_ui_x_display(ui), 
+  XSetForeground(mb_kbd_ui_x_display(ui),
 		 xft_backend->xgc, xft_backend->xcol_f4f4f4.pixel);
 
-  XFillRectangle(mb_kbd_ui_x_display(ui), 
-		 mb_kbd_ui_backbuffer(ui), 
+  XFillRectangle(mb_kbd_ui_x_display(ui),
+		 mb_kbd_ui_backbuffer(ui),
 		 xft_backend->xgc,
-		 0, 0, 
+		 0, 0,
 		 mb_kbd_ui_x_win_width(ui),
 		 mb_kbd_ui_x_win_height(ui));
 
-  XSetForeground(mb_kbd_ui_x_display(ui), 
-		 xft_backend->xgc, 
-		 BlackPixel(mb_kbd_ui_x_display(ui), 
+  XSetForeground(mb_kbd_ui_x_display(ui),
+		 xft_backend->xgc,
+		 BlackPixel(mb_kbd_ui_x_display(ui),
 			    mb_kbd_ui_x_screen(ui)));
 
 
@@ -310,7 +312,7 @@ mb_kbd_ui_xft_resources_create(MBKeyboardUI  *ui)
 
   xft_backend->xft_backbuffer = XftDrawCreate(mb_kbd_ui_x_display(ui),
 					      mb_kbd_ui_backbuffer(ui),
-					      DefaultVisual(mb_kbd_ui_x_display(ui), 
+					      DefaultVisual(mb_kbd_ui_x_display(ui),
 							    mb_kbd_ui_x_screen(ui)),
 					      DefaultColormap(mb_kbd_ui_x_display(ui),
 							      mb_kbd_ui_x_screen(ui)));
@@ -319,22 +321,22 @@ mb_kbd_ui_xft_resources_create(MBKeyboardUI  *ui)
   coltmp.red   = coltmp.green = coltmp.blue  = 0x0000; coltmp.alpha = 0xcccc;
 
   XftColorAllocValue(mb_kbd_ui_x_display(ui),
-		     DefaultVisual(mb_kbd_ui_x_display(ui), 
-				   mb_kbd_ui_x_screen(ui)), 
-		     DefaultColormap(mb_kbd_ui_x_display(ui), 
+		     DefaultVisual(mb_kbd_ui_x_display(ui),
+				   mb_kbd_ui_x_screen(ui)),
+		     DefaultColormap(mb_kbd_ui_x_display(ui),
 				     mb_kbd_ui_x_screen(ui)),
 		     &coltmp,
 		     &xft_backend->font_col);
 
-  xft_backend->xgc = XCreateGC(mb_kbd_ui_x_display(ui), 
+  xft_backend->xgc = XCreateGC(mb_kbd_ui_x_display(ui),
 			       mb_kbd_ui_x_win(ui), 0, NULL);
 
-  XSetForeground(mb_kbd_ui_x_display(ui), 
-		 xft_backend->xgc, 
+  XSetForeground(mb_kbd_ui_x_display(ui),
+		 xft_backend->xgc,
 		 BlackPixel(mb_kbd_ui_x_display(ui), mb_kbd_ui_x_screen(ui)));
 
-  XSetBackground(mb_kbd_ui_x_display(ui), 
-		 xft_backend->xgc, 
+  XSetBackground(mb_kbd_ui_x_display(ui),
+		 xft_backend->xgc,
 		 WhitePixel(mb_kbd_ui_x_display(ui), mb_kbd_ui_x_screen(ui)));
 
   /* Crusty theme stuff  */
@@ -379,3 +381,11 @@ mb_kbd_ui_xft_init(MBKeyboardUI *ui)
   return (MBKeyboardUIBackend*)xft_backend;
 }
 
+void
+mb_kbd_ui_xft_destroy (MBKeyboardUI *ui)
+{
+  MBKeyboardUIBackend *backend = mb_kbd_ui_backend (ui);
+  MBKeyboardUIBackendXft *xft_backend = (MBKeyboardUIBackendXft*)backend;
+
+  free (xft_backend);
+}

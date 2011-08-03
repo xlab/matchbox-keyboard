@@ -2,6 +2,7 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
  *  Copyright (c) 2012 Vernier Software & Technology
@@ -22,6 +23,9 @@
 #define PROP_MOTIF_WM_HINTS_ELEMENTS    5
 #define MWM_HINTS_DECORATIONS          (1L << 1)
 #define MWM_DECOR_BORDER               (1L << 1)
+
+static Display *xdpy = NULL;
+static FakeKey *fakekey = NULL;
 
 typedef struct
 {
@@ -1100,7 +1104,7 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 }
 
 void
-mb_kbd_ui_event_loop(MBKeyboardUI *ui)
+mb_kbd_ui_event_loop (MBKeyboardUI *ui)
 {
   MBKeyboardKey *key = NULL;
   struct timeval tvt;
@@ -1141,7 +1145,6 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 
                   DBG("found key for press");
                   mb_kbd_key_press(key);
-
                 }
               break;
             case ButtonRelease:
@@ -1283,6 +1286,57 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
       }
 }
 
+void
+mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
+{
+  MBKeyboardKey *key = NULL;
+
+  switch (xev->type)
+    {
+    case ButtonPress:
+      DBG("got button bress at %i,%i", xev->xbutton.x, xev->xbutton.y);
+      key = mb_kbd_locate_key(ui->kbd, xev->xbutton.x, xev->xbutton.y);
+      if (key)
+        {
+          /* Hack if we never get a release event */
+          if (key != mb_kbd_get_held_key(ui->kbd))
+            {
+              mb_kbd_key_release(ui->kbd);
+            }
+
+          DBG("found key for press");
+          mb_kbd_key_press(key);
+        }
+      break;
+    case ButtonRelease:
+      if (mb_kbd_get_held_key(ui->kbd) != NULL)
+        {
+          mb_kbd_key_release(ui->kbd);
+        }
+      break;
+    case ConfigureNotify:
+      if (xev->xconfigure.window == ui->xwin
+          &&  (xev->xconfigure.width != ui->xwin_width
+               || xev->xconfigure.height != ui->xwin_height))
+        {
+          mb_kbd_ui_handle_configure(ui,
+                                     xev->xconfigure.width,
+                                     xev->xconfigure.height);
+        }
+      if (xev->xconfigure.window == ui->xwin_root)
+        update_display_size(ui);
+      break;
+    case MappingNotify:
+      fakekey_reload_keysyms(ui->fakekey);
+      XRefreshKeyboardMapping(&xev->xmapping);
+      break;
+    default:
+      break;
+    }
+
+  mb_kbd_xembed_process_xevents (ui, xev);
+}
+
 static int
 mb_kbd_ui_load_font(MBKeyboardUI *ui)
 {
@@ -1400,6 +1454,35 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
   return 1;
 }
 
+void
+mb_kbd_ui_unrealize (MBKeyboardUI *ui)
+{
+  util_trap_x_errors ();
+
+  if (ui->xwin)
+    {
+      XDestroyWindow (ui->xdpy, ui->xwin);
+      ui->xwin = None;
+    }
+
+  if (ui->backbuffer)
+    {
+      XFreePixmap (ui->xdpy, ui->backbuffer);
+      ui->backbuffer = None;
+    }
+
+  util_untrap_x_errors ();
+
+  MB_KBD_UI_BACKEND_DESTROY_FUNC (ui);
+}
+
+void
+mb_kbd_ui_destroy (MBKeyboardUI *ui)
+{
+  mb_kbd_ui_unrealize (ui);
+  free (ui);
+}
+
 int
 mb_kbd_ui_init(MBKeyboard *kbd)
 {
@@ -1409,16 +1492,25 @@ mb_kbd_ui_init(MBKeyboard *kbd)
 
   ui->kbd = kbd;
 
-  if ((ui->xdpy = XOpenDisplay(getenv("DISPLAY"))) == NULL)
-    return 0;
+  if (!xdpy)
+    {
+      if ((xdpy = XOpenDisplay(getenv("DISPLAY"))) == NULL)
+        return 0;
+    }
 
-  if ((ui->fakekey = fakekey_init(ui->xdpy)) == NULL)
-    return 0;
+  ui->xdpy = xdpy;
 
+  if (!fakekey)
+    {
+      if ((fakekey = fakekey_init(ui->xdpy)) == NULL)
+        return 0;
+    }
+
+  ui->fakekey   = fakekey;
   ui->xscreen   = DefaultScreen(ui->xdpy);
   ui->xwin_root = RootWindow(ui->xdpy, ui->xscreen);
 
-  ui->backend = MB_KBD_UI_BACKEND_INIT_FUNC(ui);
+  ui->backend = MB_KBD_UI_BACKEND_INIT_FUNC (ui);
 
   update_display_size(ui);
 

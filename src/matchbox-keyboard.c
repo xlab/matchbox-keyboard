@@ -2,6 +2,7 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
  *  Copyright (c) 2012 Vernier Software & Technology
@@ -45,10 +46,12 @@ MBKeyboard*
 mb_kbd_new (int argc, char **argv)
 {
   MBKeyboard *kb = NULL;
-  char       *variant = NULL; 
-  Bool        want_embedding = False, want_daemon = False;
+  char       *variant = NULL;
+  Bool        want_embedding = widget;
+  Bool        want_daemon = False;
   int         i;
   MBKeyboardDisplayOrientation orientation = MBKeyboardDisplayAny;
+  int         param_offset = widget ? 0 : 1;
 
   kb = util_malloc0(sizeof(MBKeyboard));
 
@@ -63,24 +66,27 @@ mb_kbd_new (int argc, char **argv)
   kb->font_pt_size = 8;
   kb->font_variant = strdup("bold");
 
-  for (i = 1; i < argc; i++) 
+  for (i = 1; i < argc; i++)
     {
-      if (streq ("-xid", argv[i]) || streq ("--xid", argv[i])) 
-	{
-	  want_embedding = True;
-	  continue;
-	}
+      if (streq ("-xid", argv[i]) || streq ("--xid", argv[i]))
+        {
+          want_embedding = True;
+          continue;
+        }
 
-      if (streq ("-d", argv[i]) || streq ("--daemon", argv[i])) 
-	{
-	  want_daemon = True;
-	  continue;
-	}
+      if (!strcmp ("-d", argv[i]) || !strcmp ("--daemon", argv[i]))
+        {
+          want_daemon = True;
+          continue;
+        }
 
-      if (streq ("--fontfamily", argv[i])) 
+      if (!strcmp ("--fontfamily", argv[i]))
         {
           if (++i>=argc)
             {
+              if (widget)
+                return NULL;
+              else
               mb_kbd_usage (argv[0]);
             }
           else
@@ -105,41 +111,63 @@ mb_kbd_new (int argc, char **argv)
             }
           continue;
         }
-      
-      if (streq ("--fontptsize", argv[i])) 
+
+      if (!strcmp ("--fontptsize", argv[i]))
         {
-          if (++i>=argc) mb_kbd_usage (argv[0]);
+          if (++i>=argc)
+            {
+              if (widget)
+                return NULL;
+              else
+                mb_kbd_usage (argv[0]);
+            }
+
           kb->font_pt_size = strtol(argv[i], NULL, 0);
           continue;
         }
 
-      if (streq ("--fontvariant", argv[i])) 
+      if (!strcmp ("--fontvariant", argv[i]))
         {
-          if (++i>=argc) mb_kbd_usage (argv[0]);
+          if (++i>=argc)
+        {
+              if (widget)
+                return NULL;
+              else
+                mb_kbd_usage (argv[0]);
+            }
+
           kb->font_variant = strdup(argv[i]);
           continue;
         }
-      
+
       if (streq ("-o", argv[i]) || streq ("--orientation", argv[i]))
 	{
 	  if (++i>=argc) mb_kbd_usage (argv[0]);
 
-	  if (streq(argv[i], "portrait"))
+          if (!strcmp(argv[i], "portrait"))
 	    {
 	      orientation = MBKeyboardDisplayPortrait;
 	    }
-	  else if (streq(argv[i], "landscape"))
+          else if (!strcmp(argv[i], "landscape"))
 	    {
 	      orientation = MBKeyboardDisplayLandscape;
 	    }
+          else if (widget)
+            {
+              return NULL;
+            }
 	  else
+            {
 	    mb_kbd_usage (argv[0]);
+            }
 
 	  continue;
 	}
 
       if (i == (argc-1) && argv[i][0] != '-')
 	variant = argv[i];
+      else if (widget)
+        return NULL;
       else
 	mb_kbd_usage(argv[0]);
     }
@@ -153,13 +181,13 @@ mb_kbd_new (int argc, char **argv)
   if (!mb_kbd_config_load(kb, variant))
     return NULL;
 
-  kb->selected_layout 
+  kb->selected_layout
     = (MBKeyboardLayout *)util_list_get_nth_data(kb->layouts, 0);
 
   if (want_embedding)
     mb_kbd_ui_set_embeded (kb->ui, True);
 
-  if (want_daemon)
+  if (want_daemon && !widget)
     {
       mb_kbd_ui_set_daemon (kb->ui, True);
       if (orientation != MBKeyboardDisplayAny)
@@ -175,6 +203,40 @@ mb_kbd_new (int argc, char **argv)
   //fprintf (stderr, "***** Settings: font_family: %s font_pt_size: %d font_variant: %s\n", kb->font_family, kb->font_pt_size, kb->font_variant);
 
   return kb;
+}
+
+void
+mb_kbd_destroy (MBKeyboard *kb)
+{
+  if (kb->font_family)
+    free (kb->font_family);
+
+  if (kb->font_variant)
+    free (kb->font_variant);
+
+  if (kb->config_file)
+    free (kb->config_file);
+
+  if (kb->layouts)
+    {
+      List *l;
+
+      l = kb->layouts;
+      while (l)
+        {
+          List             *n = l->next;
+          MBKeyboardLayout *c = l->data;
+
+          n = l->next;
+          mb_kbd_layout_destroy (c);
+          free (l);
+          l = n;
+        }
+    }
+
+  mb_kbd_ui_destroy (kb->ui);
+
+  free (kb);
 }
 
 int
@@ -248,10 +310,10 @@ mb_kbd_keys_current_state(MBKeyboard *kbd)
 
   if (mb_kbd_has_state(kbd, MBKeyboardStateMod2))
     return MBKeyboardKeyStateMod2;
-  
+
   if (mb_kbd_has_state(kbd, MBKeyboardStateMod3))
     return MBKeyboardKeyStateMod3;
-  
+
   return MBKeyboardKeyStateNormal;
 }
 
@@ -282,28 +344,28 @@ mb_kbd_locate_key(MBKeyboard *kb, int x, int y)
     {
       MBKeyboardRow *row = row_item->data;
 
-      if (x >= mb_kbd_row_x(row) 
-	  && x <= mb_kbd_row_x(row) + mb_kbd_row_width(row) 
-	  && y >= mb_kbd_row_y(row)
-	  && y <= mb_kbd_row_y(row) + mb_kbd_row_height(row) )
-	{
-	  mb_kbd_row_for_each_key(row, key_item) 
-	    {
-	      MBKeyboardKey *key = key_item->data;
+      if (x >= mb_kbd_row_x(row)
+          && x <= mb_kbd_row_x(row) + mb_kbd_row_width(row)
+          && y >= mb_kbd_row_y(row)
+          && y <= mb_kbd_row_y(row) + mb_kbd_row_height(row) )
+        {
+          mb_kbd_row_for_each_key(row, key_item)
+            {
+              MBKeyboardKey *key = key_item->data;
 
-	      if (!mb_kbd_is_extended(kb) 
-		      && mb_kbd_key_get_extended(key))
-		continue;
+              if (!mb_kbd_is_extended(kb)
+                  && mb_kbd_key_get_extended(key))
+                continue;
 
-	      if (!mb_kbd_key_is_blank(key)
-		  && x >= mb_kbd_key_abs_x(key)
-		  && x <= mb_kbd_key_abs_x(key) + mb_kbd_key_width(key))
-		return key;
+              if (!mb_kbd_key_is_blank(key)
+                  && x >= mb_kbd_key_abs_x(key)
+                  && x <= mb_kbd_key_abs_x(key) + mb_kbd_key_width(key))
+                return key;
 
-	    }
-	 
-	  return NULL;
-	}
+            }
+
+          return NULL;
+        }
 
       row_item = util_list_next(row_item);
     }
@@ -354,7 +416,7 @@ mb_kbd_run(MBKeyboard *kb)
 }
 
 
-int 
+int
 main(int argc, char **argv)
 {
   MBKeyboard *kb;
@@ -362,6 +424,8 @@ main(int argc, char **argv)
   kb = mb_kbd_new(argc, argv);
 
   if (kb) mb_kbd_run(kb);
+
+  mb_kbd_destroy (kb);
 
   return 0;
 }

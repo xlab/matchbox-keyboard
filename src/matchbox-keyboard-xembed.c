@@ -1,9 +1,11 @@
 /*
- *  Matchbox Keyboard - A lightweight software keyboard.
+ *	Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -48,26 +50,26 @@ mb_kbd_xembed_set_win_info (MBKeyboardUI *ui, int flags)
 
    Atom atom_ATOM_XEMBED_INFO;
 
-   atom_ATOM_XEMBED_INFO 
-     = XInternAtom(mb_kbd_ui_x_display(ui), "_XEMBED_INFO", False);
+  atom_ATOM_XEMBED_INFO
+    = XInternAtom(mb_kbd_ui_x_display(ui), "_XEMBED_INFO", False);
 
 
-   list[0] = MAX_SUPPORTED_XEMBED_VERSION;
-   list[1] = flags;
-   XChangeProperty (mb_kbd_ui_x_display(ui), 
-		    mb_kbd_ui_x_win(ui), 
-		    atom_ATOM_XEMBED_INFO,
-		    atom_ATOM_XEMBED_INFO, 32,
-		    PropModeReplace, (unsigned char *) list, 2);
+  list[0] = MAX_SUPPORTED_XEMBED_VERSION;
+  list[1] = flags;
+  XChangeProperty (mb_kbd_ui_x_display(ui),
+                   mb_kbd_ui_x_win(ui),
+                   atom_ATOM_XEMBED_INFO,
+                   atom_ATOM_XEMBED_INFO, 32,
+                   PropModeReplace, (unsigned char *) list, 2);
 }
 
 static Bool
 mb_kbd_xembed_send_message (MBKeyboardUI *ui,
-			    Window        w,
-			    long          message,
-			    long          detail,
-			    long          data1, 
-			    long          data2)
+                            Window        w,
+                            long          message,
+                            long          detail,
+                            long          data1,
+                            long          data2)
 {
   XEvent ev;
 
@@ -88,7 +90,7 @@ mb_kbd_xembed_send_message (MBKeyboardUI *ui,
   XSendEvent(mb_kbd_ui_x_display(ui), w, False, NoEventMask, &ev);
   XSync(mb_kbd_ui_x_display(ui), False);
 
-  if (util_untrap_x_errors()) 
+  if (util_untrap_x_errors())
     return False;
 
   return True;
@@ -106,7 +108,6 @@ mb_kbd_xembed_init (MBKeyboardUI *ui)
 void
 mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
 {
-
   switch (xevent->type)
     {
     case MapNotify:
@@ -114,45 +115,45 @@ mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
       break;
     case ClientMessage:
       if (xevent->xclient.message_type == Atom_XEMBED)
-	{
-	  switch (xevent->xclient.data.l[1])
-	    {
-	    case XEMBED_EMBEDDED_NOTIFY:
-	      /* We are now reparented. Call the repaint. 
+        {
+          switch (xevent->xclient.data.l[1])
+            {
+            case XEMBED_EMBEDDED_NOTIFY:
+              /* We are now reparented. Call the repaint.
                * note, 'data1' ( see spec ) is is embedders window
-	      */
-	      DBG("### got XEMBED_EMBEDDED_NOTIFY ###");
-	      ParentEmbedderWin = xevent->xclient.data.l[3];
+               */
+              DBG("### got XEMBED_EMBEDDED_NOTIFY ###");
+              ParentEmbedderWin = xevent->xclient.data.l[3];
 
-	      /* FIXME: we really want to know what our final
+              /* FIXME: we really want to know what our final
                *        size will be before mapping as this can
-               *        look ugly when window is mapped then a 
+               *        look ugly when window is mapped then a
                *        load of resizes.
                *        Maybe fixible in GTK calling code ?
-	      */ 
+               */
 
-	      mb_kbd_ui_redraw(ui);	      
+              mb_kbd_ui_redraw(ui);
 
-	      XSync(mb_kbd_ui_x_display(ui), False);
+              XSync(mb_kbd_ui_x_display(ui), False);
 
-	      /* And please Map us */
+              /* And please Map us */
 
 
 
-	      mb_kbd_xembed_set_win_info (ui, XEMBED_MAPPED);
+              mb_kbd_xembed_set_win_info (ui, XEMBED_MAPPED);
 
-	      break;
-	    case XEMBED_WINDOW_ACTIVATE:
-	      /* FIXME: What to do here */
-	      DBG("### got XEMBED_WINDOW_ACTIVATE ###");
-	      break;
-	    case XEMBED_WINDOW_DEACTIVATE:
-	      /* FIXME: What to do here ? unmap or exit */
-	      DBG("### got XEMBED_WINDOW_DEACTIVATE ###");
-	      break;
-	    case XEMBED_FOCUS_IN:
-	      DBG("### got XEMBED_FOCUS_IN ###");
-	      /* 
+              break;
+            case XEMBED_WINDOW_ACTIVATE:
+              /* FIXME: What to do here */
+              DBG("### got XEMBED_WINDOW_ACTIVATE ###");
+              break;
+            case XEMBED_WINDOW_DEACTIVATE:
+              /* FIXME: What to do here ? unmap or exit */
+              DBG("### got XEMBED_WINDOW_DEACTIVATE ###");
+              break;
+            case XEMBED_FOCUS_IN:
+              DBG("### got XEMBED_FOCUS_IN ###");
+              /*
                * Please never give us key focus...
 	      */
 	      if (ParentEmbedderWin)
@@ -160,8 +161,7 @@ mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
 					    ParentEmbedderWin,
 					    XEMBED_FOCUS_NEXT,
 					    0, 0, 0);
-	      break
-;	      /* TODO: Modility + rest of spec ? */
+	      break; /* TODO: Modility + rest of spec ? */
 	    }
 	}
     }

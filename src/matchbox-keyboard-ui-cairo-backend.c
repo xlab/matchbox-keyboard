@@ -2,6 +2,7 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
  *  Copyright (c) 2012 Vernier Software & Technology
@@ -292,6 +293,7 @@ mb_kbd_ui_cairo_resources_create(MBKeyboardUI  *ui)
 				   mb_kbd_ui_x_win_height(ui));
 
   XFreePixmap(mb_kbd_ui_x_display(ui),  cairo_backend->foo_pxm);
+  cairo_backend->foo_pxm = None;
 
   cairo_xlib_surface_set_size (cairo_backend->surface,
 			       mb_kbd_ui_x_win_width(ui),
@@ -367,3 +369,16 @@ mb_kbd_ui_cairo_init(MBKeyboardUI *ui)
   return (MBKeyboardUIBackend*)cairo_backend;
 }
 
+void
+mb_kbd_ui_cairo_destroy (MBKeyboardUI *ui)
+{
+  MBKeyboardUIBackend *backend = mb_kbd_ui_backend (ui);
+  MBKeyboardUIBackendCairo *cairo_backend = (MBKeyboardUIBackendCairo*)backend;
+
+  if (cairo_backend->foo_pxm)
+    XFreePixmap (mb_kbd_ui_x_display (ui), cairo_backend->foo_pxm);
+
+  cairo_destroy (cairo_backend->cr);
+
+  free (cairo_backend);
+}

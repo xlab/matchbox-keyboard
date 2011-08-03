@@ -2,8 +2,10 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *              Tomas Frydrych <tomas@sleepfive.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -20,7 +22,7 @@
 
 struct MBKeyboardLayout
 {
-  MBKeyboard       *kbd;  
+  MBKeyboard       *kbd;
   char             *id;
   List             *rows;
 };
@@ -38,6 +40,30 @@ mb_kbd_layout_new(MBKeyboard *kbd, const char *id)
 
   return layout;
 }
+
+void
+mb_kbd_layout_destroy (MBKeyboardLayout *layout)
+{
+  List *l;
+
+  if (layout->id)
+    free (layout->id);
+
+  l = layout->rows;
+
+  while (l)
+    {
+      List *n = l->next;
+      MBKeyboardRow *r = l->data;
+
+      mb_kbd_row_destroy (r);
+      free (l);
+      l = n;
+    }
+
+  free (layout);
+}
+
 
 void
 mb_kbd_layout_append_row(MBKeyboardLayout *layout,
