@@ -646,6 +646,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   char                *wm_name;
   boolean              have_matchbox_wm = False;
   boolean              have_ewmh_wm     = False;
+  int                  desk_width = 0, desk_height = 0, desk_y = 0;
 
   /*
     atom_wm_protocols = {
@@ -740,6 +741,26 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard",
                          NULL, 0, NULL, 0, &size_hints);
 
+  if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height))
+    {
+      /* Assuming we take up all available display width
+       * ( at least true with matchbox wm ). we resize
+       * the base ui width to this ( and height as a factor )
+       * to avoid the case of mapping and then the wm resizing
+       * us, causing an ugly repaint.
+       *
+       * We do this also when embedding; though the exact size is not likely
+       * going to match the desktop width, it is a better approximation, and
+       * the actual resize is going to be less ugly later on.
+       */
+      if (desk_width > ui->xwin_width)
+        {
+          mb_kbd_ui_resize(ui,
+                           desk_width,
+                           ( desk_width * ui->xwin_height ) / ui->xwin_width);
+        }
+    }
+
   if (!ui->want_embedding)
     {
       mwm_hints = util_malloc0(sizeof(PropMotifWmHints));
@@ -774,28 +795,13 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
                                    1399 }; /* bottom_end_x */
 
           Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, atom_NET_WM_STATE_SKIP_PAGER };
-          int  desk_width = 0, desk_height = 0, desk_y = 0;
-
           XChangeProperty(ui->xdpy, ui->xwin,
                           atom_NET_WM_STATE, XA_ATOM, 32,
                           PropModeReplace,
                           (unsigned char *)states, 2);
 
-          if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height))
+          if (desk_width)
             {
-              /* Assuming we take up all available display width
-               * ( at least true with matchbox wm ). we resize
-               * the base ui width to this ( and height as a factor )
-               * to avoid the case of mapping and then the wm resizing
-               * us, causing an ugly repaint.
-               */
-              if (desk_width > ui->xwin_width)
-                {
-                  mb_kbd_ui_resize(ui,
-                                   desk_width,
-                                   ( desk_width * ui->xwin_height ) / ui->xwin_width);
-                }
-
               wm_struct_vals[2]  = desk_y + desk_height - ui->xwin_height;
               wm_struct_vals[11] = desk_width;
 
