@@ -40,10 +40,10 @@ util_list_length(List *list)
 List*
 util_list_get_last(List *list)
 {
-  if (list == NULL) 
+  if (list == NULL)
     return NULL;
 
-  while (list->next) 
+  while (list->next)
     list = util_list_next(list);
   return list;
 }
@@ -51,10 +51,10 @@ util_list_get_last(List *list)
 List*
 util_list_get_first(List *list)
 {
-  if (list == NULL) 
+  if (list == NULL)
     return NULL;
 
-  while (list->prev) 
+  while (list->prev)
     list = util_list_previous(list);
   return list;
 }
@@ -62,7 +62,7 @@ util_list_get_first(List *list)
 void*
 util_list_get_nth_data(List *list, int n)
 {
-  if (list == NULL) 
+  if (list == NULL)
     return NULL;
 
   list = util_list_get_first(list);
@@ -90,11 +90,11 @@ util_list_append(List *list, void *data)
     }
   else
     {
-      list = util_list_get_last(list);
+      List *last = util_list_get_last(list);
 
-      list->next = util_list_alloc_item();
-      list->next->prev = list;
-      list->next->data = data;
+      last->next = util_list_alloc_item();
+      last->next->prev = list;
+      last->next->data = data;
     }
 
   return list;
