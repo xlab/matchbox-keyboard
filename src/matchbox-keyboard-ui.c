@@ -741,7 +741,8 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard",
                          NULL, 0, NULL, 0, &size_hints);
 
-  if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height))
+  if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height) &&
+      !(ui->kbd->req_width || ui->kbd->req_height))
     {
       /* Assuming we take up all available display width
        * ( at least true with matchbox wm ). we resize
@@ -759,6 +760,15 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
                            desk_width,
                            ( desk_width * ui->xwin_height ) / ui->xwin_width);
         }
+    }
+
+  if (ui->kbd->req_width || ui->kbd->req_height)
+    {
+      int w = ui->kbd->req_width  ? ui->kbd->req_width  : ui->xwin_width;
+      int h = ui->kbd->req_height ? ui->kbd->req_height : ui->xwin_height;
+
+      DBG ("Setting initial size per explicit request: %dx%d", w, h);
+      mb_kbd_ui_resize (ui, w, h);
     }
 
   if (!ui->want_embedding)
@@ -866,11 +876,14 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   int               height_font_pt_size, width_font_pt_size;
   int               next_row_y,  n_rows, extra_key_height;
 
-  MARK();
+  DBG ("resizing to %dx%d", width, height);
 
   /* Don't scale beyond a sensible height on wide screens */
   if (height > (ui->dpy_height * 2 / 5))
-    height = ui->dpy_height * 2 / 5;
+    {
+      height = ui->dpy_height * 2 / 5;
+      DBG ("Tweaked height to %d", height);
+    }
 
   width_diff  = width  - ui->base_alloc_width;
   height_diff = height - ui->base_alloc_height;

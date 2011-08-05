@@ -68,7 +68,33 @@ mb_kbd_new (int argc, char **argv)
 
   for (i = 1; i < argc; i++)
     {
-      if (streq ("-xid", argv[i]) || streq ("--xid", argv[i]))
+      if (!strcmp ("-width", argv[i]) || !strcmp ("--width", argv[i]))
+        {
+          if (++i>=argc)
+            {
+              if (!widget)
+                mb_kbd_usage (argv[0]);
+            }
+          else
+            kb->req_width = strtol (argv[i], NULL, 0);
+
+          continue;
+        }
+
+      if (!strcmp ("-height", argv[i]) || !strcmp ("--height", argv[i]))
+        {
+          if (++i>=argc)
+            {
+              if (!widget)
+                mb_kbd_usage (argv[0]);
+            }
+          else
+            kb->req_height = strtol (argv[i], NULL, 0);
+
+          continue;
+        }
+
+      if (!strcmp ("-xid", argv[i]) || !strcmp ("--xid", argv[i]))
         {
           want_embedding = True;
           continue;

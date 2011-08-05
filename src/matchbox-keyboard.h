@@ -167,6 +167,7 @@ struct MBKeyboard
   MBKeyboardLayout      *selected_layout;
   int                    key_border, key_pad, key_margin;
   int                    row_spacing, col_spacing;
+  int                    req_width, req_height;
   boolean                extended; /* are we showing extended keys ? */
   MBKeyboardKey         *held_key;
   MBKeyboardStateType    keys_state;
