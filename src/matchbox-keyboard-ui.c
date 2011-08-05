@@ -878,8 +878,17 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
   DBG ("resizing to %dx%d", width, height);
 
-  /* Don't scale beyond a sensible height on wide screens */
-  if (height > (ui->dpy_height * 2 / 5))
+  /*
+   * Ignore resizes with meaninglessly small sizes; this typically happens when
+   * first embedded before the embedder works out how big we should be.
+   */
+  if (width <= 10 || height <= 10)
+    return;
+
+  /* Don't scale beyond a sensible height on wide screens
+   * Only do this if we are not embedding, otherwise it's the embedder's call
+   */
+  if (!ui->want_embedding && height > (ui->dpy_height * 2 / 5))
     {
       height = ui->dpy_height * 2 / 5;
       DBG ("Tweaked height to %d", height);
@@ -903,25 +912,22 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   layout   = mb_kbd_get_selected_layout(ui->kbd);
   row_item = mb_kbd_layout_rows(layout);
 
-  /* load a bigger font ?
-   * Only load if height and width have changed
+  /*
+   * load a bigger font ?
+   * Must do this when either width *or* height change!
    */
-
-  width_font_pt_size = ( (ui->base_font_pt_size * width)
+  width_font_pt_size = ((ui->base_font_pt_size * width)
                          / ui->base_alloc_width );
+  height_font_pt_size = ((ui->base_font_pt_size * height)
+                          / ui->base_alloc_height );
 
-  if (util_abs(width_font_pt_size - kbd->font_pt_size) > 2)
+  if (util_abs(width_font_pt_size - kbd->font_pt_size) > 2 ||
+      util_abs(height_font_pt_size - kbd->font_pt_size) > 2)
     {
-      height_font_pt_size = ( (ui->base_font_pt_size * height)
-                              / ui->base_alloc_height );
+      ui->kbd->font_pt_size = (height_font_pt_size > width_font_pt_size)
+        ? width_font_pt_size : height_font_pt_size;
 
-      if (util_abs(height_font_pt_size - kbd->font_pt_size) > 2)
-        {
-          ui->kbd->font_pt_size = (height_font_pt_size > width_font_pt_size)
-            ? width_font_pt_size : height_font_pt_size;
-
-	  mb_kbd_ui_load_font(ui);
-	}
+      mb_kbd_ui_load_font(ui);
     }
 
   n_rows = util_list_length(row_item);
