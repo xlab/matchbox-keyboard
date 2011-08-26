@@ -86,7 +86,7 @@ launch_keyboard (gint  type,
               g_string_free (string, TRUE);
             } break;
           default:
-            execlp ("/bin/sh", "sh", "-c", "matchbox-keyboard --xid --fontfamily dejavu:sans --fontptsize 12 --fontvariant mono:bold numpad", NULL);
+            execlp ("/bin/sh", "sh", "-c", "matchbox-keyboard --xid --fontfamily dejavu:sans --fontptsize 12 --fontvariant mono:bold numpad-small", NULL);
             break;
           }
       }
@@ -272,8 +272,8 @@ get_locale_strings (gchar **locale, gchar **locale_btn)
 
 int main(int argc, char **argv)
 {
-  GtkWidget *body;
-  unsigned long     kb_xid;
+  GtkWidget *body, *textview;
+  unsigned long kb_xid;
   GdkWindow *gdkwin;
   PangoContext *pangocontext;
   char *fontdescription;
@@ -300,46 +300,9 @@ int main(int argc, char **argv)
   gtk_window_set_resizable (GTK_WINDOW (kb_window), FALSE);
   //gtk_window_set_default_size (GTK_WINDOW (kb_window), 125, 125);
   gtk_container_set_border_width (GTK_CONTAINER (kb_window), 3);
-
-    {
-    GdkGeometry geo;
-    GdkWindowTypeHint hint = GDK_WINDOW_TYPE_HINT_DOCK;
-    GdkGravity gravity = GDK_GRAVITY_STATIC;
-    
-    switch (dock_gravity)
-      {
-      default:
-        hint = GDK_WINDOW_TYPE_HINT_DIALOG;
-        break;
-    }
-
-    geo.max_height = -1;
-    geo.max_width = -1;
-    geo.min_height = -1;
-    geo.min_width = -1;
-    geo.base_height = -1;
-    geo.base_width = -1;
-    geo.width_inc = 1;
-    geo.height_inc = 1;
-    geo.min_aspect = 1;
-    geo.max_aspect = 2;
-    geo.win_gravity = gravity;
-    
-    gtk_window_set_geometry_hints (GTK_WINDOW(kb_window),
-                                   NULL,
-                                   &geo,
-                                   GDK_HINT_MIN_SIZE|GDK_HINT_BASE_SIZE|GDK_HINT_ASPECT|GDK_HINT_RESIZE_INC);
-    
-    gtk_window_set_type_hint (GTK_WINDOW(kb_window), hint);
-  }
-
-  /* The window should never take focus. */
-  gtk_window_set_accept_focus (GTK_WINDOW (kb_window), FALSE);
-
-  //gtk_window_set_decorated (GTK_WINDOW(kb_window), FALSE);
-  /* The decoration hints. */
-  /*gdkwin = gtk_widget_get_parent_window (kb_window);
-    gdk_window_set_decorations (gdkwin, GDK_DECOR_RESIZEH|GDK_DECOR_BORDER);*/
+  
+  textview = gtk_text_view_new ();
+  gtk_box_pack_start (GTK_BOX (body), textview, TRUE, TRUE, 2);
 
   /* Get the font details that came through the rc files. */
   pangocontext = gtk_widget_get_pango_context (kb_window);
