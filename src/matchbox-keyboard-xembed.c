@@ -142,11 +142,18 @@ mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
               XSync(mb_kbd_ui_x_display(ui), False);
 
               /* And please Map us */
-
-
-
               mb_kbd_xembed_set_win_info (ui, XEMBED_MAPPED);
 
+              /*
+               * The above should get us mapped, but there is a bug in GtkSocket
+               * where the map is supposed to happen during the widget
+               * allocation, but that gets short circuited if the widget size
+               * does not change ... this happens to us, because we go into
+               * great length in NgiKeyboard to avoid unsightly resizing of the
+               * kbd window ... so we take the liberty of mapping ourselves,
+               * since now we are already reparented.
+               */
+              XMapWindow (mb_kbd_ui_x_display(ui), mb_kbd_ui_x_win (ui));
               break;
             case XEMBED_WINDOW_ACTIVATE:
               /* FIXME: What to do here */
