@@ -40,7 +40,7 @@ struct MBKeyboardUI
 {
   Display            *xdpy;
   int                 xscreen;
-  Window              xwin_root, xwin;
+  Window              xwin_root, xwin, xembedder;
   Pixmap              backbuffer;
 
   int                 dpy_width, dpy_height;
@@ -1609,3 +1609,16 @@ mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui,
 {
   ui->valid_orientation = orientation;
 }
+
+Window
+mb_kbd_ui_x_embedder(MBKeyboardUI *ui)
+{
+  return ui->xembedder;
+}
+
+void
+mb_kbd_ui_set_x_embedder(MBKeyboardUI *ui, Window xembedder)
+{
+  ui->xembedder = xembedder;
+}
+

@@ -40,8 +40,9 @@
 #define XEMBED_UNREGISTER_ACCELERATOR   13
 #define XEMBED_ACTIVATE_ACCELERATOR     14
 
-static Atom Atom_XEMBED; /* FIXME: put array of atoms in UI struct  */
-static Window ParentEmbedderWin = None;
+static Atom Atom_XEMBED; /* FIXME: put array of atoms in UI struct	*/
+static Atom Atom_WM_DELETE_WINDOW;
+static Atom Atom_WM_PROTOCOLS;
 
 static void
 mb_kbd_xembed_set_win_info (MBKeyboardUI *ui, int flags)
@@ -101,6 +102,10 @@ mb_kbd_xembed_init (MBKeyboardUI *ui)
 {
   /* FIXME: Urg global  */
   Atom_XEMBED = XInternAtom(mb_kbd_ui_x_display(ui), "_XEMBED", False);
+	Atom_WM_DELETE_WINDOW =
+          XInternAtom(mb_kbd_ui_x_display(ui), "WM_DELETE_WINDOW", False);
+	Atom_WM_PROTOCOLS =
+          XInternAtom(mb_kbd_ui_x_display(ui), "WM_PROTOCOLS", False);
 
   mb_kbd_xembed_set_win_info (ui, 0);
 }
@@ -123,7 +128,7 @@ mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
                * note, 'data1' ( see spec ) is is embedders window
                */
               DBG("### got XEMBED_EMBEDDED_NOTIFY ###");
-              ParentEmbedderWin = xevent->xclient.data.l[3];
+              mb_kbd_ui_set_x_embedder (ui, xevent->xclient.data.l[3]);
 
               /* FIXME: we really want to know what our final
                *        size will be before mapping as this can
@@ -151,19 +156,29 @@ mb_kbd_xembed_process_xevents (MBKeyboardUI *ui, XEvent *xevent)
               /* FIXME: What to do here ? unmap or exit */
               DBG("### got XEMBED_WINDOW_DEACTIVATE ###");
               break;
+            case XEMBED_FOCUS_OUT:
+              DBG("### got XEMBED_FOCUS_OUT ###");
+              break;
             case XEMBED_FOCUS_IN:
               DBG("### got XEMBED_FOCUS_IN ###");
               /*
                * Please never give us key focus...
-	      */
-	      if (ParentEmbedderWin)
-		mb_kbd_xembed_send_message (ui,
-					    ParentEmbedderWin,
-					    XEMBED_FOCUS_NEXT,
-					    0, 0, 0);
-	      break; /* TODO: Modility + rest of spec ? */
-	    }
-	}
+               */
+              if (mb_kbd_ui_x_embedder (ui))
+                mb_kbd_xembed_send_message (ui,
+                                            mb_kbd_ui_x_embedder (ui),
+                                            XEMBED_FOCUS_NEXT,
+                                            0, 0, 0);
+              break; /* TODO: Modility + rest of spec ? */
+            }
+        }
+      else if (xevent->xclient.message_type == Atom_WM_PROTOCOLS)
+        {
+          if (xevent->xclient.data.l[0] == Atom_WM_DELETE_WINDOW)
+            {
+              exit (0);
+            }
+        }
     }
 
   /* FIXME: Handle case of Embedder dieing ( Xfixes call ) ? */

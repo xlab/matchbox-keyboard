@@ -259,6 +259,12 @@ mb_kbd_ui_x_win_width(MBKeyboardUI *ui);
 Window
 mb_kbd_ui_x_win_root(MBKeyboardUI *ui);
 
+Window
+mb_kbd_ui_x_embedder(MBKeyboardUI *ui);
+
+void
+mb_kbd_ui_set_x_embedder(MBKeyboardUI *ui, Window xembedder);
+
 Pixmap
 mb_kbd_ui_backbuffer(MBKeyboardUI *ui);
 
