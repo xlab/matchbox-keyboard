@@ -18,13 +18,16 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "matchbox-keyboard.h"
 
 #define PROP_MOTIF_WM_HINTS_ELEMENTS    5
 #define MWM_HINTS_DECORATIONS          (1L << 1)
 #define MWM_DECOR_BORDER               (1L << 1)
 
-static Display *xdpy = NULL;
 static FakeKey *fakekey = NULL;
 
 typedef struct
@@ -145,8 +148,8 @@ get_desktop_area(MBKeyboardUI *ui, int *x, int *y, int *width, int *height)
   return True;
 }
 
-static void
-update_display_size(MBKeyboardUI *ui)
+void
+mb_kbd_ui_update_display_size(MBKeyboardUI *ui)
 {
   XWindowAttributes winattr;
 
@@ -182,41 +185,6 @@ want_extended(MBKeyboardUI *ui)
 
   return False;
 }
-
-static boolean
-get_xevent_timed(Display        *dpy,
-                 XEvent         *event_return,
-                 struct timeval *tv)
-{
-  if (tv->tv_usec == 0 && tv->tv_sec == 0)
-    {
-      XNextEvent(dpy, event_return);
-      return True;
-    }
-
-  XFlush(dpy);
-
-  if (XPending(dpy) == 0)
-    {
-      int fd = ConnectionNumber(dpy);
-
-      fd_set readset;
-      FD_ZERO(&readset);
-      FD_SET(fd, &readset);
-
-      if (select(fd+1, &readset, NULL, NULL, tv) == 0)
-        return False;
-      else
-        {
-          XNextEvent(dpy, event_return);
-          return True;
-        }
-    } else {
-      XNextEvent(dpy, event_return);
-      return True;
-    }
-}
-
 
 void
 mb_kbd_ui_send_press(MBKeyboardUI        *ui,
@@ -611,250 +579,289 @@ mb_kbd_ui_hide(MBKeyboardUI  *ui)
 static int
 mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 {
+  if (ui->kbd->is_widget)
+    {
+      XSetWindowAttributes attrs;
+
+      DBG ("Creating new window for widget, parent 0x%x!!!",
+           (unsigned int) ui->kbd->x_parent);
+
+      attrs.override_redirect = True;
+      attrs.event_mask =
+        ButtonPressMask |
+        ButtonReleaseMask |
+        Button1MotionMask |
+        StructureNotifyMask;
+
+      /*
+       * Construct the window initially at the requested position and size, not
+       * the calculated size; e.g., for the gtk widget this will be -1,-1;1x1,
+       * and if we use the caluclated size at 0,0 we get nasty flicker when the
+       * actual size allocation happens later.
+       */
+      ui->xwin = XCreateWindow (ui->xdpy,
+                                ui->kbd->x_parent,
+                                ui->kbd->req_x, ui->kbd->req_y,
+                                ui->kbd->req_width, ui->kbd->req_height,
+                                0,
+                                CopyFromParent, CopyFromParent, CopyFromParent,
+                                CWOverrideRedirect|CWEventMask,
+                                &attrs);
+
+      ui->backbuffer = XCreatePixmap(ui->xdpy,
+                                     ui->xwin,
+                                     ui->kbd->req_width,
+                                     ui->kbd->req_height,
+                                     DefaultDepth(ui->xdpy, ui->xscreen));
+    }
+  else
+    {
+      DBG ("Creating new window for application!!!");
 
 #define PROP_MOTIF_WM_HINTS_ELEMENTS    5
 #define MWM_HINTS_DECORATIONS          (1L << 1)
 #define MWM_DECOR_BORDER               (1L << 1)
 
-  typedef struct
-  {
-    unsigned long       flags;
-    unsigned long       functions;
-    unsigned long       decorations;
-    long                inputMode;
-    unsigned long       status;
-  } PropMotifWmHints ;
+      typedef struct
+      {
+        unsigned long       flags;
+        unsigned long       functions;
+        unsigned long       decorations;
+        long                inputMode;
+        unsigned long       status;
+      } PropMotifWmHints ;
 
 
-  Atom /* atom_wm_protocols[3], */
-    atom_NET_WM_WINDOW_TYPE,
-    atom_NET_WM_WINDOW_TYPE_TOOLBAR,
-    atom_NET_WM_WINDOW_TYPE_DOCK,
-    atom_NET_WM_STRUT_PARTIAL,
-    atom_NET_WM_STATE_SKIP_PAGER,
-    atom_NET_WM_STATE_SKIP_TASKBAR,
-    atom_NET_WM_STATE,
-    atom_MOTIF_WM_HINTS;
+      Atom /* atom_wm_protocols[3], */
+        atom_NET_WM_WINDOW_TYPE,
+        atom_NET_WM_WINDOW_TYPE_TOOLBAR,
+        atom_NET_WM_WINDOW_TYPE_DOCK,
+        atom_NET_WM_STRUT_PARTIAL,
+        atom_NET_WM_STATE_SKIP_PAGER,
+        atom_NET_WM_STATE_SKIP_TASKBAR,
+        atom_NET_WM_STATE,
+        atom_MOTIF_WM_HINTS;
 
 
-  PropMotifWmHints    *mwm_hints;
-  XSizeHints           size_hints;
-  XWMHints            *wm_hints;
-  XSetWindowAttributes win_attr;
+      PropMotifWmHints    *mwm_hints;
+      XSizeHints           size_hints;
+      XWMHints            *wm_hints;
+      XSetWindowAttributes win_attr;
 
 
-  char                *wm_name;
-  boolean              have_matchbox_wm = False;
-  boolean              have_ewmh_wm     = False;
-  int                  desk_width = 0, desk_height = 0, desk_y = 0;
+      char                *wm_name;
+      boolean              have_matchbox_wm = False;
+      boolean              have_ewmh_wm     = False;
+      int                  desk_width = 0, desk_height = 0, desk_y = 0;
 
-  /*
-    atom_wm_protocols = {
-    XInternAtom(ui->xdpy, "WM_DELETE_WINDOW",False),
-    XInternAtom(ui->xdpy, "WM_PROTOCOLS",False),
-    XInternAtom(ui->xdpy, "WM_NORMAL_HINTS", False),
-  };
-  */
-  atom_NET_WM_WINDOW_TYPE =
-    XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE" , False);
+      /*
+        atom_wm_protocols = {
+        XInternAtom(ui->xdpy, "WM_DELETE_WINDOW",False),
+        XInternAtom(ui->xdpy, "WM_PROTOCOLS",False),
+        XInternAtom(ui->xdpy, "WM_NORMAL_HINTS", False),
+        };
+      */
+      atom_NET_WM_WINDOW_TYPE =
+        XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE" , False);
 
-  atom_NET_WM_WINDOW_TYPE_TOOLBAR =
-    XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
+      atom_NET_WM_WINDOW_TYPE_TOOLBAR =
+        XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
 
-  atom_NET_WM_WINDOW_TYPE_DOCK =
-    XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+      atom_NET_WM_WINDOW_TYPE_DOCK =
+        XInternAtom(ui->xdpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
 
-  atom_MOTIF_WM_HINTS =
-    XInternAtom(ui->xdpy, "_MOTIF_WM_HINTS", False);
+      atom_MOTIF_WM_HINTS =
+        XInternAtom(ui->xdpy, "_MOTIF_WM_HINTS", False);
 
-  atom_NET_WM_STRUT_PARTIAL =
-    XInternAtom(ui->xdpy, "_NET_WM_STRUT_PARTIAL", False);
+      atom_NET_WM_STRUT_PARTIAL =
+        XInternAtom(ui->xdpy, "_NET_WM_STRUT_PARTIAL", False);
 
-  atom_NET_WM_STATE_SKIP_TASKBAR =
-    XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
+      atom_NET_WM_STATE_SKIP_TASKBAR =
+        XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
 
-  atom_NET_WM_STATE_SKIP_PAGER =
-    XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_PAGER", False);
+      atom_NET_WM_STATE_SKIP_PAGER =
+        XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_PAGER", False);
 
-  atom_NET_WM_STATE =
-    XInternAtom(ui->xdpy, "_NET_WM_STATE", False);
+      atom_NET_WM_STATE =
+        XInternAtom(ui->xdpy, "_NET_WM_STATE", False);
 
-  if ((wm_name = get_current_window_manager_name(ui)) != NULL)
-    {
-      have_ewmh_wm = True; 	/* basically assumed to be Metacity
-				   or at least only tested with mcity */
-    }
-  else
-    {
-      if (ui->is_daemon)
-	{
-	  /* Hack to avoid starting before the WM. Needed only in daemon mode
-	  */
-	  while (wm_name == NULL)
-	    {
-	      sleep(1);
-	      wm_name = get_current_window_manager_name(ui);
-	    }
-
-	  have_ewmh_wm = True;
-	}
-    }
-
-  if (wm_name && streq(wm_name, "matchbox"))
-    have_matchbox_wm = True;
-
-  win_attr.override_redirect = False; /* Set to true for extreme case */
-  win_attr.event_mask
-    = ButtonPressMask|ButtonReleaseMask|Button1MotionMask|StructureNotifyMask;
-
-  ui->xwin = XCreateWindow(ui->xdpy,
-			   ui->xwin_root,
-			   0, 0,
-			   ui->xwin_width, ui->xwin_height,
-			   0,
-			   CopyFromParent, CopyFromParent, CopyFromParent,
-			   CWOverrideRedirect|CWEventMask,
-			   &win_attr);
-
-  XSelectInput (ui->xdpy,  ui->xwin_root,
-                SubstructureNotifyMask|StructureNotifyMask);
-
-  wm_hints = XAllocWMHints();
-
-  if (wm_hints)
-    {
-      DBG("setting no focus hint");
-      wm_hints->input = False;
-      wm_hints->flags = InputHint;
-      XSetWMHints(ui->xdpy, ui->xwin, wm_hints );
-      XFree(wm_hints);
-    }
-
-  size_hints.flags = PPosition | PSize | PMinSize;
-  size_hints.x = 0;
-  size_hints.y = 0;
-  size_hints.width      =  ui->xwin_width;
-  size_hints.height     =  ui->xwin_height;
-  size_hints.min_width  =  ui->xwin_width;
-  size_hints.min_height =  ui->xwin_height;
-
-  XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard",
-                         NULL, 0, NULL, 0, &size_hints);
-
-  if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height) &&
-      !(ui->kbd->req_width || ui->kbd->req_height))
-    {
-      /* Assuming we take up all available display width
-       * ( at least true with matchbox wm ). we resize
-       * the base ui width to this ( and height as a factor )
-       * to avoid the case of mapping and then the wm resizing
-       * us, causing an ugly repaint.
-       *
-       * We do this also when embedding; though the exact size is not likely
-       * going to match the desktop width, it is a better approximation, and
-       * the actual resize is going to be less ugly later on.
-       */
-      if (desk_width > ui->xwin_width)
+      if ((wm_name = get_current_window_manager_name(ui)) != NULL)
         {
-          mb_kbd_ui_resize(ui,
-                           desk_width,
-                           ( desk_width * ui->xwin_height ) / ui->xwin_width);
+          have_ewmh_wm = True; 	/* basically assumed to be Metacity
+                                   or at least only tested with mcity */
         }
-    }
-
-  if (ui->kbd->req_width || ui->kbd->req_height)
-    {
-      int w = ui->kbd->req_width  ? ui->kbd->req_width  : ui->xwin_width;
-      int h = ui->kbd->req_height ? ui->kbd->req_height : ui->xwin_height;
-
-      DBG ("Setting initial size per explicit request: %dx%d", w, h);
-      mb_kbd_ui_resize (ui, w, h);
-    }
-
-  if (!ui->want_embedding)
-    {
-      mwm_hints = util_malloc0(sizeof(PropMotifWmHints));
-
-      if (mwm_hints)
+      else
         {
-          mwm_hints->flags = MWM_HINTS_DECORATIONS;
-          mwm_hints->decorations = 0;
-
-          XChangeProperty(ui->xdpy, ui->xwin, atom_MOTIF_WM_HINTS,
-                          XA_ATOM, 32, PropModeReplace,
-                          (unsigned char *)mwm_hints,
-                          PROP_MOTIF_WM_HINTS_ELEMENTS);
-
-          free(mwm_hints);
-        }
-
-      if (have_ewmh_wm)
-        {
-          /* XXX Fix this for display size */
-          int wm_struct_vals[] = { 0, /* left */
-                                   0, /* right */
-                                   0, /* top */
-                                   0, /* bottom */
-                                   0, /* left_start_y */
-                                   0, /* left_end_y */
-                                   0, /* right_start_y */
-                                   0, /* right_end_y */
-                                   0, /* top_start_x */
-                                   0, /* top_end_x */
-                                   0, /* bottom_start_x */
-                                   1399 }; /* bottom_end_x */
-
-          Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, atom_NET_WM_STATE_SKIP_PAGER };
-          XChangeProperty(ui->xdpy, ui->xwin,
-                          atom_NET_WM_STATE, XA_ATOM, 32,
-                          PropModeReplace,
-                          (unsigned char *)states, 2);
-
-          if (desk_width)
+          if (ui->is_daemon)
             {
-              wm_struct_vals[2]  = desk_y + desk_height - ui->xwin_height;
-              wm_struct_vals[11] = desk_width;
+              /* Hack to avoid starting before the WM. Needed only in daemon
+               * mode
+               */
+              while (wm_name == NULL)
+                {
+                  sleep(1);
+                  wm_name = get_current_window_manager_name(ui);
+                }
 
+              have_ewmh_wm = True;
+            }
+        }
+
+      if (wm_name && streq(wm_name, "matchbox"))
+        have_matchbox_wm = True;
+
+      win_attr.override_redirect = False; /* Set to true for extreme case */
+      win_attr.event_mask =
+        ButtonPressMask|ButtonReleaseMask|Button1MotionMask|StructureNotifyMask;
+
+      ui->xwin = XCreateWindow(ui->xdpy,
+                               ui->xwin_root,
+                               0, 0,
+                               ui->xwin_width, ui->xwin_height,
+                               0,
+                               CopyFromParent, CopyFromParent, CopyFromParent,
+                               CWOverrideRedirect|CWEventMask,
+                               &win_attr);
+
+      XSelectInput (ui->xdpy,  ui->xwin_root,
+                    SubstructureNotifyMask|StructureNotifyMask);
+
+      wm_hints = XAllocWMHints();
+
+      if (wm_hints)
+        {
+          DBG("setting no focus hint");
+          wm_hints->input = False;
+          wm_hints->flags = InputHint;
+          XSetWMHints(ui->xdpy, ui->xwin, wm_hints );
+          XFree(wm_hints);
+        }
+
+      size_hints.flags = PPosition | PSize | PMinSize;
+      size_hints.x = 0;
+      size_hints.y = 0;
+      size_hints.width      =  ui->xwin_width;
+      size_hints.height     =  ui->xwin_height;
+      size_hints.min_width  =  ui->xwin_width;
+      size_hints.min_height =  ui->xwin_height;
+
+      XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard",
+                             NULL, 0, NULL, 0, &size_hints);
+
+      if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height) &&
+          !(ui->kbd->req_width || ui->kbd->req_height))
+        {
+          /* Assuming we take up all available display width
+           * ( at least true with matchbox wm ). we resize
+           * the base ui width to this ( and height as a factor )
+           * to avoid the case of mapping and then the wm resizing
+           * us, causing an ugly repaint.
+           *
+           * We do this also when embedding; though the exact size is not likely
+           * going to match the desktop width, it is a better approximation, and
+           * the actual resize is going to be less ugly later on.
+           */
+          if (desk_width > ui->xwin_width)
+            {
+              mb_kbd_ui_resize(ui,
+                               desk_width,
+                               (desk_width * ui->xwin_height) / ui->xwin_width);
+            }
+        }
+
+      if (ui->kbd->req_width || ui->kbd->req_height)
+        {
+          int w = ui->kbd->req_width  ? ui->kbd->req_width  : ui->xwin_width;
+          int h = ui->kbd->req_height ? ui->kbd->req_height : ui->xwin_height;
+
+          DBG ("Setting initial size per explicit request: %dx%d", w, h);
+          mb_kbd_ui_resize (ui, w, h);
+        }
+
+      if (!ui->want_embedding)
+        {
+          mwm_hints = util_malloc0(sizeof(PropMotifWmHints));
+
+          if (mwm_hints)
+            {
+              mwm_hints->flags = MWM_HINTS_DECORATIONS;
+              mwm_hints->decorations = 0;
+
+              XChangeProperty(ui->xdpy, ui->xwin, atom_MOTIF_WM_HINTS,
+                              XA_ATOM, 32, PropModeReplace,
+                              (unsigned char *)mwm_hints,
+                              PROP_MOTIF_WM_HINTS_ELEMENTS);
+
+              free(mwm_hints);
+            }
+
+          if (have_ewmh_wm)
+            {
+              /* XXX Fix this for display size */
+              int wm_struct_vals[] = { 0, /* left */
+                                       0, /* right */
+                                       0, /* top */
+                                       0, /* bottom */
+                                       0, /* left_start_y */
+                                       0, /* left_end_y */
+                                       0, /* right_start_y */
+                                       0, /* right_end_y */
+                                       0, /* top_start_x */
+                                       0, /* top_end_x */
+                                       0, /* bottom_start_x */
+                                       1399 }; /* bottom_end_x */
+
+              Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR,
+                                atom_NET_WM_STATE_SKIP_PAGER };
               XChangeProperty(ui->xdpy, ui->xwin,
-                              atom_NET_WM_STRUT_PARTIAL, XA_CARDINAL, 32,
+                              atom_NET_WM_STATE, XA_ATOM, 32,
                               PropModeReplace,
-                              (unsigned char *)wm_struct_vals , 12);
+                              (unsigned char *)states, 2);
 
-              DBG("desk width: %i, desk height: %i xwin_height :%i",
-                  desk_width, desk_height, ui->xwin_height);
+              if (desk_width)
+                {
+                  wm_struct_vals[2]  = desk_y + desk_height - ui->xwin_height;
+                  wm_struct_vals[11] = desk_width;
 
-            }
+                  XChangeProperty(ui->xdpy, ui->xwin,
+                                  atom_NET_WM_STRUT_PARTIAL, XA_CARDINAL, 32,
+                                  PropModeReplace,
+                                  (unsigned char *)wm_struct_vals , 12);
 
-          if (have_matchbox_wm)
-            {
-              XChangeProperty(ui->xdpy, ui->xwin,
-                              atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32,
-                              PropModeReplace,
-                              (unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
-            }
-          else
-            {
-              /*
-                XChangeProperty(ui->xdpy, ui->xwin,
-                atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32,
-                PropModeReplace,
-                (unsigned char *) &atom_NET_WM_WINDOW_TYPE_DOCK, 1);
-              */
+                  DBG("desk width: %i, desk height: %i xwin_height :%i",
+                      desk_width, desk_height, ui->xwin_height);
 
+                }
+
+              if (have_matchbox_wm)
+                {
+                  XChangeProperty(ui->xdpy, ui->xwin,
+                                  atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32,
+                                  PropModeReplace,
+                                  (unsigned char *)
+                                  &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
+                }
+              else
+                {
+                  /*
+                    XChangeProperty(ui->xdpy, ui->xwin,
+                    atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32,
+                    PropModeReplace,
+                    (unsigned char *) &atom_NET_WM_WINDOW_TYPE_DOCK, 1);
+                  */
+
+                }
             }
         }
+
+      ui->backbuffer = XCreatePixmap(ui->xdpy,
+                                     ui->xwin,
+                                     ui->xwin_width,
+                                     ui->xwin_height,
+                                     DefaultDepth(ui->xdpy, ui->xscreen));
     }
 
-  ui->backbuffer = XCreatePixmap(ui->xdpy,
-                                 ui->xwin,
-                                 ui->xwin_width,
-                                 ui->xwin_height,
-                                 DefaultDepth(ui->xdpy, ui->xscreen));
-
-
-  XSetWindowBackgroundPixmap(ui->xdpy,
-                             ui->xwin,
-                             ui->backbuffer);
+  XSetWindowBackgroundPixmap (ui->xdpy, ui->xwin, ui->backbuffer);
 
   ui->backend->resources_create(ui);
 
@@ -875,6 +882,12 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   int               width_diff, height_diff;
   int               height_font_pt_size, width_font_pt_size;
   int               next_row_y,  n_rows, extra_key_height;
+
+  if (width == ui->xwin_width && height == ui->xwin_height)
+    {
+      DBG ("Already at size %d x %d", width, height);
+      return;
+    }
 
   DBG ("resizing to %dx%d", width, height);
 
@@ -1070,7 +1083,8 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 	}
     }
 
-  XResizeWindow(ui->xdpy, ui->xwin, width, height);
+  if (!ui->kbd->is_widget)
+    XResizeWindow(ui->xdpy, ui->xwin, width, height);
 
   ui->xwin_width  = width;
   ui->xwin_height = height;
@@ -1105,7 +1119,7 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 
   /* Figure out if screen size has changed - does a round trip - bad */
 
-  update_display_size(ui);
+  mb_kbd_ui_update_display_size(ui);
 
   old_state = mb_kbd_is_extended(ui->kbd);
   new_state = want_extended(ui);
@@ -1129,201 +1143,6 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 }
 
 void
-mb_kbd_ui_event_loop (MBKeyboardUI *ui)
-{
-  MBKeyboardKey *key = NULL;
-  struct timeval tvt;
-
-  /* Key repeat - values for standard xorg install ( xset q) */
-  int repeat_delay = 100 * 10000;
-  int repeat_rate  = 30  * 1000;
-  int hide_delay = 100 * 1000;
-  int to_hide = 0;
-
-  int press_x = 0, press_y = 0;
-
-  tvt.tv_sec  = 0;
-  tvt.tv_usec = repeat_delay;
-
-  while (True)
-    {
-      XEvent xev;
-
-      if (get_xevent_timed(ui->xdpy, &xev, &tvt))
-        {
-          switch (xev.type)
-            {
-            case ButtonPress:
-              press_x = xev.xbutton.x; press_y = xev.xbutton.y;
-              DBG("got button press at %i,%i (%i,%i)",
-                  xev.xbutton.x, xev.xbutton.y,
-                  xev.xbutton.x_root, xev.xbutton.y_root);
-              key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
-              if (key)
-                {
-                  /* Hack if we never get a release event */
-                  if (key != mb_kbd_get_held_key(ui->kbd))
-                    {
-                      mb_kbd_key_release(ui->kbd, True);
-                      tvt.tv_usec = repeat_delay;
-                    }
-                  else
-                    tvt.tv_usec = repeat_rate;
-
-                  DBG("found key for press");
-                  mb_kbd_key_press(key);
-                }
-              break;
-            case ButtonRelease:
-              DBG("got button release at %i,%i (%i,%i)",
-                  xev.xbutton.x, xev.xbutton.y,
-                  xev.xbutton.x_root, xev.xbutton.y_root);
-              if (mb_kbd_get_held_key(ui->kbd) != NULL)
-                {
-                  Bool cancel = False;
-
-                  key = mb_kbd_locate_key (ui->kbd,
-                                           xev.xbutton.x, xev.xbutton.y);
-                  if (key != mb_kbd_get_held_key(ui->kbd))
-                    cancel = True;
-
-                  mb_kbd_key_release (ui->kbd, cancel);
-                  tvt.tv_usec = repeat_delay;
-
-                  /* Gestures */
-#if 0
-		    /* FIXME: check time first */
-		    if ( (press_x - xev.xbutton.x) > ui->key_uwidth )
-		      {
-			/* <-- slide back ...backspace */
-			fakekey_press_keysym(ui->fakekey, XK_BackSpace, 0);
-			fakekey_repeat(ui->fakekey);
-			fakekey_release(ui->fakekey);
-			/* FIXME: add <-- --> <-- --> support */
-		      }
-		    else if ( (xev.xbutton.y - press_y) > ui->key_uheight )
-		      {
-			/* V slide down ...return  */
-			fakekey_press_keysym(ui->fakekey, XK_BackSpace, 0);
-			fakekey_release(ui->fakekey);
-			fakekey_press_keysym(ui->fakekey, XK_Return, 0);
-			fakekey_release(ui->fakekey);
-		      }
-#endif
-                  /* TODO ^ caps support */
-
-                }
-              break;
-            case ConfigureNotify:
-              if (xev.xconfigure.window == ui->xwin
-                  &&  (xev.xconfigure.width != ui->xwin_width
-                       || xev.xconfigure.height != ui->xwin_height))
-                {
-                  mb_kbd_ui_handle_configure(ui,
-                                             xev.xconfigure.width,
-                                             xev.xconfigure.height);
-                }
-              if (xev.xconfigure.window == ui->xwin_root)
-                update_display_size(ui);
-              break;
-            case MappingNotify:
-              fakekey_reload_keysyms(ui->fakekey);
-              XRefreshKeyboardMapping(&xev.xmapping);
-              break;
-            default:
-              break;
-            }
-          if (ui->want_embedding)
-            mb_kbd_xembed_process_xevents (ui, &xev);
-
-          if (ui->is_daemon)
-            {
-              switch (mb_kbd_remote_process_xevents (ui, &xev))
-                {
-                case MBKeyboardRemoteHide:
-                  if (to_hide == 1) {
-                    mb_kbd_ui_hide(ui);
-                  }
-                  tvt.tv_usec = hide_delay;
-                  to_hide = 1;
-                  break;
-                case MBKeyboardRemoteShow:
-                  mb_kbd_ui_show(ui);
-                  tvt.tv_usec = repeat_delay;
-                  to_hide = 0;
-                  break;
-                case MBKeyboardRemoteToggle:
-                  to_hide = 0;
-                  tvt.tv_usec = repeat_delay;
-                  if (ui->visible)
-                    mb_kbd_ui_hide(ui);
-                  else
-                    mb_kbd_ui_show(ui);
-                  break;
-                case MBKeyboardRemoteNone:
-                  if (to_hide == 1) {
-                    mb_kbd_ui_hide(ui);
-                    tvt.tv_usec = repeat_delay;
-                    to_hide = 0;
-                  }
-                  break;
-                }
-            }
-        }
-      else
-        {
-        case MBKeyboardRemoteHide:
-          if (to_hide == 1) {
-            mb_kbd_ui_hide(ui);
-          }
-          tvt.tv_usec = hide_delay;
-          to_hide = 1;
-          break;
-        case MBKeyboardRemoteShow:
-          mb_kbd_ui_show(ui);
-          tvt.tv_usec = repeat_delay;
-          to_hide = 0;
-          break;
-        case MBKeyboardRemoteToggle:
-          to_hide = 0;
-          tvt.tv_usec = repeat_delay;
-          if (ui->visible)
-            mb_kbd_ui_hide(ui);
-          else
-            mb_kbd_ui_show(ui);
-          break;
-        case MBKeyboardRemoteNone:
-          if (to_hide == 1) {
-            mb_kbd_ui_hide(ui);
-            tvt.tv_usec = repeat_delay;
-            to_hide = 0;
-          }
-          break;
-        }
-      }
-          }
-	else
-	  {
-      /* Hide timed out */
-      if (to_hide)
-      {
-        DBG("Hide timed out, calling mb_kbd_ui_hide");
-        mb_kbd_ui_hide(ui);
-        tvt.tv_usec = repeat_delay;
-        to_hide = 0;
-      }
-
-	    /* Keyrepeat */
-	    if (mb_kbd_get_held_key(ui->kbd) != NULL)
-	      {
-		fakekey_repeat(ui->fakekey);
-		tvt.tv_usec = repeat_rate;
-	      }
-	  }
-      }
-}
-
-void
 mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
 {
   MBKeyboardKey *key = NULL;
@@ -1331,7 +1150,8 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
   switch (xev->type)
     {
     case ButtonPress:
-      DBG("got button press at %i,%i (%i,%i)",
+      DBG("got button press on 0x%x at %i,%i (%i,%i)",
+          (unsigned int) xev->xany.window,
           xev->xbutton.x, xev->xbutton.y,
           xev->xbutton.x_root, xev->xbutton.y_root);
       key = mb_kbd_locate_key(ui->kbd, xev->xbutton.x, xev->xbutton.y);
@@ -1375,7 +1195,14 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
                                      xev->xconfigure.height);
         }
       if (xev->xconfigure.window == ui->xwin_root)
-        update_display_size(ui);
+        mb_kbd_ui_update_display_size(ui);
+      break;
+    case MapNotify:
+      if (xev->xmap.window == ui->xwin)
+        {
+          DBG("Got MapNotify for 0x%x", (unsigned int) ui->xwin);
+          mb_kbd_ui_redraw(ui);
+        }
       break;
     case MappingNotify:
       fakekey_reload_keysyms(ui->fakekey);
@@ -1384,8 +1211,6 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
     default:
       break;
     }
-
-  mb_kbd_xembed_process_xevents (ui, xev);
 }
 
 static int
@@ -1455,6 +1280,17 @@ mb_kbd_ui_x_win_width(MBKeyboardUI *ui)
   return ui->xwin_width;
 }
 
+int
+mb_kbd_ui_base_height(MBKeyboardUI *ui)
+{
+  return ui->base_alloc_height;
+}
+
+int
+mb_kbd_ui_base_width(MBKeyboardUI *ui)
+{
+  return ui->base_alloc_width;
+}
 
 Pixmap
 mb_kbd_ui_backbuffer(MBKeyboardUI *ui)
@@ -1492,21 +1328,9 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
 
   mb_kbd_ui_resources_create(ui);
 
-  unless (mb_kbd_ui_embeded(ui))
-    {
-      if (ui->is_daemon)
-	{
-	  /* Dont map daemon to begin with */
-	  mb_kbd_remote_init (ui);
-	}
-      else
-	{
-	  mb_kbd_ui_show(ui);
-	  mb_kbd_ui_redraw(ui);
-	}
-    }
-  else
-    mb_kbd_xembed_init (ui);
+#ifdef WANT_CAIRO
+  ui->kbd->popup = mb_kbd_popup_new (ui);
+#endif
 
   return 1;
 }
@@ -1549,13 +1373,7 @@ mb_kbd_ui_init(MBKeyboard *kbd)
 
   ui->kbd = kbd;
 
-  if (!xdpy)
-    {
-      if ((xdpy = XOpenDisplay(getenv("DISPLAY"))) == NULL)
-        return 0;
-    }
-
-  ui->xdpy = xdpy;
+  ui->xdpy = mb_xdpy;
 
   if (!fakekey)
     {
@@ -1569,7 +1387,7 @@ mb_kbd_ui_init(MBKeyboard *kbd)
 
   ui->backend = MB_KBD_UI_BACKEND_INIT_FUNC (ui);
 
-  update_display_size(ui);
+  mb_kbd_ui_update_display_size(ui);
 
   return 1;
 }
@@ -1620,5 +1438,23 @@ void
 mb_kbd_ui_set_x_embedder(MBKeyboardUI *ui, Window xembedder)
 {
   ui->xembedder = xembedder;
+}
+
+Bool
+mb_kbd_ui_is_daemon (MBKeyboardUI *ui)
+{
+  return ui->is_daemon;
+}
+
+Bool
+mb_kbd_ui_is_visible (MBKeyboardUI *ui)
+{
+  return ui->visible;
+}
+
+FakeKey *
+mb_kbd_ui_get_fakekey (MBKeyboardUI *ui)
+{
+  return ui->fakekey;
 }
 

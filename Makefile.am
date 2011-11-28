@@ -22,3 +22,5 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-examples --enable-gtk-im --enable-applet
 
 snapshot:
 	$(MAKE) dist distdir=$(PACKAGE)-snap`date +"%Y%m%d"`
+
+CLEANFILES = $(BUILT_SOURCES)

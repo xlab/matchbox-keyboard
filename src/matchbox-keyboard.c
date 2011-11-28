@@ -17,6 +17,9 @@
  *  more details.
  *
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "matchbox-keyboard.h"
 
@@ -25,6 +28,10 @@
 #endif
 
 #define FONT_FAMILY_LEN 100
+
+Display          *mb_xdpy = NULL;
+int               mb_xscreen = 0;
+Window            mb_xroot = None;
 
 static void
 mb_kbd_usage (char *progname)
@@ -41,13 +48,12 @@ mb_kbd_usage (char *progname)
           "                         Base font point size to use\n"
           "   --fontvariant <variant1:variant2>\n"
           "                         Colon (:) delimited list of Font variants to apply (ie. bold:mono:italic)\n");
-  fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);
-
-  exit(-1);
+  fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);  exit(-1);
 }
 
 MBKeyboard*
-mb_kbd_new (int argc, char **argv)
+mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
+            int x, int y, int width, int height)
 {
   MBKeyboard *kb = NULL;
   char       *variant = NULL;
@@ -70,8 +76,19 @@ mb_kbd_new (int argc, char **argv)
   kb->font_pt_size = 8;
   kb->font_variant = strdup("bold");
 
-  for (i = 1; i < argc; i++)
+  kb->x_parent = parent;
+  kb->is_widget = widget;
+
+  if (width > 0)
+    kb->req_width = width;
+
+  if (height > 0)
+    kb->req_height = height;
+
+  for (i = param_offset; i < argc; i++)
     {
+      DBG ("argv[%d] = %s", i, argv[i]);
+
       if (!strcmp ("-width", argv[i]) || !strcmp ("--width", argv[i]))
         {
           if (++i>=argc)
@@ -214,7 +231,7 @@ mb_kbd_new (int argc, char **argv)
   kb->selected_layout
     = (MBKeyboardLayout *)util_list_get_nth_data(kb->layouts, 0);
 
-  if (want_embedding)
+  if (want_embedding && !widget)
     mb_kbd_ui_set_embeded (kb->ui, True);
 
   if (want_daemon && !widget)
@@ -223,18 +240,6 @@ mb_kbd_new (int argc, char **argv)
       if (orientation != MBKeyboardDisplayAny)
 	mb_kbd_ui_limit_orientation (kb->ui, orientation);
     }
-
-  if (!mb_kbd_ui_realize(kb->ui))
-    return NULL;
-
-  if (want_embedding)
-    mb_kbd_ui_print_window (kb->ui);
-
-  //fprintf (stderr, "***** Settings: font_family: %s font_pt_size: %d font_variant: %s\n", kb->font_family, kb->font_pt_size, kb->font_variant);
-
-#ifdef WANT_CAIRO
-  kb->popup = mb_kbd_popup_new (kb->ui);
-#endif
 
   return kb;
 }
@@ -445,28 +450,6 @@ boolean
 mb_kbd_is_extended(MBKeyboard *kb)
 {
   return kb->extended;
-}
-
-
-void
-mb_kbd_run(MBKeyboard *kb)
-{
-  mb_kbd_ui_event_loop(kb->ui);
-}
-
-
-int
-main(int argc, char **argv)
-{
-  MBKeyboard *kb;
-
-  kb = mb_kbd_new(argc, argv);
-
-  if (kb) mb_kbd_run(kb);
-
-  mb_kbd_destroy (kb);
-
-  return 0;
 }
 
 void

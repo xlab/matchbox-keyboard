@@ -53,6 +53,7 @@
 
 #include <fakekey/fakekey.h>
 
+#include "libmatchbox-keyboard.h"
 #include "matchbox-keyboard-remote.h"
 
 #if (WANT_DEBUG)
@@ -63,6 +64,8 @@
 #endif
 
 #define MARK() DBG("mark")
+
+extern Display *mb_xdpy;
 
 typedef void*         pointer;
 typedef unsigned char uchar ;
@@ -79,7 +82,6 @@ struct List
   void *data;
 };
 
-typedef struct MBKeyboard       MBKeyboard;
 typedef struct MBKeyboardLayout MBKeyboardLayout;
 typedef struct MBKeyboardRow    MBKeyboardRow;
 typedef struct MBKeyboardKey    MBKeyboardKey;
@@ -159,6 +161,7 @@ MBKeyboardDisplayOrientation;
 
 struct MBKeyboard
 {
+  Bool                   is_widget;
   MBKeyboardUI          *ui;
   char                  *font_family;
   int                    font_pt_size;
@@ -168,11 +171,13 @@ struct MBKeyboard
   MBKeyboardLayout      *selected_layout;
   int                    key_border, key_pad, key_margin;
   int                    row_spacing, col_spacing;
+  int                    req_x, req_y;
   int                    req_width, req_height;
   boolean                extended; /* are we showing extended keys ? */
   MBKeyboardKey         *held_key;
   MBKeyboardStateType    keys_state;
   MBKeyboardPopup       *popup;
+  Window                 x_parent;
 };
 
 /**** UI ***********/
@@ -216,6 +221,9 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key);
 void
 mb_kbd_ui_redraw(MBKeyboardUI  *ui);
 
+FakeKey *
+mb_kbd_ui_get_fakekey (MBKeyboardUI *ui);
+
 void
 mb_kbd_ui_swap_buffers(MBKeyboardUI  *ui);
 
@@ -256,6 +264,12 @@ mb_kbd_ui_x_win_height(MBKeyboardUI *ui);
 int
 mb_kbd_ui_x_win_width(MBKeyboardUI *ui);
 
+int
+mb_kbd_ui_base_height(MBKeyboardUI *ui);
+
+int
+mb_kbd_ui_base_width(MBKeyboardUI *ui);
+
 Window
 mb_kbd_ui_x_win_root(MBKeyboardUI *ui);
 
@@ -280,8 +294,14 @@ mb_kbd_ui_set_embeded (MBKeyboardUI *ui, int embed);
 void
 mb_kbd_ui_set_daemon (MBKeyboardUI *ui, int value);
 
+Bool
+mb_kbd_ui_is_daemon (MBKeyboardUI *ui);
+
 int
 mb_kbd_ui_embeded (MBKeyboardUI *ui);
+
+Bool
+mb_kbd_ui_is_visible (MBKeyboardUI *ui);
 
 void
 mb_kbd_ui_print_window (MBKeyboardUI *ui);
@@ -325,6 +345,10 @@ MBKeyboardRemoteOperation
 mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent);
 
 /**** Keyboard ****/
+
+MBKeyboard*
+mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
+            int x, int y, int w, int h);
 
 int
 mb_kbd_row_spacing(MBKeyboard *kb);

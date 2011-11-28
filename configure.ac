@@ -27,6 +27,10 @@ AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_FUNC_STAT
 
+LIBRARY_REQUIRES="libfakekey"
+LIBRARY_EXTRA_LIBS=
+LIBRARY_EXTRA_CFLAGS=
+
 AC_ARG_ENABLE(cairo,
   AC_HELP_STRING([--enable-cairo],[enable experimental Cairo support [default=no]]),
    		enable_cairo=$enableval, 
@@ -50,6 +54,16 @@ AC_ARG_ENABLE(applet,
 		enable_applet=no)	    
 AM_CONDITIONAL(WANT_APPLET, test x$enable_applet = xyes)
 
+AC_ARG_ENABLE(gtk-widget,
+  AC_HELP_STRING([--enable-gtk-widget], [build gtk-widget [default=no]]),
+		enable_gtk_widget=$enableval,
+		enable_gtk_widget=no)
+AM_CONDITIONAL(WANT_GTK_WIDGET, test x$enable_gtk_widget = xyes)
+
+if test x$enable_gtk_widget = xyes; then
+   AC_DEFINE_UNQUOTED(WANT_GTK_WIDGET, 1, [Build a gtk widget into library])
+fi
+
 AC_ARG_ENABLE(debug,
   AC_HELP_STRING([--enable-debug], [enable debug (verbose) build]),
      enable_debug=$enableval, enable_debug=no )
@@ -66,12 +80,14 @@ PKG_CHECK_MODULES(FAKEKEY, libfakekey,,
 	         AC_MSG_ERROR([*** You need to install libfakekey from MB SVN  ***]))
 
 if test x$enable_cairo = xyes; then
-   PKG_CHECK_MODULES(CAIRO, cairo,, [enable_cairo="no"])
+   PKG_CHECK_MODULES(CAIRO, cairo)
+   LIBRARY_REQUIRES="$LIBRARY_REQUIRES cairo"
 fi
 
 if test x$enable_cairo = xno; then
 PKG_CHECK_MODULES(XFT, xft xrender,,
 	         AC_MSG_ERROR([*** Required Xft Library not found ***]))
+LIBRARY_REQUIRES="$LIBRARY_REQUIRES xft xrender"
 fi
 
 AM_CONDITIONAL(WANT_CAIRO, test x$enable_cairo = xyes)
@@ -80,10 +96,14 @@ if test x$enable_cairo = xyes; then
    AC_DEFINE_UNQUOTED(WANT_CAIRO, 1, [Use Cairo to paint libs])
 fi
 
-if test x$enable_examples = xyes || test x$enable_im = xyes; then
+if test x$enable_examples = xyes || test x$enable_im = xyes || test x$enable_gtk_widget = xyes; then
    PKG_CHECK_MODULES(GTK2, gtk+-2.0)
    GTK_VERSION=`$PKG_CONFIG --variable=gtk_binary_version gtk+-2.0`
    AC_SUBST(GTK_VERSION)
+
+   if test x$enable_im = xyes || test x$enable_gtk_widget = xyes; then
+      LIBRARY_REQUIRES="$LIBRARY_REQUIRES gtk+-2.0"
+   fi
 fi
 
 if test x$enable_applet = xyes; then
@@ -169,6 +189,13 @@ dnl ------ Expat ------------------------------------------------------------
       AC_MSG_ERROR([cannot find expat library])
    fi
 
+   if test "$cross_compiling" = yes; then
+       LIBRARY_EXTRA_LIBS="$LIBRARY_EXTRA_LIBS -lexpat"
+   else
+       LIBRARY_EXTRA_LIBS="$LIBRARY_EXTRA_LIBS $EXPAT_LIBS"
+       LIBRARY_EXTRA_CFLAGS="$LIBRARY_EXTRA_CFLAGS $EXPAT_CFLAGS"
+   fi
+
 dnl ------ Check for PNG ---------------------------------------------------
 
 AC_MSG_CHECKING(for libpng12)
@@ -177,6 +204,7 @@ if $PKG_CONFIG --exists libpng12; then
         AC_MSG_RESULT(yes)
         PNG_LIBS=`$PKG_CONFIG --libs libpng12`
         PNG_CFLAGS=`$PKG_CONFIG --cflags libpng12`
+	LIBRARY_REQUIRES="$LIBRARY_REQUIRES libpng12"
 else
         AC_MSG_RESULT(no)
         AC_CHECK_LIB([png], [png_create_read_struct],
@@ -187,6 +215,8 @@ else
         else
             AC_MSG_ERROR([*** Cannot find libpng12 ****])
         fi
+
+	LIBRARY_EXTRA_LIBS="$LIBRARY_EXTRA_LIBS -lpng -lz"
 fi
 
 
@@ -219,9 +249,14 @@ AC_SUBST(EXPAT_CFLAGS)
 AC_SUBST(PNG_LIBS)
 AC_SUBST(PNG_CFLAGS)
 
+AC_SUBST(LIBRARY_REQUIRES)
+AC_SUBST(LIBRARY_EXTRA_LIBS)
+AC_SUBST(LIBRARY_EXTRA_CFLAGS)
+
 AC_OUTPUT([
 Makefile
-src/Makefile  
+src/Makefile
+src/libmatchbox-keyboard.pc
 layouts/Makefile
 examples/Makefile
 gtk-im/Makefile
@@ -239,6 +274,7 @@ echo "
 
             Building with Debug:          ${enable_debug}
             Building with Cairo:          ${enable_cairo}
+            Building Gtk widget:          ${enable_gtk_widget}
             Building Examples:            ${enable_examples}
             Building GTK+ Input Method:   ${enable_im}
             Building panel applet:        ${enable_applet}

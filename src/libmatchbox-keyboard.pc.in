@@ -1,0 +1,14 @@
+prefix=@prefix@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+requires=@LIBRARY_REQUIRES@
+extralibs=@LIBRARY_EXTRA_LIBS@
+extracflags=@LIBRARY_EXTRA_CFLAGS@
+
+Name: libmatchbox-keyboard
+Description: Matchbox Keyboard Widget
+Version: @VERSION@
+Libs: ${extralibs} -L${libdir} -lmatchbox-keyboard
+Cflags: ${extracflags} -I${includedir}/libmatchbox-keyboard
+Requires: ${requires}
