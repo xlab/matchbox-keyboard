@@ -28,6 +28,7 @@
 #endif
 
 #define FONT_FAMILY_LEN 100
+#define MB_KB_CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 Display          *mb_xdpy = NULL;
 int               mb_xscreen = 0;
@@ -47,7 +48,11 @@ mb_kbd_usage (char *progname)
           "   --fontptsize <integer>\n"
           "                         Base font point size to use\n"
           "   --fontvariant <variant1:variant2>\n"
-          "                         Colon (:) delimited list of Font variants to apply (ie. bold:mono:italic)\n");
+          "                         Colon (:) delimited list of Font variants to apply (ie. bold:mono:italic)\n"
+          "   --rowspacing <integer>\n"
+          "                         Pixel padding between keys in a row. 0 - 50"
+          "   --colspacing <integer>\n"
+          "                         Pixel padding between keys in a column. 0 - 50");
   fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);  exit(-1);
 }
 
@@ -187,9 +192,53 @@ mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
           continue;
         }
 
-      if (streq ("-o", argv[i]) || streq ("--orientation", argv[i]))
-	{
-	  if (++i>=argc) mb_kbd_usage (argv[0]);
+      if (!strcmp ("--rowspacing", argv[i]))
+        {
+          int spacing = kb->row_spacing;
+          if (++i>=argc)
+            {
+              if (widget)
+                return NULL;
+              else
+                mb_kbd_usage (argv[0]);
+            }
+          else
+            {              
+              spacing = strtol(argv[i], NULL, 0);
+              spacing = MB_KB_CLAMP (spacing, 0, 50);
+            }
+          kb->row_spacing = spacing;
+          continue;
+        }
+
+      if (!strcmp ("--colspacing", argv[i]))
+        {
+          int spacing = kb->col_spacing;
+          if (++i>=argc)
+            {
+              if (widget)
+                return NULL;
+              else
+                mb_kbd_usage (argv[0]);
+            }
+          else
+            {              
+              spacing = strtol(argv[i], NULL, 0);
+              spacing = MB_KB_CLAMP (spacing, 0, 50);
+            }
+          kb->col_spacing = spacing;
+          continue;
+        }
+
+      if (!strcmp ("-o", argv[i]) || !strcmp ("--orientation", argv[i]))
+        {
+          if (++i>=argc)
+            {
+              if (widget)
+                return NULL;
+              else
+                mb_kbd_usage (argv[0]);
+            }
 
           if (!strcmp(argv[i], "portrait"))
 	    {
