@@ -1132,13 +1132,7 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
   mb_kbd_set_extended(ui->kbd, new_state);
 
   /* realocate the layout */
-
-  mb_kbd_ui_allocate_ui_layout(ui,
-                               &ui->base_alloc_width, &ui->base_alloc_height);
-
   mb_kbd_ui_resize(ui, width, height);
-
-
 }
 
 void
