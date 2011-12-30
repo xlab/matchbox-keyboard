@@ -879,7 +879,7 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   MBKeyboardLayout *layout;
   List              *row_item, *key_item;
   int               width_diff, height_diff;
-  int               height_font_pt_size, width_font_pt_size;
+  int               height_font_pt_size, width_font_pt_size, new_font_pt_size;
   int               next_row_y,  n_rows, extra_key_height;
 
   if (width == ui->xwin_width && height == ui->xwin_height)
@@ -888,7 +888,9 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
       return;
     }
 
-  DBG ("resizing to %dx%d", width, height);
+  DBG ("resizing to %dx%d (from base %dx%d, font %d)",
+       width, height, ui->base_alloc_width, ui->base_alloc_height,
+       ui->base_font_pt_size);
 
   /*
    * Ignore resizes with meaninglessly small sizes; this typically happens when
@@ -933,11 +935,16 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   height_font_pt_size = ((ui->base_font_pt_size * height)
                           / ui->base_alloc_height );
 
-  if (util_abs(width_font_pt_size - kbd->font_pt_size) > 2 ||
-      util_abs(height_font_pt_size - kbd->font_pt_size) > 2)
+  new_font_pt_size = (height_font_pt_size > width_font_pt_size)
+    ? width_font_pt_size : height_font_pt_size;
+
+  DBG("****** new font pt size %d ******", new_font_pt_size);
+
+  if (util_abs(new_font_pt_size - kbd->font_pt_size) > 2)
     {
-      ui->kbd->font_pt_size = (height_font_pt_size > width_font_pt_size)
-        ? width_font_pt_size : height_font_pt_size;
+      ui->kbd->font_pt_size = new_font_pt_size;
+
+      DBG("****** reloading font for pt size %d", ui->kbd->font_pt_size);
 
       mb_kbd_ui_load_font(ui);
     }
