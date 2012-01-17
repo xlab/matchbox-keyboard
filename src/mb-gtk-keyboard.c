@@ -125,6 +125,9 @@ mb_gtk_keyboard_size_request (GtkWidget *widget, GtkRequisition *req)
   MbGtkKeyboard        *self = (MbGtkKeyboard*) widget;
   MbGtkKeyboardPrivate *priv = self->priv;
 
+  if (!priv->kb)
+    gtk_widget_realize (widget);
+
   req->width  = mb_kbd_ui_x_win_width (priv->kb->ui);
   req->height = mb_kbd_ui_x_win_height (priv->kb->ui);
 
