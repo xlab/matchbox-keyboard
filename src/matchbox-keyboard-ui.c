@@ -1185,6 +1185,49 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
           mb_kbd_key_release(ui->kbd, cancel);
         }
       break;
+    case MotionNotify:
+      {
+        static int last_x = -30;
+        static int last_y = -30;
+        const  int delta = 5;
+
+        DBG("got MotionNotify on 0x%x at %i,%i (%i,%i), state: 0x%x",
+            (unsigned int) xev->xany.window,
+            xev->xmotion.x, xev->xmotion.y,
+            xev->xmotion.x_root, xev->xmotion.y_root,
+            xev->xmotion.state);
+
+        if (abs (xev->xmotion.x - last_x) > delta ||
+            abs (xev->xmotion.y - last_y) > delta)
+          {
+            last_x = xev->xmotion.x;
+            last_y = xev->xmotion.y;
+
+            key = mb_kbd_locate_key(ui->kbd, xev->xmotion.x, xev->xmotion.y);
+
+            if (key)
+              {
+                /* Hack if we never get a release event */
+                if (key != mb_kbd_get_held_key (ui->kbd))
+                  {
+                    DBG ("New key for MotionNotify");
+                    mb_kbd_key_release (ui->kbd, True);
+
+                    mb_kbd_key_press(key);
+                    mb_kbd_show_popup (ui->kbd, key,
+                                       xev->xmotion.x_root - xev->xbutton.x,
+                                       xev->xmotion.y_root - xev->xbutton.y);
+                  }
+
+              }
+            else
+              {
+                DBG ("MotionNotify in noman's land");
+                mb_kbd_key_release (ui->kbd, True);
+              }
+          }
+        break;
+      }
     case ConfigureNotify:
       if (xev->xconfigure.window == ui->xwin
           &&  (xev->xconfigure.width != ui->xwin_width
