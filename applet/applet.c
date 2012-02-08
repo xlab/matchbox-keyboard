@@ -1,7 +1,7 @@
 /*
  * keyboard - Tray applet to toggle matchbox-keyboard's visibility
  *
- * Copyright (C) 2007 OpenedHand Ltd.
+ * Copyright (C) 2005-2012 Intel Corp
  *
  * Authors:
  *  Ross Burton <ross@openedhand.com>
