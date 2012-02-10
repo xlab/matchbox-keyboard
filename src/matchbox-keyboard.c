@@ -4,6 +4,7 @@
  *  Authored By Matthew Allum <mallum@o-hand.com>
  *
  *  Copyright (c) 2005-2012 Intel Corp
+ *  Copyright (c) 2012 Vernier Software & Technology
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms and conditions of the GNU Lesser General Public License,
@@ -18,6 +19,8 @@
 
 #include "matchbox-keyboard.h"
 
+#define FONT_FAMILY_LEN 100
+
 static void
 mb_kbd_usage (char *progname)
 {
@@ -26,7 +29,13 @@ mb_kbd_usage (char *progname)
 	  "   -xid,--xid            Print window ID to stdout ( for embedding )\n"
 	  "   -d,--daemon           Run in 'daemon' mode (for remote control)\n"
 	  "   -o,--orientation <portrait|landscape>\n"
-          "                         Use to limit visibility with screen orientation \n");
+          "                         Use to limit visibility with screen orientation \n"
+          "   --fontfamily <font family>\n"
+          "                         Colon (:) delimited list of font family descriptor to use (ie. dejavu:sans)\n"
+          "   --fontptsize <integer>\n"
+          "                         Base font point size to use\n"
+          "   --fontvariant <variant1:variant2>\n"
+          "                         Colon (:) delimited list of Font variants to apply (ie. bold:mono:italic)\n");
   fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);
 
   exit(-1);
@@ -44,14 +53,14 @@ mb_kbd_new (int argc, char **argv)
   kb = util_malloc0(sizeof(MBKeyboard));
 
   kb->key_border = 1;
-  kb->key_pad    = 2;
+  kb->key_pad    = 0;
   kb->key_margin = 0;
 
-  kb->col_spacing = 5;
-  kb->row_spacing = 5;
+  kb->col_spacing = 0;
+  kb->row_spacing = 0;
 
   kb->font_family  = strdup("sans");
-  kb->font_pt_size = 5;
+  kb->font_pt_size = 8;
   kb->font_variant = strdup("bold");
 
   for (i = 1; i < argc; i++) 
@@ -68,6 +77,49 @@ mb_kbd_new (int argc, char **argv)
 	  continue;
 	}
 
+      if (streq ("--fontfamily", argv[i])) 
+        {
+          if (++i>=argc)
+            {
+              mb_kbd_usage (argv[0]);
+            }
+          else
+            {
+              char family[FONT_FAMILY_LEN];
+              char *cp = strdup (argv[i]);
+              const char *delimiter = ":";
+              char *token = strtok (cp, delimiter);
+
+              memset (family, 0, FONT_FAMILY_LEN);
+
+              while (NULL != token)
+                {
+                  strncat (family, token, (FONT_FAMILY_LEN - strlen (family)));
+                  token = strtok (NULL, delimiter);
+                  if (NULL != token)
+                    strncat (family, " ", (FONT_FAMILY_LEN - strlen (family)));
+                }
+
+              kb->font_family  = strndup(family, 100);
+              free (cp);
+            }
+          continue;
+        }
+      
+      if (streq ("--fontptsize", argv[i])) 
+        {
+          if (++i>=argc) mb_kbd_usage (argv[0]);
+          kb->font_pt_size = strtol(argv[i], NULL, 0);
+          continue;
+        }
+
+      if (streq ("--fontvariant", argv[i])) 
+        {
+          if (++i>=argc) mb_kbd_usage (argv[0]);
+          kb->font_variant = strdup(argv[i]);
+          continue;
+        }
+      
       if (streq ("-o", argv[i]) || streq ("--orientation", argv[i]))
 	{
 	  if (++i>=argc) mb_kbd_usage (argv[0]);
@@ -98,15 +150,6 @@ mb_kbd_new (int argc, char **argv)
   if (!mb_kbd_ui_init(kb))
     return NULL;
 
-  if (mb_kbd_ui_display_width(kb->ui) <= 320) 
-    {
-      kb->key_border   = 1;
-      kb->key_pad      = 0;
-      kb->col_spacing  = 0;
-      kb->row_spacing  = 0;
-      kb->font_pt_size = 8;
-    }
-
   if (!mb_kbd_config_load(kb, variant))
     return NULL;
 
@@ -129,7 +172,7 @@ mb_kbd_new (int argc, char **argv)
   if (want_embedding)
     mb_kbd_ui_print_window (kb->ui);
 
-
+  //fprintf (stderr, "***** Settings: font_family: %s font_pt_size: %d font_variant: %s\n", kb->font_family, kb->font_pt_size, kb->font_variant);
 
   return kb;
 }
