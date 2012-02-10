@@ -1,5 +1,5 @@
 AC_PREREQ(2.53)
-AC_INIT([matchbox-keyboard], 0.1, [mallum@handhelds.org])
+AC_INIT([matchbox-keyboard], 0.2, [tomas@sleepfive.com])
 AC_CONFIG_SRCDIR([src/matchbox-keyboard.c])
 
 AM_INIT_AUTOMAKE()
