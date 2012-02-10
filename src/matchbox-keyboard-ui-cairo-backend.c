@@ -108,6 +108,7 @@ mb_kbd_ui_cairo_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   cairo_pattern_t       *pat;
   double                 x, y, w, h;
   double                 x1p, x2p, y1p, y2p;
+  boolean                caps;
 
   if (mb_kbd_key_is_blank(key)) /* spacer */
     return;
@@ -175,10 +176,15 @@ mb_kbd_ui_cairo_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   /* Handle state related painting */
 
   state = mb_kbd_keys_current_state(kbd);
+  caps = mb_kbd_has_state(kbd, MBKeyboardStateCaps);
 
-  if (mb_kbd_has_state(kbd, MBKeyboardStateCaps)
-      && mb_kbd_key_get_obey_caps(key))
-    state = MBKeyboardKeyStateShifted;
+  if (caps)
+    {
+      if (mb_kdb_key_has_state (key, MBKeyboardKeyStateCaps))
+        state = MBKeyboardKeyStateCaps;
+      else if (mb_kbd_key_get_obey_caps(key))
+        state = MBKeyboardKeyStateShifted;
+    }
 
   if (!mb_kdb_key_has_state(key, state))
     {

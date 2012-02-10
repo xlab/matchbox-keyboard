@@ -18,6 +18,14 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#if WANT_GTK_WIDGET
+#include <glib.h>
+#endif
+
 #include "matchbox-keyboard.h"
 
 #define MBKB_N_KEY_STATES 5
@@ -74,7 +82,33 @@ struct MBKeyboardKey
   boolean                extended;   /* only show in landscape */
 
   MBKeyboardStateType    sets_kbdstate; /* needed */
+
+
+#if WANT_GTK_WIDGET
+  guint press_timeout;
+  guint press_flag : 1;
+#endif
 };
+
+#if WANT_GTK_WIDGET
+static gboolean
+mb_kbd_key_shift_timeout (gpointer data)
+{
+  MBKeyboardKey *key = data;
+
+  /*
+   * Long press on the Shift key -- turn caps on and untoggle the shift.
+   */
+  mb_kbd_toggle_state (key->kbd, MBKeyboardStateCaps);
+  mb_kbd_toggle_state (key->kbd, MBKeyboardStateShifted);
+  mb_kbd_redraw_key (key->kbd, key);
+
+  key->press_timeout = 0;
+  key->press_flag = TRUE;
+  return FALSE;
+}
+#endif
+
 
 static void
 _mb_kbd_key_init_state(MBKeyboardKey           *key,
@@ -507,8 +541,38 @@ mb_kbd_key_press (MBKeyboardKey *key)
 	switch ( mb_kbd_key_get_modifer_action(key, state) )
 	  {
 	  case MBKeyboardKeyModShift:
-	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateShifted);
 	    queue_full_kbd_redraw = True;
+#if WANT_GTK_WIDGET
+            if (key->press_flag)
+              {
+                /*
+                 * Keyboard is in caps state because of previous long shift
+                 * press; toggle the caps; do nothing with the shift key.
+                 */
+                mb_kbd_toggle_state (key->kbd, MBKeyboardStateCaps);
+              }
+            else
+              {
+                /*
+                 * Normal press on Shift; toggle the shift key state, then
+                 * store the key so we can handle it correctly in the release
+                 * function.
+                 */
+                mb_kbd_toggle_state(key->kbd, MBKeyboardStateShifted);
+                mb_kbd_set_held_key(key->kbd, key);
+
+                /*
+                 * Add timeout to detect long press.
+                 */
+                if (key->press_timeout)
+                  g_source_remove (key->press_timeout);
+
+                key->press_timeout =
+                  g_timeout_add (700, mb_kbd_key_shift_timeout, key);
+              }
+
+            key->press_flag = FALSE;
+#endif
 	    break;
 	  case MBKeyboardKeyModMod1:
 	    mb_kbd_toggle_state(key->kbd, MBKeyboardStateMod1);
@@ -675,6 +739,24 @@ mb_kbd_key_release(MBKeyboard *kbd, Bool cancel)
 
             break;
           }
+
+#if WANT_GTK_WIDGET
+        case MBKeyboardKeyActionModifier:
+          switch (mb_kbd_key_get_modifer_action (key, state))
+            {
+            case MBKeyboardKeyModShift:
+              if (key->press_timeout)
+                {
+                  DBG ("Removing shift timeout");
+                  g_source_remove (key->press_timeout);
+                  key->press_timeout = 0;
+                  key->press_flag = FALSE;
+                }
+              break;
+            default:
+              break;
+            }
+#endif
         default:
           break;
         }

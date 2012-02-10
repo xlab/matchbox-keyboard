@@ -121,6 +121,7 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   int                    xscreen;
   Pixmap                 backbuffer;
   MBKeyboard            *kbd;
+  boolean                caps;
 
   if (mb_kbd_key_is_blank(key)) /* spacer */
     return;
@@ -213,10 +214,15 @@ mb_kbd_ui_xft_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key)
   /* real code is here */
 
   state = mb_kbd_keys_current_state(kbd);
+  caps = mb_kbd_has_state(kbd, MBKeyboardStateCaps);
 
-  if (mb_kbd_has_state(kbd, MBKeyboardStateCaps)
-      && mb_kbd_key_get_obey_caps(key))
-    state = MBKeyboardKeyStateShifted;
+  if (caps)
+    {
+      if (mb_kdb_key_has_state (key, MBKeyboardKeyStateCaps))
+        state = MBKeyboardKeyStateCaps;
+      else if (mb_kbd_key_get_obey_caps(key))
+        state = MBKeyboardKeyStateShifted;
+    }
 
   if (!mb_kdb_key_has_state(key, state))
     {

@@ -71,7 +71,6 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height);
 static int
 mb_kbd_ui_load_font(MBKeyboardUI *ui);
 
-
 static char*
 get_current_window_manager_name (MBKeyboardUI  *ui)
 {

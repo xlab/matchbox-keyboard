@@ -130,6 +130,7 @@ typedef enum
 {
   MBKeyboardKeyStateNormal = 0,
   MBKeyboardKeyStateShifted,
+  MBKeyboardKeyStateCaps,
   MBKeyboardKeyStateMod1,
   MBKeyboardKeyStateMod2,
   MBKeyboardKeyStateMod3,
