@@ -203,7 +203,7 @@ mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
                 mb_kbd_usage (argv[0]);
             }
           else
-            {              
+            {
               spacing = strtol(argv[i], NULL, 0);
               spacing = MB_KB_CLAMP (spacing, 0, 50);
             }
@@ -222,7 +222,7 @@ mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
                 mb_kbd_usage (argv[0]);
             }
           else
-            {              
+            {
               spacing = strtol(argv[i], NULL, 0);
               spacing = MB_KB_CLAMP (spacing, 0, 50);
             }
@@ -282,6 +282,8 @@ mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
 
   if (want_embedding && !widget)
     mb_kbd_ui_set_embeded (kb->ui, True);
+
+  mb_kbd_ui_set_widget (kb->ui, widget);
 
   if (want_daemon && !widget)
     {

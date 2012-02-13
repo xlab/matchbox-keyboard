@@ -55,6 +55,7 @@ struct MBKeyboardUI
   int                 base_font_pt_size;
 
   Bool                want_embedding;
+  Bool                want_widget;
   Bool                is_daemon;
   Bool                visible;
   FakeKey             *fakekey;
@@ -902,7 +903,8 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
   /* Don't scale beyond a sensible height on wide screens
    * Only do this if we are not embedding, otherwise it's the embedder's call
    */
-  if (!ui->want_embedding && height > (ui->dpy_height * 2 / 5))
+  if (!ui->want_embedding && !ui->want_widget &&
+      height > (ui->dpy_height * 2 / 5))
     {
       height = ui->dpy_height * 2 / 5;
       DBG ("Tweaked height to %d", height);
@@ -1121,6 +1123,8 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 {
   boolean old_state, new_state;
 
+  DBG ("UI resize to %d x %d", width, height);
+
   MARK();
 
   /* Figure out if screen size has changed - does a round trip - bad */
@@ -1229,6 +1233,7 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
         break;
       }
     case ConfigureNotify:
+      DBG ("ConfigureNotify");
       if (xev->xconfigure.window == ui->xwin
           &&  (xev->xconfigure.width != ui->xwin_width
                || xev->xconfigure.height != ui->xwin_height))
@@ -1447,6 +1452,12 @@ int
 mb_kbd_ui_embeded (MBKeyboardUI *ui)
 {
   return ui->want_embedding;
+}
+
+void
+mb_kbd_ui_set_widget (MBKeyboardUI *ui, int widget)
+{
+  ui->want_widget = widget;
 }
 
 void

@@ -293,6 +293,9 @@ void
 mb_kbd_ui_set_embeded (MBKeyboardUI *ui, int embed);
 
 void
+mb_kbd_ui_set_widget (MBKeyboardUI *ui, int widget);
+
+void
 mb_kbd_ui_set_daemon (MBKeyboardUI *ui, int value);
 
 Bool
