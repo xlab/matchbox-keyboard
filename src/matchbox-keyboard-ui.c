@@ -1212,7 +1212,10 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
             if (key)
               {
                 /* Hack if we never get a release event */
-                if (key != mb_kbd_get_held_key (ui->kbd))
+                /* Always ignore motion events on modifier keys */
+                if (key != mb_kbd_get_held_key (ui->kbd) &&
+                    mb_kbd_key_get_action_type (key, MBKeyboardKeyStateNormal)
+                    != MBKeyboardKeyActionModifier)
                   {
                     DBG ("New key for MotionNotify");
                     mb_kbd_key_release (ui->kbd, True);
