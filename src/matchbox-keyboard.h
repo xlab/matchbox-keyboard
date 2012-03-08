@@ -222,6 +222,12 @@ mb_kbd_ui_redraw_key(MBKeyboardUI  *ui, MBKeyboardKey *key);
 void
 mb_kbd_ui_redraw(MBKeyboardUI  *ui);
 
+void
+mb_kbd_ui_resize(MBKeyboardUI *ui, int x, int y, int width, int height);
+
+void
+mb_kbd_ui_resize_backbuffer (MBKeyboardUI *ui);
+
 FakeKey *
 mb_kbd_ui_get_fakekey (MBKeyboardUI *ui);
 

@@ -66,9 +66,6 @@ struct MBKeyboardUI
   MBKeyboardDisplayOrientation valid_orientation;
 };
 
-static void
-mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height);
-
 static int
 mb_kbd_ui_load_font(MBKeyboardUI *ui);
 
@@ -590,8 +587,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
       attrs.event_mask =
         ButtonPressMask |
         ButtonReleaseMask |
-        Button1MotionMask |
-        StructureNotifyMask;
+        Button1MotionMask;
 
       /*
        * Construct the window initially at the requested position and size, not
@@ -763,7 +759,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
            */
           if (desk_width > ui->xwin_width)
             {
-              mb_kbd_ui_resize(ui,
+              mb_kbd_ui_resize(ui, -1, -1,
                                desk_width,
                                (desk_width * ui->xwin_height) / ui->xwin_width);
             }
@@ -775,7 +771,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
           int h = ui->kbd->req_height ? ui->kbd->req_height : ui->xwin_height;
 
           DBG ("Setting initial size per explicit request: %dx%d", w, h);
-          mb_kbd_ui_resize (ui, w, h);
+          mb_kbd_ui_resize (ui, -1, -1, w, h);
         }
 
       if (!ui->want_embedding)
@@ -873,8 +869,31 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   return 1;
 }
 
-static void
-mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
+void
+mb_kbd_ui_resize_backbuffer (MBKeyboardUI *ui)
+{
+  if (ui->backbuffer) /* may get called before initialised */
+    {
+      XFreePixmap(ui->xdpy, ui->backbuffer);
+      ui->backbuffer = XCreatePixmap(ui->xdpy,
+                                     ui->xwin,
+                                     ui->xwin_width,
+                                     ui->xwin_height,
+                                     DefaultDepth(ui->xdpy, ui->xscreen));
+
+      ui->backend->resize (ui, ui->xwin_width, ui->xwin_height);
+
+      XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
+
+      mb_kbd_ui_redraw(ui);
+    }
+}
+
+/*
+ * if x,y are -1, do a pure resize; otherwise do MoveResize
+ */
+void
+mb_kbd_ui_resize(MBKeyboardUI *ui, int x, int y, int width, int height)
 {
   MBKeyboard       *kbd = ui->kbd;
   MBKeyboardLayout *layout;
@@ -1091,27 +1110,15 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 	}
     }
 
-  if (!ui->kbd->is_widget)
+  if (x < 0 || y < 0)
     XResizeWindow(ui->xdpy, ui->xwin, width, height);
+  else
+    XMoveResizeWindow(ui->xdpy, ui->xwin, x, y, width, height);
 
   ui->xwin_width  = width;
   ui->xwin_height = height;
 
-  if (ui->backbuffer) /* may get called before initialised */
-    {
-      XFreePixmap(ui->xdpy, ui->backbuffer);
-      ui->backbuffer = XCreatePixmap(ui->xdpy,
-                                     ui->xwin,
-                                     ui->xwin_width,
-                                     ui->xwin_height,
-                                     DefaultDepth(ui->xdpy, ui->xscreen));
-
-      ui->backend->resize(ui, width, height);
-
-      XSetWindowBackgroundPixmap(ui->xdpy, ui->xwin, ui->backbuffer);
-
-      mb_kbd_ui_redraw(ui);
-    }
+  mb_kbd_ui_resize_backbuffer (ui);
 
   mb_kbd_resize_popup (ui->kbd);
 }
@@ -1136,14 +1143,14 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 
   if (new_state == old_state) 	/* Not a rotation */
     {
-      mb_kbd_ui_resize(ui, width, height);
+      mb_kbd_ui_resize(ui, -1, -1, width, height);
       return;
     }
 
   mb_kbd_set_extended(ui->kbd, new_state);
 
   /* realocate the layout */
-  mb_kbd_ui_resize(ui, width, height);
+  mb_kbd_ui_resize(ui, -1, -1, width, height);
 }
 
 void
@@ -1237,14 +1244,6 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
       }
     case ConfigureNotify:
       DBG ("ConfigureNotify");
-      if (xev->xconfigure.window == ui->xwin
-          &&  (xev->xconfigure.width != ui->xwin_width
-               || xev->xconfigure.height != ui->xwin_height))
-        {
-          mb_kbd_ui_handle_configure(ui,
-                                     xev->xconfigure.width,
-                                     xev->xconfigure.height);
-        }
       if (xev->xconfigure.window == ui->xwin_root)
         mb_kbd_ui_update_display_size(ui);
       break;
@@ -1252,6 +1251,13 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
       if (xev->xmap.window == ui->xwin)
         {
           DBG("Got MapNotify for 0x%x", (unsigned int) ui->xwin);
+          mb_kbd_ui_redraw(ui);
+        }
+      break;
+    case Expose:
+      if (xev->xexpose.window == ui->xwin)
+        {
+          DBG("Got Expose for 0x%x", (unsigned int) ui->xwin);
           mb_kbd_ui_redraw(ui);
         }
       break;

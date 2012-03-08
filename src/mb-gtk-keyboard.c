@@ -103,19 +103,29 @@ mb_gtk_keyboard_realize (GtkWidget *widget)
 static void
 mb_gtk_keyboard_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 {
+  MbGtkKeyboard        *self = (MbGtkKeyboard*) widget;
+  MbGtkKeyboardPrivate *priv = self->priv;
+
+  if (widget->allocation.width == allocation->width &&
+      widget->allocation.height == allocation->height)
+    {
+      DBG ("Size allocate NOP (%d x %d)",
+           widget->allocation.width, widget->allocation.height);
+      return;
+    }
+
   widget->allocation = *allocation;
 
-  DBG ("Size allocate %d x %d, realized: %d",
+  DBG ("Size allocate %d,%d;%dx%d, realized: %d",
+       widget->allocation.x, widget->allocation.y,
        widget->allocation.width, widget->allocation.height,
        GTK_WIDGET_REALIZED (widget));
 
   if (GTK_WIDGET_REALIZED (widget))
     {
-      gdk_window_move_resize (widget->window,
-			      widget->allocation.x,
-			      widget->allocation.y,
-			      widget->allocation.width,
-                              widget->allocation.height);
+      mb_kbd_ui_resize (priv->kb->ui,
+                        allocation->x, allocation->y,
+                        allocation->width, allocation->height);
     }
 }
 
@@ -161,6 +171,29 @@ mb_gtk_keyboard_unmap (GtkWidget *widget)
 }
 
 static void
+mb_gtk_keyboard_style_set (GtkWidget *widget,
+                           GtkStyle  *previous_style)
+{
+  MbGtkKeyboard        *self = (MbGtkKeyboard*) widget;
+  MbGtkKeyboardPrivate *priv = self->priv;
+
+  DBG ("Style change");
+#if 0
+  if (GTK_WIDGET_CLASS (mb_gtk_keyboard_parent_class)->style_set)
+    GTK_WIDGET_CLASS (mb_gtk_keyboard_parent_class)->style_set (widget, previous_style);
+
+  if (GTK_WIDGET_REALIZED (widget))
+    {
+      mb_kbd_ui_resize_backbuffer (priv->kb->ui);
+    }
+#else
+  if (GTK_WIDGET_REALIZED (widget))
+    mb_kbd_ui_redraw (priv->kb->ui);
+#endif
+}
+
+
+static void
 mb_gtk_keyboard_class_init (MbGtkKeyboardClass *klass)
 {
   GObjectClass   *object_class = (GObjectClass *)klass;
@@ -180,6 +213,7 @@ mb_gtk_keyboard_class_init (MbGtkKeyboardClass *klass)
   widget_class->size_request  = mb_gtk_keyboard_size_request;
   widget_class->map           = mb_gtk_keyboard_map;
   widget_class->unmap         = mb_gtk_keyboard_unmap;
+  widget_class->style_set     = mb_gtk_keyboard_style_set;
 
   pspec = g_param_spec_boxed ("argv",
                               "Argv for mbk",
