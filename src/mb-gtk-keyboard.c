@@ -53,7 +53,7 @@ mb_gtk_keyboard_realize (GtkWidget *widget)
   MbGtkKeyboard        *kbd = MB_GTK_KEYBOARD (widget);
   MbGtkKeyboardPrivate *priv = kbd->priv;
   MBKeyboard           *kb;
-  Window                xparent;
+  GdkWindow            *parent;
   Display              *xdpy;
   int                   argc;
   char                **p;
@@ -75,11 +75,11 @@ mb_gtk_keyboard_realize (GtkWidget *widget)
        widget->allocation.width,
        widget->allocation.height);
 
-  xdpy    = GDK_DISPLAY();
-  xparent = GDK_WINDOW_XID (gtk_widget_get_parent_window (widget));
+  xdpy   = GDK_DISPLAY();
+  parent = gtk_widget_get_parent_window (widget);
 
   priv->kb = kb =
-    mb_keyboard_new (xdpy, xparent,
+    mb_keyboard_new (xdpy, parent,
                      widget->allocation.x,
                      widget->allocation.y,
                      widget->allocation.width,
@@ -89,7 +89,7 @@ mb_gtk_keyboard_realize (GtkWidget *widget)
   DBG ("Wrapping xid 0x%x in GdkWindow",
            (unsigned int)mb_keyboard_get_xwindow (kb));
 
-  widget->window = gdk_window_foreign_new (mb_keyboard_get_xwindow (kb));
+  widget->window = g_object_ref (mb_kbd_ui_gdk_win (kb->ui));
 
   DBG ("GdkWindow %p", widget->window);
   gdk_window_add_filter (widget->window, xevent_handler, widget);

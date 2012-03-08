@@ -56,9 +56,15 @@ mb_kbd_usage (char *progname)
   fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);  exit(-1);
 }
 
+#if WANT_GTK_WIDGET
+MBKeyboard*
+mb_kbd_new (int argc, char **argv, Bool widget, GdkWindow *parent,
+            int x, int y, int width, int height)
+#else
 MBKeyboard*
 mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
             int x, int y, int width, int height)
+#endif
 {
   MBKeyboard *kb = NULL;
   char       *variant = NULL;
@@ -81,7 +87,7 @@ mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
   kb->font_pt_size = 8;
   kb->font_variant = strdup("bold");
 
-  kb->x_parent = parent;
+  kb->parent = parent;
   kb->is_widget = widget;
 
   if (width > 0)

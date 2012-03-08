@@ -25,11 +25,19 @@ extern Display *mb_xdpy;
 extern int      mb_xscreen;
 extern Window   mb_xroot;
 
+#if WANT_GTK_WIDGET
+MBKeyboard *
+mb_keyboard_new (Display *xdpy, GdkWindow *parent,
+                 int x, int y,
+                 int width, int height,
+                 int argc, char **argv)
+#else
 MBKeyboard *
 mb_keyboard_new (Display *xdpy, Window parent,
                  int x, int y,
                  int width, int height,
                  int argc, char **argv)
+#endif
 {
   MBKeyboard *kb;
 

@@ -29,6 +29,10 @@
 #include <cairo.h>
 #endif
 
+#if WANT_GTK_WIDGET
+#include <gdk/gdkx.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -178,7 +182,11 @@ struct MBKeyboard
   MBKeyboardKey         *held_key;
   MBKeyboardStateType    keys_state;
   MBKeyboardPopup       *popup;
-  Window                 x_parent;
+#if WANT_GTK_WIDGET
+  GdkWindow             *parent;
+#else
+  Window                 parent;
+#endif
 };
 
 /**** UI ***********/
@@ -264,6 +272,11 @@ mb_kbd_ui_x_screen(MBKeyboardUI *ui);
 
 Window
 mb_kbd_ui_x_win(MBKeyboardUI *ui);
+
+#if WANT_GTK_WIDGET
+GdkWindow *
+mb_kbd_ui_gdk_win (MBKeyboardUI *ui);
+#endif
 
 int
 mb_kbd_ui_x_win_height(MBKeyboardUI *ui);
@@ -356,9 +369,15 @@ mb_kbd_remote_process_xevents (MBKeyboardUI *ui, XEvent *xevent);
 
 /**** Keyboard ****/
 
+#if WANT_GTK_WIDGET
+MBKeyboard*
+mb_kbd_new (int argc, char **argv, Bool widget, GdkWindow *parent,
+            int x, int y, int w, int h);
+#else
 MBKeyboard*
 mb_kbd_new (int argc, char **argv, Bool widget, Window parent,
             int x, int y, int w, int h);
+#endif
 
 int
 mb_kbd_row_spacing(MBKeyboard *kb);

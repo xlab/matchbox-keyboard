@@ -22,6 +22,10 @@
 #include "config.h"
 #endif
 
+#if WANT_GTK_WIDGET
+#include <gdk/gdkx.h>
+#endif
+
 #include "matchbox-keyboard.h"
 
 #define PROP_MOTIF_WM_HINTS_ELEMENTS    5
@@ -44,6 +48,9 @@ struct MBKeyboardUI
   Display            *xdpy;
   int                 xscreen;
   Window              xwin_root, xwin, xembedder;
+#if WANT_GTK_WIDGET
+  GdkWindow          *gwin;
+#endif
   Pixmap              backbuffer;
 
   int                 dpy_width, dpy_height;
@@ -578,10 +585,31 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 {
   if (ui->kbd->is_widget)
     {
+#if WANT_GTK_WIDGET
+      GdkWindowAttr attrs = {0};
+
+      attrs.override_redirect = TRUE;
+      attrs.event_mask =
+        GDK_BUTTON_PRESS_MASK |
+        GDK_BUTTON_RELEASE_MASK |
+        GDK_BUTTON1_MOTION_MASK;
+
+      attrs.x = ui->kbd->req_x;
+      attrs.y = ui->kbd->req_y;
+      attrs.width = ui->kbd->req_width;
+      attrs.height = ui->kbd->req_height;
+      attrs.wclass = GDK_INPUT_OUTPUT;
+      attrs.window_type = GDK_WINDOW_CHILD;
+
+      ui->gwin = gdk_window_new (ui->kbd->parent, &attrs,
+                                 GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR);
+
+      ui->xwin = GDK_WINDOW_XID (ui->gwin);
+#else
       XSetWindowAttributes attrs;
 
       DBG ("Creating new window for widget, parent 0x%x!!!",
-           (unsigned int) ui->kbd->x_parent);
+           (unsigned int) ui->kbd->parent);
 
       attrs.override_redirect = True;
       attrs.event_mask =
@@ -596,14 +624,14 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
        * actual size allocation happens later.
        */
       ui->xwin = XCreateWindow (ui->xdpy,
-                                ui->kbd->x_parent,
+                                ui->kbd->parent,
                                 ui->kbd->req_x, ui->kbd->req_y,
                                 ui->kbd->req_width, ui->kbd->req_height,
                                 0,
                                 CopyFromParent, CopyFromParent, CopyFromParent,
                                 CWOverrideRedirect|CWEventMask,
                                 &attrs);
-
+#endif
       ui->backbuffer = XCreatePixmap(ui->xdpy,
                                      ui->xwin,
                                      ui->kbd->req_width,
@@ -1397,11 +1425,20 @@ mb_kbd_ui_unrealize (MBKeyboardUI *ui)
 {
   util_trap_x_errors ();
 
+#if WANT_GTK_WIDGET
+  if (ui->gwin)
+    {
+      gdk_window_destroy (ui->gwin);
+      ui->gwin = NULL;
+      ui->xwin = None;
+    }
+#else
   if (ui->xwin)
     {
       XDestroyWindow (ui->xdpy, ui->xwin);
       ui->xwin = None;
     }
+#endif
 
   if (ui->backbuffer)
     {
@@ -1521,3 +1558,10 @@ mb_kbd_ui_get_fakekey (MBKeyboardUI *ui)
   return ui->fakekey;
 }
 
+#if WANT_GTK_WIDGET
+GdkWindow *
+mb_kbd_ui_gdk_win (MBKeyboardUI *ui)
+{
+  return ui->gwin;
+}
+#endif
