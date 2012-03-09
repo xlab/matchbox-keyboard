@@ -20,6 +20,10 @@
 
 #include "matchbox-keyboard.h"
 
+#ifdef WANT_CAIRO
+#include "matchbox-keyboard-popup.h"
+#endif
+
 #define FONT_FAMILY_LEN 100
 
 static void
@@ -228,6 +232,10 @@ mb_kbd_new (int argc, char **argv)
 
   //fprintf (stderr, "***** Settings: font_family: %s font_pt_size: %d font_variant: %s\n", kb->font_family, kb->font_pt_size, kb->font_variant);
 
+#ifdef WANT_CAIRO
+  kb->popup = mb_kbd_popup_new (kb->ui);
+#endif
+
   return kb;
 }
 
@@ -259,6 +267,11 @@ mb_kbd_destroy (MBKeyboard *kb)
           l = n;
         }
     }
+
+#ifdef WANT_CAIRO
+  if (kb->popup)
+    mb_kbd_popup_destroy (kb->popup);
+#endif
 
   mb_kbd_ui_destroy (kb->ui);
 
@@ -454,4 +467,38 @@ main(int argc, char **argv)
   mb_kbd_destroy (kb);
 
   return 0;
+}
+
+void
+mb_kbd_show_popup (MBKeyboard *kb, MBKeyboardKey *key, int x_root, int y_root)
+{
+#ifdef WANT_CAIRO
+  mb_kbd_popup_show (kb->popup, key, x_root, y_root);
+#endif
+}
+
+void
+mb_kbd_hide_popup (MBKeyboard *kb)
+{
+#ifdef WANT_CAIRO
+  mb_kbd_popup_hide (kb->popup);
+#endif
+}
+
+void
+mb_kbd_load_popup_font (MBKeyboard *kb)
+{
+#ifdef WANT_CAIRO
+  if (kb->popup)
+    mb_kbd_popup_load_font (kb->popup);
+#endif
+}
+
+void
+mb_kbd_resize_popup (MBKeyboard *kb)
+{
+#ifdef WANT_CAIRO
+  if (kb->popup)
+    mb_kbd_popup_resize (kb->popup);
+#endif
 }

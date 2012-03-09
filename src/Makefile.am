@@ -3,9 +3,11 @@ PKGDATADIR = $(datadir)/matchbox-keyboard
 DATADIR    = $(datadir)
 
 if WANT_CAIRO
-CAIRO_BACKEND_C =                                                     \
-	matchbox-keyboard-ui-cairo-backend.c                          \
-        matchbox-keyboard-ui-cairo-backend.h
+CAIRO_BACKEND_C =                             \
+	matchbox-keyboard-ui-cairo-backend.c  \
+        matchbox-keyboard-ui-cairo-backend.h  \
+	matchbox-keyboard-popup.c	      \
+	matchbox-keyboard-popup.h
 else
 XFT_BACKEND_C =                                                       \
 	matchbox-keyboard-ui-xft-backend.c                            \

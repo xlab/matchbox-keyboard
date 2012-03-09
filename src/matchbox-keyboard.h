@@ -85,6 +85,7 @@ typedef struct MBKeyboardRow    MBKeyboardRow;
 typedef struct MBKeyboardKey    MBKeyboardKey;
 typedef struct MBKeyboardUI     MBKeyboardUI;
 typedef struct MBKeyboardUIBackend MBKeyboardUIBackend;
+typedef struct MBKeyboardPopup  MBKeyboardPopup;
 
 #ifdef WANT_CAIRO
 typedef cairo_surface_t MBKeyboardImage;
@@ -171,6 +172,7 @@ struct MBKeyboard
   boolean                extended; /* are we showing extended keys ? */
   MBKeyboardKey         *held_key;
   MBKeyboardStateType    keys_state;
+  MBKeyboardPopup       *popup;
 };
 
 /**** UI ***********/
@@ -378,6 +380,17 @@ mb_kbd_redraw(MBKeyboard *kb);
 void
 mb_kbd_redraw_key(MBKeyboard *kb, MBKeyboardKey *key);
 
+void
+mb_kbd_show_popup (MBKeyboard *kb, MBKeyboardKey *key, int x_root, int y_root);
+
+void
+mb_kbd_hide_popup (MBKeyboard *kb);
+
+void
+mb_kbd_load_popup_font (MBKeyboard *kb);
+
+void
+mb_kbd_resize_popup (MBKeyboard *kb);
 
 /**** Layout ****/
 
@@ -570,7 +583,7 @@ void
 mb_kbd_key_press(MBKeyboardKey *key);
 
 void
-mb_kbd_key_release(MBKeyboard *kbd);
+mb_kbd_key_release(MBKeyboard *kbd, Bool cancel);
 
 void
 mb_kbd_key_dump_key(MBKeyboardKey *key);

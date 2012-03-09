@@ -435,7 +435,7 @@ mb_kbd_key_get_action_type(MBKeyboardKey           *key,
 
 
 void
-mb_kbd_key_press(MBKeyboardKey *key)
+mb_kbd_key_press (MBKeyboardKey *key)
 {
   /* XXX what about state handling XXX */
   MBKeyboardKeyStateType state;
@@ -467,6 +467,10 @@ mb_kbd_key_press(MBKeyboardKey *key)
         state = MBKeyboardKeyStateNormal;
     }
 
+  /*
+   * The only key that sends key events on press is backspace, everything
+   * else sends on release.
+   */
   switch (mb_kbd_key_get_action_type(key, state))
     {
     case MBKeyboardKeyActionGlyph:
@@ -475,19 +479,24 @@ mb_kbd_key_press(MBKeyboardKey *key)
 
 	if ((key_char = mb_kbd_key_get_char_action(key, state)) != NULL)
 	  {
-	    mb_kbd_ui_send_press(key->kbd->ui, key_char, flags);
 	    mb_kbd_set_held_key(key->kbd, key);
 	  }
 	break;
-
-
       }
     case MBKeyboardKeyActionXKeySym:
       {
 	KeySym ks;
 	if ((ks = mb_kbd_key_get_keysym_action(key, state)) != None)
 	  {
-	    mb_kbd_ui_send_keysym_press(key->kbd->ui, ks, flags);
+            /* Only backspace sends on press and has autorepeat */
+            switch (ks)
+              {
+              case XK_BackSpace:
+                mb_kbd_ui_send_keysym_press(key->kbd->ui, ks, flags);
+                break;
+              default:;
+              }
+
 	    mb_kbd_set_held_key(key->kbd, key);
 	  }
 	break;
@@ -608,11 +617,68 @@ mb_kbd_key_is_held(MBKeyboard *kbd, MBKeyboardKey *key)
 }
 
 void
-mb_kbd_key_release(MBKeyboard *kbd)
+mb_kbd_key_release(MBKeyboard *kbd, Bool cancel)
 {
-  MBKeyboardKey *key = mb_kbd_get_held_key(kbd);
+  MBKeyboardKey *key   = mb_kbd_get_held_key (kbd);
 
-  mb_kbd_set_held_key(kbd, NULL);
+  mb_kbd_set_held_key (kbd, NULL);
+  mb_kbd_hide_popup (kbd);
+
+  if (key && !cancel)
+    {
+      int                     flags = 0;
+      MBKeyboardKeyStateType  state;
+
+      state = mb_kbd_keys_current_state (key->kbd);
+
+      if (mb_kbd_has_state (key->kbd, MBKeyboardStateCaps)
+          && mb_kbd_key_get_obey_caps (key))
+        state = MBKeyboardKeyStateShifted;
+
+      if (mb_kbd_has_state (key->kbd, MBKeyboardStateControl))
+        flags |= FAKEKEYMOD_CONTROL;
+
+      if (mb_kbd_has_state (key->kbd, MBKeyboardStateAlt))
+        flags |= FAKEKEYMOD_ALT;
+
+      if (!mb_kdb_key_has_state (key, state))
+        {
+          if (state == MBKeyboardKeyStateNormal)
+            return;  /* keys should at least have a normal state */
+          else
+            state = MBKeyboardKeyStateNormal;
+        }
+
+      switch (mb_kbd_key_get_action_type (key, state))
+        {
+        case MBKeyboardKeyActionGlyph:
+          {
+            const char *key_char;
+
+            if ((key_char = mb_kbd_key_get_char_action (key, state)) != NULL)
+              mb_kbd_ui_send_press(key->kbd->ui, key_char, flags);
+            break;
+          }
+        case MBKeyboardKeyActionXKeySym:
+          {
+            KeySym ks;
+            if ((ks = mb_kbd_key_get_keysym_action (key, state)) != None)
+              {
+                switch (ks)
+                  {
+                  case XK_BackSpace:
+                    break;
+                  default:
+                    mb_kbd_ui_send_keysym_press(key->kbd->ui, ks, flags);
+                  }
+              }
+
+            break;
+          }
+        default:
+          break;
+        }
+    }
 
   if (key)
     {

@@ -1091,7 +1091,7 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
       mb_kbd_ui_redraw(ui);
     }
 
-
+  mb_kbd_resize_popup (ui->kbd);
 }
 
 void
@@ -1155,14 +1155,16 @@ mb_kbd_ui_event_loop (MBKeyboardUI *ui)
             {
             case ButtonPress:
               press_x = xev.xbutton.x; press_y = xev.xbutton.y;
-              DBG("got button bress at %i,%i", xev.xbutton.x, xev.xbutton.y);
+              DBG("got button press at %i,%i (%i,%i)",
+                  xev.xbutton.x, xev.xbutton.y,
+                  xev.xbutton.x_root, xev.xbutton.y_root);
               key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
               if (key)
                 {
                   /* Hack if we never get a release event */
                   if (key != mb_kbd_get_held_key(ui->kbd))
                     {
-                      mb_kbd_key_release(ui->kbd);
+                      mb_kbd_key_release(ui->kbd, True);
                       tvt.tv_usec = repeat_delay;
                     }
                   else
@@ -1173,9 +1175,19 @@ mb_kbd_ui_event_loop (MBKeyboardUI *ui)
                 }
               break;
             case ButtonRelease:
+              DBG("got button release at %i,%i (%i,%i)",
+                  xev.xbutton.x, xev.xbutton.y,
+                  xev.xbutton.x_root, xev.xbutton.y_root);
               if (mb_kbd_get_held_key(ui->kbd) != NULL)
                 {
-                  mb_kbd_key_release(ui->kbd);
+                  Bool cancel = False;
+
+                  key = mb_kbd_locate_key (ui->kbd,
+                                           xev.xbutton.x, xev.xbutton.y);
+                  if (key != mb_kbd_get_held_key(ui->kbd))
+                    cancel = True;
+
+                  mb_kbd_key_release (ui->kbd, cancel);
                   tvt.tv_usec = repeat_delay;
 
                   /* Gestures */
@@ -1319,24 +1331,38 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
   switch (xev->type)
     {
     case ButtonPress:
-      DBG("got button bress at %i,%i", xev->xbutton.x, xev->xbutton.y);
+      DBG("got button press at %i,%i (%i,%i)",
+          xev->xbutton.x, xev->xbutton.y,
+          xev->xbutton.x_root, xev->xbutton.y_root);
       key = mb_kbd_locate_key(ui->kbd, xev->xbutton.x, xev->xbutton.y);
       if (key)
         {
           /* Hack if we never get a release event */
-          if (key != mb_kbd_get_held_key(ui->kbd))
+          if (key != mb_kbd_get_held_key (ui->kbd))
             {
-              mb_kbd_key_release(ui->kbd);
+              mb_kbd_key_release (ui->kbd, True);
             }
 
           DBG("found key for press");
           mb_kbd_key_press(key);
+          mb_kbd_show_popup (ui->kbd, key,
+                             xev->xbutton.x_root - xev->xbutton.x,
+                             xev->xbutton.y_root - xev->xbutton.y);
         }
       break;
     case ButtonRelease:
       if (mb_kbd_get_held_key(ui->kbd) != NULL)
         {
-          mb_kbd_key_release(ui->kbd);
+          Bool cancel = False;
+
+          DBG("got button release at %i,%i (%i,%i)",
+              xev->xbutton.x, xev->xbutton.y,
+              xev->xbutton.x_root, xev->xbutton.y_root);
+          key = mb_kbd_locate_key (ui->kbd, xev->xbutton.x, xev->xbutton.y);
+          if (key != mb_kbd_get_held_key(ui->kbd))
+            cancel = True;
+
+          mb_kbd_key_release(ui->kbd, cancel);
         }
       break;
     case ConfigureNotify:
@@ -1365,7 +1391,13 @@ mb_kbd_ui_handle_widget_xevent (MBKeyboardUI *ui, XEvent *xev)
 static int
 mb_kbd_ui_load_font(MBKeyboardUI *ui)
 {
-  return ui->backend->font_load(ui);
+  int ret;
+
+  ret = ui->backend->font_load(ui);
+
+  mb_kbd_load_popup_font (ui->kbd);
+
+  return ret;
 }
 
 
