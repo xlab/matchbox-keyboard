@@ -745,6 +745,14 @@ mb_kbd_key_release(MBKeyboard *kbd, Bool cancel)
                   case XK_BackSpace:
                     break;
                   default:
+                    /*
+                     * Fake shift for Greek capitals.
+                     */
+                    if (ks >= XK_Greek_ALPHA && ks <= XK_Greek_OMEGA)
+                      flags |= FAKEKEYMOD_SHIFT;
+                    if (ks >= XK_Greek_alpha && ks <= XK_Greek_omega)
+                      flags &= ~FAKEKEYMOD_SHIFT;
+
                     mb_kbd_ui_send_keysym_press(key->kbd->ui, ks, flags);
                   }
               }
