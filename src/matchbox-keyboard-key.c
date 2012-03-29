@@ -496,6 +496,9 @@ mb_kbd_key_press (MBKeyboardKey *key)
   if (mb_kbd_has_state(key->kbd, MBKeyboardStateAlt))
     flags |= FAKEKEYMOD_ALT;
 
+  if (mb_kbd_has_state(key->kbd, MBKeyboardStateMod1))
+    flags |= FAKEKEYMOD_META;
+
   if (!mb_kdb_key_has_state(key, state))
     {
       if (state == MBKeyboardKeyStateNormal)
@@ -716,6 +719,9 @@ mb_kbd_key_release(MBKeyboard *kbd, Bool cancel)
 
       if (mb_kbd_has_state (key->kbd, MBKeyboardStateAlt))
         flags |= FAKEKEYMOD_ALT;
+
+      if (mb_kbd_has_state(key->kbd, MBKeyboardStateMod1))
+        flags |= FAKEKEYMOD_META;
 
       if (!mb_kdb_key_has_state (key, state))
         {
