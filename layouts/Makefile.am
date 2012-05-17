@@ -42,6 +42,7 @@ fragment_in_files = \
 		base-fragment-sl_SI.xml.in \
 		base-fragment-sv_SE.xml.in \
 		base-fragment-tr_TR.xml.in \
+		internet-fragment.xml.in   \
 		$(NULL)
 
 variant_in_files = $(fragment_in_files) \
@@ -50,6 +51,7 @@ variant_in_files = $(fragment_in_files) \
 		keyboard-symbol.xml.in \
 		keyboard-numpad-extended.xml.in \
 		keyboard-numpad-small.xml.in    \
+		keyboard-internet.xml.in \
                   $(NULL)
 
 %.xml.tmp: %.xml.in

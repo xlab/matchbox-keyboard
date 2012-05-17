@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ QWERTY keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest QWERTY">
+    <include file="internet-fragment.xml"/>
+    <include file="base-fragment.xml"/>
+</layout>
+</keyboard>

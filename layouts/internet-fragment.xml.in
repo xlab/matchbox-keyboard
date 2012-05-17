@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fragment>
+  <row>
+    <key width="1500">
+      <default display="⇥" action="tab"/>
+      <!-- This does not work, it seems to send out Tab keysym without the shift
+	   modifier; I guess we would have to implement this in the kbd itself in
+	   some fashion.
+	   <shifted display="⇤" action="tab"/>
+      -->
+    </key>
+    <key obey-caps="true">
+      <default display="/" />
+      <shifted display="\" />
+    </key>
+    <key obey-caps="true">
+      <default display="." />
+      <shifted display="," />
+    </key>
+    <key obey-caps="true">
+      <default display=":" />
+      <shifted display=";" />
+    </key>
+    <key obey-caps="true">
+      <default display="-" />
+      <shifted display="_" />
+    </key>
+    <key obey-caps="true">
+      <default display="+" />
+      <shifted display="%" />
+    </key>
+    <key obey-caps="true">
+      <default display="@" />
+      <shifted display="$" />
+    </key>
+    <key obey-caps="true">
+      <default display="#" />
+    </key>
+    <key obey-caps="true">
+      <default display="?" />
+    </key>
+    <key obey-caps="true">
+      <default display="&amp;" />
+    </key>
+    <key obey-caps="true">
+      <default display="=" />
+    </key>
+  </row>
+</fragment>
