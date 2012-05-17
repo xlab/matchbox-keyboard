@@ -486,6 +486,9 @@ mb_kbd_key_press (MBKeyboardKey *key)
     state = MBKeyboardKeyStateShifted;
 
   /* XXX below fakekey mods probably better in ui */
+  if (state == MBKeyboardKeyStateShifted ||
+      mb_kbd_has_state(key->kbd, MBKeyboardStateShifted))
+    flags |= FAKEKEYMOD_SHIFT;
 
   if (mb_kbd_has_state(key->kbd, MBKeyboardStateControl))
     flags |= FAKEKEYMOD_CONTROL;
@@ -703,6 +706,10 @@ mb_kbd_key_release(MBKeyboard *kbd, Bool cancel)
       if (mb_kbd_has_state (key->kbd, MBKeyboardStateCaps)
           && mb_kbd_key_get_obey_caps (key))
         state = MBKeyboardKeyStateShifted;
+
+      if (state == MBKeyboardKeyStateShifted ||
+          mb_kbd_has_state (key->kbd, MBKeyboardStateShifted))
+        flags |= FAKEKEYMOD_SHIFT;
 
       if (mb_kbd_has_state (key->kbd, MBKeyboardStateControl))
         flags |= FAKEKEYMOD_CONTROL;
