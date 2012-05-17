@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ Arabic ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest ALPHA:ar_EG">
+
+    <row>
+        <key obey-caps="true">
+            <default display="ض" />
+            <shifted display="ذ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ص" />
+            <shifted display="۱" />
+        </key>
+        <key obey-caps="true">
+            <default display="ت" />
+            <shifted display="۲" />
+        </key>
+        <key obey-caps="true">
+            <default display="ق" />
+            <shifted display="۳" />
+        </key>
+        <key obey-caps="true">
+            <default display="ف" />
+            <shifted display="۴" />
+        </key>
+        <key obey-caps="true">
+            <default display="غ" />
+            <shifted display="۵" />
+        </key>
+        <key obey-caps="true">
+            <default display="ع" />
+            <shifted display="۶" />
+        </key>
+        <key obey-caps="true">
+            <default display="ه" />
+            <shifted display="۷" />
+        </key>
+        <key obey-caps="true">
+            <default display="خ" />
+            <shifted display="۸" />
+        </key>
+        <key obey-caps="true">
+            <default display="ح" />
+            <shifted display="۹" />
+        </key>
+        <key obey-caps="true">
+            <default display="ج" />
+            <shifted display="۰" />
+        </key>
+        <key obey-caps="true">
+            <default display="د" />
+            <shifted display="ﹼ" />
+        </key>
+	<key width="1500">
+            <default display="⇦" action="backspace" />
+        </key>
+    </row>
+
+    <row>
+        <key obey-caps="true">
+            <default display="ش" />
+        </key>
+        <key obey-caps="true">
+            <default display="س" />
+        </key>
+        <key obey-caps="true">
+            <default display="ي" />
+        </key>
+        <key obey-caps="true">
+            <default display="ب" />
+        </key>
+        <key obey-caps="true">
+            <default display="ل" />
+        </key>
+        <key obey-caps="true">
+            <default display="ا" />
+            <shifted display="أ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ت" />
+            <shifted display="ـ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ن" />
+            <shifted display="،" />
+        </key>
+        <key obey-caps="true">
+            <default display="م" />
+        </key>
+        <key obey-caps="true">
+            <default display="ك" />
+        </key>
+        <key obey-caps="true">
+            <default display="ط" />
+        </key>
+        <key width="1500">
+            <default display="⏎" action="return"/>
+        </key>
+    </row>
+
+    <row>
+         <key width="1500">
+            <default display="⇧" action="modifier:shift" />
+            <caps    display="⬆" action="modifier:shift" />
+        </key>
+        <key obey-caps="true">
+            <default display="ئ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ء" />
+        </key>
+        <key obey-caps="true">
+            <default display="ؤ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ر" />
+        </key>
+        <key obey-caps="true">
+            <default display="ﻻ" />
+            <shifted display="ﻵ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ى" />
+            <shifted display="آ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ة" />
+        </key>
+        <key obey-caps="true">
+            <default display="و" />
+        </key>
+        <key obey-caps="true">
+            <default display="ز" />
+        </key>
+        <key obey-caps="true">
+            <default display="ظ" />
+            <shifted display="؟" />
+        </key>
+        <key width="3000">
+            <default display=" " action="space" />
+        </key>
+    </row>
+</layout>
+</keyboard>

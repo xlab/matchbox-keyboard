@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ Russian ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest ALPHA:ru_RU">
+
+    <row>
+        <key obey-caps="true">
+            <default display="й" />
+            <shifted display="Й" />
+        </key>
+        <key obey-caps="true">
+            <default display="ц" />
+            <shifted display="Ц" />
+        </key>
+        <key obey-caps="true">
+            <default display="у" />
+            <shifted display="У" />
+        </key>
+        <key obey-caps="true">
+            <default display="к" />
+            <shifted display="К" />
+        </key>
+        <key obey-caps="true">
+            <default display="е" />
+            <shifted display="Е" />
+        </key>
+        <key obey-caps="true">
+            <default display="н" />
+            <shifted display="Н" />
+        </key>
+        <key obey-caps="true">
+            <default display="г" />
+            <shifted display="Г" />
+        </key>
+        <key obey-caps="true">
+            <default display="ш" />
+            <shifted display="Ш" />
+        </key>
+        <key obey-caps="true">
+            <default display="щ" />
+            <shifted display="Щ" />
+        </key>
+        <key obey-caps="true">
+            <default display="з" />
+            <shifted display="З" />
+        </key>
+        <key obey-caps="true">
+            <default display="х" />
+            <shifted display="Х" />
+        </key>
+	<key fill="true">
+            <default display="⇦" action="backspace" />
+        </key>
+    </row>
+
+    <row>
+        <key obey-caps="true">
+            <default display="ф" />
+            <shifted display="Ф" />
+        </key>
+        <key obey-caps="true">
+            <default display="ы" />
+            <shifted display="Ы" />
+        </key>
+        <key obey-caps="true">
+            <default display="в" />
+            <shifted display="В" />
+        </key>
+        <key obey-caps="true">
+            <default display="а" />
+            <shifted display="А" />
+        </key>
+        <key obey-caps="true">
+            <default display="п" />
+            <shifted display="П" />
+        </key>
+        <key obey-caps="true">
+            <default display="р" />
+            <shifted display="Р" />
+        </key>
+        <key obey-caps="true">
+            <default display="о" />
+            <shifted display="О" />
+        </key>
+        <key obey-caps="true">
+            <default display="л" />
+            <shifted display="Л" />
+        </key>
+        <key obey-caps="true">
+            <default display="д" />
+            <shifted display="Д" />
+        </key>
+        <key obey-caps="true">
+            <default display="ж" />
+            <shifted display="Ж" />
+        </key>
+        <key obey-caps="true">
+            <default display="э" />
+            <shifted display="Э" />
+        </key>
+        <key width="2000">
+            <default display="⏎" action="return"/>
+        </key>
+    </row>
+
+    <row>
+         <key fill="true">
+            <default display="⇧" action="modifier:shift" />
+            <caps    display="⬆" action="modifier:shift" />
+        </key>
+        <key obey-caps="true">
+            <default display="я" />
+            <shifted display="Я" />
+        </key>
+        <key obey-caps="true">
+            <default display="ч" />
+            <shifted display="Ч" />
+        </key>
+        <key obey-caps="true">
+            <default display="с" />
+            <shifted display="С" />
+        </key>
+        <key obey-caps="true">
+            <default display="м" />
+            <shifted display="М" />
+        </key>
+        <key obey-caps="true">
+            <default display="и" />
+            <shifted display="И" />
+        </key>
+        <key obey-caps="true">
+            <default display="т" />
+            <shifted display="Т" />
+        </key>
+        <key obey-caps="true">
+            <default display="ь" />
+            <shifted display="Ь" />
+        </key>
+        <key obey-caps="true">
+            <default display="б" />
+            <shifted display="Б" />
+        </key>
+        <key obey-caps="true">
+            <default display="ю" />
+            <shifted display="Ю" />
+        </key>
+        <key width="3000">
+            <default display=" " action="space" />
+        </key>
+    </row>
+</layout>
+</keyboard>

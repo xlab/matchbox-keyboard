@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ Greek ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest ALPHA:el_GR">
+
+    <row>
+        <key obey-caps="true">
+            <default display="ς" />
+            <shifted display="·" />
+        </key>
+        <key obey-caps="true">
+            <default display="ε" />
+            <shifted display="Ε" />
+        </key>
+        <key obey-caps="true">
+            <default display="ρ" />
+            <shifted display="Ρ" />
+        </key>
+        <key obey-caps="true">
+            <default display="τ" />
+            <shifted display="Τ" />
+        </key>
+        <key obey-caps="true">
+            <default display="υ" />
+            <shifted display="Υ" />
+        </key>
+        <key obey-caps="true">
+            <default display="θ" />
+            <shifted display="Θ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ι" />
+            <shifted display="Ι" />
+        </key>
+        <key obey-caps="true">
+            <default display="ο" />
+            <shifted display="Ο" />
+        </key>
+        <key obey-caps="true">
+            <default display="π" />
+            <shifted display="Π" />
+        </key>
+	<key width="1500">
+            <default display="⇦" action="backspace" />
+        </key>
+    </row>
+
+    <row>
+        <key obey-caps="true">
+            <default display="α" />
+            <shifted display="Α" />
+        </key>
+        <key obey-caps="true">
+            <default display="σ" />
+            <shifted display="Σ" />
+        </key>
+        <key obey-caps="true">
+            <default display="δ" />
+            <shifted display="Δ" />
+        </key>
+        <key obey-caps="true">
+            <default display="φ" />
+            <shifted display="Φ" />
+        </key>
+        <key obey-caps="true">
+            <default display="γ" />
+            <shifted display="Γ" />
+        </key>
+        <key obey-caps="true">
+            <default display="η" />
+            <shifted display="Η" />
+        </key>
+        <key obey-caps="true">
+            <default display="ξ" />
+            <shifted display="Ξ" />
+        </key>
+        <key obey-caps="true">
+            <default display="κ" />
+            <shifted display="Κ" />
+        </key>
+        <key obey-caps="true">
+            <default display="λ" />
+            <shifted display="Λ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ˊ" action="xkeysym:dead_acute"/>
+            <shifted display="¨" action="xkeysym:dead_diaeresis"/>
+            <mod2    display="ˆ" action="xkeysym:dead_circumflex"/>
+        </key>
+        <key width="1500">
+            <default display="⏎" action="return"/>
+        </key>
+    </row>
+
+    <row>
+         <key width="1500">
+            <default display="⇧" action="modifier:shift" />
+            <caps    display="⬆" action="modifier:shift" />
+        </key>
+        <key>
+            <default display="⇪" action="modifier:mod2"/>
+        </key>
+        <key obey-caps="true">
+            <default display="ζ" />
+            <shifted display="Ζ" />
+        </key>
+        <key obey-caps="true">
+            <default display="χ" />
+            <shifted display="Χ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ψ" />
+            <shifted display="Ψ" />
+        </key>
+        <key obey-caps="true">
+            <default display="ω" />
+            <shifted display="Ω" />
+        </key>
+        <key obey-caps="true">
+            <default display="β" />
+            <shifted display="Β" />
+        </key>
+        <key obey-caps="true">
+            <default display="ν" />
+            <shifted display="Ν" />
+        </key>
+        <key obey-caps="true">
+            <default display="μ" />
+            <shifted display="Μ" />
+        </key>
+        <key width="3000">
+            <default display=" " action="space" />
+        </key>
+    </row>
+</layout>
+</keyboard>

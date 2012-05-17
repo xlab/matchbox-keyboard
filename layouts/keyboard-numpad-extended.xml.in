@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ Extended Numeric keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest Numeric Extended">
+
+    <row>
+        <key obey-caps="true">
+            <default display="1" />
+            <shifted display="~" />
+            <mod2    display="α" action="xkeysym:Greek_alpha"/>
+        </key>
+        <key obey-caps="true">
+            <default display="2" />
+            <shifted display="!" />
+            <mod2    display="β" action="xkeysym:Greek_beta"/>
+        </key>
+        <key obey-caps="true">
+            <default display="3" />
+            <shifted display="#" />
+            <mod2    display="γ" action="xkeysym:Greek_gamma"/>
+        </key>
+        <key obey-caps="true">
+            <default display="4" />
+            <shifted display="$" />
+            <mod2    display="δ" action="xkeysym:Greek_delta"/>
+        </key>
+        <key obey-caps="true">
+            <default display="5" />
+            <shifted display="%" />
+            <mod2    display="Δ" action="xkeysym:Greek_DELTA"/>
+        </key>
+        <key obey-caps="true">
+            <default display="6" />
+            <shifted display="^" />
+            <mod2    display="θ" action="xkeysym:Greek_theta"/>
+        </key>
+        <key obey-caps="true">
+            <default display="7" />
+            <shifted display="&amp;" />
+            <mod2    display="λ" action="xkeysym:Greek_lambda"/>
+        </key>
+        <key obey-caps="true">
+            <default display="8" />
+            <shifted display="[" />
+            <mod2    display="μ" action="xkeysym:Greek_mu"/>
+        </key>
+        <key obey-caps="true">
+            <default display="9" />
+            <shifted display="]" />
+            <mod2    display="ω" action="xkeysym:Greek_omega"/>
+        </key>
+        <key obey-caps="true">
+            <default display="0" />
+            <shifted display="\" />
+            <mod2    display="Ω" action="xkeysym:Greek_OMEGA"/>
+        </key>
+	<key width="1500">
+            <default display="⇦" action="backspace" />
+        </key>
+    </row>
+
+    <row>
+        <key obey-caps="true">
+            <default display="°" />
+            <shifted display="&lt;" action="xkeysym:less" />
+            <mod2    display="¹" />
+        </key>
+	<key obey-caps="true">
+            <default display="+" />
+            <shifted display="&gt;" action="xkeysym:greater" />
+            <mod2    display="²" />
+        </key>
+        <key obey-caps="true">
+            <default display="-" />
+            <shifted display="≤" />
+            <mod2    display="³" />
+        </key>
+        <key obey-caps="true">
+            <default display="*" />
+            <shifted display="≥" />
+            <mod2    display="⁴" />
+        </key>
+        <key obey-caps="true">
+            <default display="/" />
+            <shifted display="≠" />
+            <mod2    display="⁺" />
+        </key>
+        <key obey-caps="true">
+            <default display="=" />
+            <shifted display=";" />
+            <mod2    display="⁻" />
+        </key>
+        <key obey-caps="true">
+            <default display="(" />
+            <shifted display=":" />
+            <mod2    display="₂" />
+        </key>
+        <key obey-caps="true">
+            <default display=")"/>
+            <shifted display="{" />
+            <mod2    display="₃" />
+        </key>
+        <key obey-caps="true">
+            <default display="?" />
+            <shifted display="}" />
+            <mod2    display="₄" />
+        </key>
+        <key width="1500">
+            <default display="⏎" action="return"/>
+        </key>
+    </row>
+
+    <row>
+        <key width="1500">
+            <default display="⇧" action="modifier:shift" />
+            <caps    display="⬆" action="modifier:shift" />
+        </key>
+        <key>
+            <default display="⇪" action="modifier:mod2"/>
+        </key>
+        <key obey-caps="true">
+            <default display="," />
+            <shifted display="`" />
+            <mod2    display="±"/>
+        </key>
+        <key obey-caps="true">
+            <default display="." />
+            <shifted display="'" />
+            <mod2    display="π" action="xkeysym:Greek_pi"/>
+        </key>
+        <key obey-caps="true">
+            <default display="@" />
+            <shifted display="&quot;" action="xkeysym:quotedbl"/>
+            <mod2    display="⟶" />
+        </key>
+        <key obey-caps="true">
+            <default display="_" />
+            <shifted display="|"/>
+            <mod2    display="⟷" />
+        </key>
+        <key width="3000">
+            <default display=" " action="space" />
+        </key>
+    </row>
+</layout>
+</keyboard>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ Symbol keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest Symbol">
+
+    <row>
+        <key>
+            <default display="[" />
+        </key>
+        <key>
+            <default display="]" />
+        </key>
+        <key>
+            <default display="{" />
+        </key>
+        <key>
+            <default display="}" />
+        </key>
+        <key>
+            <default display="#" />
+        </key>
+        <key>
+            <default display="%" />
+        </key>
+        <key>
+            <default display="^" />
+        </key>
+        <key>
+            <default display="*" />
+        </key>
+        <key>
+            <default display="+" />
+        </key>
+        <key>
+            <default display="=" />
+        </key>
+	<key width="2000">
+            <default display="⇦" action="backspace" />
+        </key>
+    </row>
+
+    <row>
+        <key>
+            <default display="_" />
+        </key>
+        <key>
+            <default display="\" />
+        </key>
+        <key>
+            <default display="|" />
+        </key>
+        <key>
+            <default display="~" />
+        </key>
+        <key>
+            <default display="&lt;" action="xkeysym:less"/>
+        </key>
+        <key>
+            <default display="&gt;" action="xkeysym:greater"/>
+        </key>
+        <key>
+            <default display="€" />
+        </key>
+        <key>
+            <default display="£" />
+        </key>
+        <key>
+            <default display="¥" />
+        </key>
+        <key width="2000">
+            <default display="⏎" action="return"/>
+        </key>
+    </row>
+
+    <row>
+	<key>
+            <default display="°" />
+        </key>
+        <key>
+            <default display="μ" />
+        </key>
+        <key>
+            <default display="Ω" action="xkeysym:Greek_OMEGA"/>
+        </key>
+        <key>
+            <default display="²" />
+        </key>
+        <key>
+            <default display="±" />
+        </key>
+        <key width="3000">
+            <default display=" " action="space" />
+        </key>
+    </row>
+</layout>
+</keyboard>

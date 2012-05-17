@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ Polish ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest ALPHA:pl_PL">
+
+    <row>
+        <key obey-caps="true">
+            <default display="q" />
+            <shifted display="Q" />
+        </key>
+        <key obey-caps="true">
+            <default display="w" />
+            <shifted display="W" />
+        </key>
+        <key obey-caps="true">
+            <default display="e" />
+            <shifted display="E" />
+            <mod2    display="ę" />
+        </key>
+        <key obey-caps="true">
+            <default display="r" />
+            <shifted display="R" />
+            <mod2    display="Ę" />
+        </key>
+        <key obey-caps="true">
+            <default display="t" />
+            <shifted display="T" />
+        </key>
+        <key obey-caps="true">
+            <default display="y" />
+            <shifted display="Y" />
+        </key>
+        <key obey-caps="true">
+            <default display="u" />
+            <shifted display="U" />
+        </key>
+        <key obey-caps="true">
+            <default display="i" />
+            <shifted display="I" />
+        </key>
+        <key obey-caps="true">
+            <default display="o" />
+            <shifted display="O" />
+            <mod2    display="ó" />
+        </key>
+        <key obey-caps="true">
+            <default display="p" />
+            <shifted display="P" />
+            <mod2    display="Ó" />
+        </key>
+	<key width="1500">
+            <default display="⇦" action="backspace" />
+        </key>
+    </row>
+
+    <row>
+        <key obey-caps="true">
+            <default display="a" />
+            <shifted display="A" />
+            <mod2    display="ą" />
+        </key>
+        <key obey-caps="true">
+            <default display="s" />
+            <shifted display="S" />
+            <mod2    display="Ą" />
+        </key>
+        <key obey-caps="true">
+            <default display="d" />
+            <shifted display="D" />
+            <mod2    display="ś" />
+        </key>
+        <key obey-caps="true">
+            <default display="f" />
+            <shifted display="F" />
+            <mod2    display="Ś" />
+        </key>
+        <key obey-caps="true">
+            <default display="g" />
+            <shifted display="G" />
+        </key>
+        <key obey-caps="true">
+            <default display="h" />
+            <shifted display="H" />
+            <mod2    display="ń" />
+        </key>
+        <key obey-caps="true">
+            <default display="j" />
+            <shifted display="J" />
+            <mod2    display="Ń" />
+        </key>
+        <key obey-caps="true">
+            <default display="k" />
+            <shifted display="K" />
+            <mod2    display="ł" />
+        </key>
+        <key obey-caps="true">
+            <default display="l" />
+            <shifted display="L" />
+            <mod2    display="Ł" />
+        </key>
+        <key width="1500">
+            <default display="⏎" action="return"/>
+        </key>
+    </row>
+
+    <row>
+         <key width="1500">
+            <default display="⇧" action="modifier:shift" />
+            <caps    display="⬆" action="modifier:shift" />
+        </key>
+        <key>
+            <default display="⇪" action="modifier:mod2"/>
+        </key>
+        <key obey-caps="true">
+            <default display="z" />
+            <shifted display="Z" />
+            <mod2    display="ż" />
+        </key>
+        <key obey-caps="true">
+            <default display="x" />
+            <shifted display="X" />
+            <mod2    display="Ż" />
+        </key>
+        <key obey-caps="true">
+            <default display="c" />
+            <shifted display="C" />
+            <mod2    display="ź" />
+        </key>
+        <key obey-caps="true">
+            <default display="v" />
+            <shifted display="V" />
+            <mod2    display="Ź" />
+        </key>
+        <key obey-caps="true">
+            <default display="b" />
+            <shifted display="B" />
+            <mod2    display="ć" />
+        </key>
+        <key obey-caps="true">
+            <default display="n" />
+            <shifted display="N" />
+            <mod2    display="Ć" />
+        </key>
+        <key obey-caps="true">
+            <default display="m" />
+            <shifted display="M" />
+        </key>
+        <key width="3000">
+            <default display=" " action="space" />
+        </key>
+    </row>
+</layout>
+</keyboard>

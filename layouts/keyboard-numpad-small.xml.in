@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<!--
+
+ Simple Numeric keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+<options>
+<!-- not yet implemented -->
+</options>
+
+<layout id="LabQuest Numeric Simple">
+
+  <row>
+    <key>
+        <default  display="7" />
+    </key>
+    <key>
+         <default display="8" />
+    </key>
+    <key>
+        <default  display="9" />
+    </key>
+    <space/>
+    <key>
+        <default display="⇦" action="backspace" />
+    </key>
+  </row>
+
+  <row>
+    <key>
+        <default display="4" />
+    </key>
+    <key>
+        <default display="5" />
+    </key>
+    <key>
+        <default display="6" />
+    </key>
+    <key>
+        <default display="±" action="-"/>
+    </key>
+    <key>
+        <default display="e" />
+    </key>
+  </row>
+
+  <row>
+    <key>
+        <default display="1" />
+    </key>
+    <key>
+        <default display="2" />
+    </key>
+    <key>
+        <default display="3" />
+    </key>
+    <key>
+        <default display="0" />
+    </key>
+    <key>
+        <default display="." />
+    </key>
+  </row>
+</layout>
+</keyboard>

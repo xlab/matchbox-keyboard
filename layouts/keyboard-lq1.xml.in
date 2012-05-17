@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keyboard>
+
+<layout id="default keyboard">
+
+  <row>
+
+    <key width="2000">
+      <default display="image:@datadir@/arrows.png" action="tab" />
+    </key>
+
+    <space width="50" extended="true"/>
+
+    <key obey-caps='true' fill='false'>
+      <default display="q" />
+      <shifted display="Q" />
+      <mod1    display="à" action="xkeysym:agrave"/>
+      <mod2    display="À" action="xkeysym:Agrave"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="w" />
+      <shifted display="W" />
+      <mod1    display="á" action="xkeysym:aacute"/>
+      <mod2    display="Á" action="xkeysym:Aacute"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="e" />
+      <shifted display="E" />
+      <mod1    display="â" action="xkeysym:acircumflex"/>
+      <mod2    display="Â" action="xkeysym:Acircumflex"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="r" />
+      <shifted display="R" />
+      <mod1    display="ã" action="xkeysym:atilde"/>ss
+      <mod2    display="Ã" action="xkeysym:Atilde"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="t" />
+      <shifted display="T" />
+      <mod1    display="ä" action="xkeysym:adiaeresis"/>
+      <mod2    display="Ä" action="xkeysym:Adiaeresis"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="y" />
+      <shifted display="Y" />
+      <mod1    display="å" action="xkeysym:aring"/>
+      <mod2    display="Å" action="xkeysym:Aring"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="u" />
+      <shifted display="U" />
+      <mod1    display="æ" action="xkeysym:ae"/>
+      <mod2    display="Æ" action="xkeysym:AE"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="i" />
+      <shifted display="I" />
+      <mod1    display="ç" action="xkeysym:ccedilla"/>
+      <mod2    display="Ç" action="xkeysym:Ccedilla"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="o" />
+      <shifted display="O" />
+      <mod1    display="è" action="xkeysym:egrave"/>
+      <mod2    display="È" action="xkeysym:Egrave"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="p" />
+      <shifted display="P" />
+      <mod1    display="é" action="xkeysym:eacute"/>
+      <mod2    display="É" action="xkeysym:Eacute"/>
+    </key>
+    <key width="1000">
+      <default display="image:@datadir@/arrow.png" action="backspace" />
+    </key>
+
+    <space width="50" extended="true"/>
+
+    <key fill='false'>
+      <default display="7" />
+      <shifted display="&amp;" />
+      <mod1    display="image:@datadir@/super_7.png" action="xkeysym:sevensuperior" />
+      <mod2    display="image:@datadir@/sub_7.png" action="xkeysym:sevensubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="8" />
+      <shifted display="*" />
+      <mod1    display="image:@datadir@/super_8.png" action="xkeysym:eightsuperior" />
+      <mod2    display="image:@datadir@/sub_8.png" action="xkeysym:eightsubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="9" />
+      <shifted display="image:@datadir@/degree.png" action="°" />
+      <mod1    display="image:@datadir@/super_9.png" action="xkeysym:ninesuperior" />
+      <mod2    display="image:@datadir@/sub_9.png" action="xkeysym:ninesubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="÷" />
+      <shifted display="≤" />
+      <mod1    display="ρ" action="xkeysym:Greek_rho"/>
+      <mod2    display="λ" action="xkeysym:Greek_lambda"/>
+    </key>
+
+  </row>
+
+  <row>
+
+    <space width="50" extended="true"/>
+
+    <key obey-caps='true' fill='false'>
+      <default display="a" />
+      <shifted display="A" />
+      <mod1    display="ê" action="xkeysym:ecircumflex"/>
+      <mod2    display="Ê" action="xkeysym:Ecircumflex"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="s" />
+      <shifted display="S" />
+      <mod1    display="ë" action="xkeysym:ediaeresis"/>
+      <mod2    display="Ë" action="xkeysym:Ediaeresis"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="d" />
+      <shifted display="D" />
+      <mod1    display="ì" action="xkeysym:igrave"/>
+      <mod2    display="Ì" action="xkeysym:Igrave"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="f" />
+      <shifted display="F" />
+      <mod1    display="í" action="xkeysym:iacute"/>
+      <mod2    display="Í" action="xkeysym:Iacute"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="g" />
+      <shifted display="G" />
+      <mod1    display="î" action="xkeysym:icircumflex"/>
+      <mod2    display="Î" action="xkeysym:Icircumflex"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="h" />
+      <shifted display="H" />
+      <mod1    display="ï" action="xkeysym:idiaeresis"/>
+      <mod2    display="Ï" action="xkeysym:Idiaeresis"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="j" />
+      <shifted display="J" />
+      <mod1    display="ð" action="xkeysym:eth"/>
+      <mod2    display="Ð" action="xkeysym:ETH"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="k" />
+      <shifted display="K" />
+      <mod1    display="ñ" action="xkeysym:ntilde"/>
+      <mod2    display="Ñ" action="xkeysym:Ntilde"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="l" />
+      <shifted display="L" />
+      <mod1    display="ò" action="xkeysym:ograve"/>
+      <mod2    display="Ò" action="xkeysym:Ograve"/>
+    </key>
+    <key fill='false'>
+      <default display=";" />
+      <shifted display=":" />
+      <mod1    display="ó" action="xkeysym:oacute"/>
+      <mod2    display="Ó" action="xkeysym:Oacute"/>
+    </key>
+    <key fill='false'>
+      <default display="'" />
+      <shifted display='"' />
+      <mod1    display="ô" action="xkeysym:ocircumflex"/>
+      <mod2    display="Ô" action="xkeysym:Ocircumflex"/>
+    </key>
+
+    <space width="50" extended="true"/>
+
+    <key fill='false'>
+      <default display="4" />
+      <shifted display="$" />
+      <mod1    display="image:@datadir@/super_4.png" action="xkeysym:foursuperior" />
+      <mod2    display="image:@datadir@/sub_4.png" action="xkeysym:foursubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="5" />
+      <shifted display="%" />
+      <mod1    display="image:@datadir@/super_5.png" action="xkeysym:fivesuperior" />
+      <mod2    display="image:@datadir@/sub_5.png" action="xkeysym:fivesubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="6" />
+      <shifted display="^" />
+      <mod1    display="image:@datadir@/super_6.png" action="xkeysym:sixsuperior" />
+      <mod2    display="image:@datadir@/sub_6.png" action="xkeysym:sixsubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="×" />
+      <shifted display="≥" />
+      <mod1    display="μ" action="xkeysym:Greek_mu"/>
+      <mod2    display="Ω" action="xkeysym:Greek_OMEGA"/>
+    </key>
+
+  </row>
+
+  <row>
+
+    <key width="2000">
+      <default display="image:@datadir@/shift.png" action="modifier:shift" />
+      <caps display="image:@datadir@/shift_caps.png" action="modifier:shift" />
+    </key>
+
+    <space width="50" extended="true"/>
+
+   <key obey-caps='true' fill='false'>
+      <default display="z" />
+      <shifted display="Z" />
+      <mod1    display="õ" action="xkeysym:otilde"/>
+      <mod2    display="Õ" action="xkeysym:Otilde"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="x" />
+      <shifted display="X" />
+      <mod1    display="ö" action="xkeysym:odiaeresis"/>
+      <mod2    display="Ö" action="xkeysym:Odiaeresis"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="c" />
+      <shifted display="C" />
+      <mod1    display="ø" action="xkeysym:oslash"/>
+      <mod2    display="Ø" action="xkeysym:Oslash"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="v" />
+      <shifted display="V" />
+      <mod1    display="ù" action="xkeysym:ugrave"/>
+      <mod2    display="Ù" action="xkeysym:Ugrave"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="b" />
+      <shifted display="B" />
+      <mod1    display="ú" action="xkeysym:uacute"/>
+      <mod2    display="Ú" action="xkeysym:Uacute"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="n" />
+      <shifted display="N" />
+      <mod1    display="û" action="xkeysym:ucircumflex"/>
+      <mod2    display="Û" action="xkeysym:Ucircumflex"/>
+    </key>
+    <key obey-caps='true' fill='false'>
+      <default display="m" />
+      <shifted display="M" />
+      <mod1    display="ü" action="xkeysym:udiaeresis"/>
+      <mod2    display="Ü" action="xkeysym:Udiaeresis"/>
+    </key>
+    <key fill='false'>
+      <default display="," />
+      <shifted display="&lt;" action="xkeysym:less"/>
+      <mod1    display="ý" action="xkeysym:yacute"/>
+      <mod2    display="Ý" action="xkeysym:Yacute"/>
+    </key>
+    <key fill='false'>
+      <default display="." />
+      <shifted display="&gt;" action="xkeysym:greater"/>
+      <mod1    display="þ" action="xkeysym:thorn"/>
+      <mod2    display="Þ" action="xkeysym:THORN"/>
+    </key>
+
+    <key width="2150">
+      <default display="image:@datadir@/return.png" action="return"/>
+    </key>
+
+    <space width="100" extended="true"/>
+
+    <key fill='false'>
+      <default display="1" />
+      <shifted display="!" />
+      <mod1    display="image:@datadir@/super_1.png" action="xkeysym:onesuperior" />
+      <mod2    display="image:@datadir@/sub_1.png" action="xkeysym:onesubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="2" />
+      <shifted display="@" />
+      <mod1    display="image:@datadir@/super_2.png" action="xkeysym:twosuperior" />
+      <mod2    display="image:@datadir@/sub_2.png" action="xkeysym:twosubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="3" />
+      <shifted display="#" />
+      <mod1    display="image:@datadir@/super_3.png" action="xkeysym:threesuperior" />
+      <mod2    display="image:@datadir@/sub_3.png" action="xkeysym:threesubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="-" />
+      <shifted display="_" />
+      <mod1    display="image:@datadir@/super_minus.png" action="¯" />
+      <mod2    display="image:@datadir@/sub_minus.png" action="₋" />
+    </key>
+
+  </row>
+
+  <row>
+
+    <space width="50" extended="true"/>
+
+    <key width="750">
+      <default display="image:@datadir@/shift_2.png" action="modifier:mod1"/>
+    </key>
+
+    <space width="50" extended="true"/>
+
+    <key width="750">
+      <default display="image:@datadir@/shift_3.png" action="modifier:mod2"/>
+    </key>
+
+    <space width="1000" extended="true"/>
+
+
+    <key fill='false'>
+      <default display="(" />
+      <shifted display="{" />
+      <mod1    display="[" />
+      <mod2    display="ω" action="xkeysym:Greek_omega"/>
+    </key>
+    <key fill='false'>
+      <default display=")" />
+      <shifted display="}" />
+      <mod1    display="]" />
+      <mod2    display="ϕ" action="xkeysym:Greek_phi"/>
+    </key>
+
+    <space width="50" extended="true"/>
+
+    <key width="4600">
+      <default display=" " action="space" />
+    </key>
+
+    <space width="50" extended="true"/>
+
+    <key fill='false'>
+      <default display="\" />
+      <shifted display="|" />
+      <mod1    display="ÿ" action="xkeysym:ydiaeresis"/>
+      <mod2    display="ß" action="xkeysym:ssharp"/>
+    </key>
+    <key fill='false'>
+      <default display="/" />
+      <shifted display="?" />
+      <mod1    display="¿" />
+      <mod2    display="¡" />
+    </key>
+    <key fill='false'>
+      <default display="π" action="xkeysym:Greek_pi"/>
+      <shifted display="Δ" action="xkeysym:Greek_DELTA"/>
+      <mod1    display="α" action="xkeysym:Greek_alpha"/>
+      <mod2    display="β" action="xkeysym:Greek_beta"/>
+    </key>
+
+
+    <space width="1000" extended="true"/>
+
+    <key fill='false'>
+      <default display="." />
+      <shifted display="√" />
+      <mod1    display="θ" action="xkeysym:Greek_theta"/>
+      <mod2    display="∫" />
+    </key>
+
+    <key fill='false'>
+      <default display="0" />
+      <shifted display="∞"/>
+      <mod1    display="image:@datadir@/super_0.png" action="xkeysym:zerosuperior" />
+      <mod2    display="image:@datadir@/sub_0.png" action="xkeysym:zerosubscript" />
+    </key>
+
+    <key fill='false'>
+      <default display="=" />
+      <shifted display="≠" />
+      <mod1    display="~" />
+      <mod2    display="→" />
+    </key>
+
+    <key fill='false'>
+      <default display="+" />
+      <shifted display="±" />
+      <mod1    display="image:@datadir@/super_plus.png" action="⁺" />
+      <mod2    display="image:@datadir@/sub_plus.png" action="₊" />
+    </key>
+
+  </row>
+
+</layout>
+
+</keyboard>
