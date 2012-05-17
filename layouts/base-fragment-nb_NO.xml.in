@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fragment>
+
+<!--
+
+ Norwegian keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+
+-->
+
+    <row>
+        <key obey-caps="true">
+            <default display="q" />
+            <shifted display="Q" />
+        </key>
+        <key obey-caps="true">
+            <default display="w" />
+            <shifted display="W" />
+        </key>
+        <key obey-caps="true">
+            <default display="e" />
+            <shifted display="E" />
+        </key>
+        <key obey-caps="true">
+            <default display="r" />
+            <shifted display="R" />
+        </key>
+        <key obey-caps="true">
+            <default display="t" />
+            <shifted display="T" />
+        </key>
+        <key obey-caps="true">
+            <default display="y" />
+            <shifted display="Y" />
+        </key>
+        <key obey-caps="true">
+            <default display="u" />
+            <shifted display="U" />
+        </key>
+        <key obey-caps="true">
+            <default display="i" />
+            <shifted display="I" />
+        </key>
+        <key obey-caps="true">
+            <default display="o" />
+            <shifted display="O" />
+        </key>
+        <key obey-caps="true">
+            <default display="p" />
+            <shifted display="P" />
+        </key>
+        <key obey-caps="true">
+            <default display="å" />
+            <shifted display="Å" />
+        </key>
+        <key obey-caps="true">
+            <default display="ü" />
+            <shifted display="ˆ" action="xkeysym:dead_circumflex"/>
+        </key>
+	<key width="1500">
+            <default display="⇦" action="backspace" />
+        </key>
+    </row>
+
+    <row>
+        <key obey-caps="true">
+            <default display="a" />
+            <shifted display="A" />
+        </key>
+        <key obey-caps="true">
+            <default display="s" />
+            <shifted display="S" />
+        </key>
+        <key obey-caps="true">
+            <default display="d" />
+            <shifted display="D" />
+        </key>
+        <key obey-caps="true">
+            <default display="f" />
+            <shifted display="F" />
+        </key>
+        <key obey-caps="true">
+            <default display="g" />
+            <shifted display="G" />
+        </key>
+        <key obey-caps="true">
+            <default display="h" />
+            <shifted display="H" />
+        </key>
+        <key obey-caps="true">
+            <default display="j" />
+            <shifted display="J" />
+        </key>
+        <key obey-caps="true">
+            <default display="k" />
+            <shifted display="K" />
+        </key>
+        <key obey-caps="true">
+            <default display="l" />
+            <shifted display="L" />
+        </key>
+        <key obey-caps="true">
+            <default display="ø" />
+            <shifted display="Ø" />
+        </key>
+        <key obey-caps="true">
+            <default display="æ" />
+            <shifted display="Æ" />
+        </key>
+        <key width="1500">
+            <default display="⏎" action="return"/>
+        </key>
+    </row>
+
+    <row>
+         <key width="1500">
+            <default display="⇧" action="modifier:shift" />
+            <caps    display="⬆" action="modifier:shift" />
+        </key>
+        <key obey-caps="true">
+            <default display="z" />
+            <shifted display="Z" />
+        </key>
+        <key obey-caps="true">
+            <default display="x" />
+            <shifted display="X" />
+        </key>
+        <key obey-caps="true">
+            <default display="c" />
+            <shifted display="C" />
+        </key>
+        <key obey-caps="true">
+            <default display="v" />
+            <shifted display="V" />
+        </key>
+        <key obey-caps="true">
+            <default display="b" />
+            <shifted display="B" />
+        </key>
+        <key obey-caps="true">
+            <default display="n" />
+            <shifted display="N" />
+        </key>
+        <key obey-caps="true">
+            <default display="m" />
+            <shifted display="M" />
+        </key>
+        <key obey-caps="true">
+            <default display="¤" />
+            <shifted display="ˋ" action="xkeysym:dead_grave"/>
+        </key>
+        <key width="3000">
+            <default display=" " action="space" />
+        </key>
+    </row>
+</fragment>

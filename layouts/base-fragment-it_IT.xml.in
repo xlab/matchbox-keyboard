@@ -1,53 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<keyboard>
+<fragment>
 
 <!--
 
- Danish ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+ Italian ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
 
 -->
-
-<options>
-<!-- not yet implemented -->
-</options>
-
-<layout id="LabQuest ALPHA:da_DK">
 
     <row>
         <key obey-caps="true">
             <default display="q" />
             <shifted display="Q" />
-            <mod2    display="ˋ" action="xkeysym:dead_grave"/>
+            <mod2    display="ˆ" action="xkeysym:dead_circumflex"/>
         </key>
         <key obey-caps="true">
             <default display="w" />
             <shifted display="W" />
-            <mod2    display="ˊ" action="xkeysym:dead_acute"/>
+            <mod2    display="ˋ" action="xkeysym:dead_grave"/>
         </key>
         <key obey-caps="true">
             <default display="e" />
             <shifted display="E" />
-            <mod2    display="ˆ" action="xkeysym:dead_circumflex"/>
+            <mod2    display="ˊ" action="xkeysym:dead_acute"/>
         </key>
         <key obey-caps="true">
             <default display="r" />
             <shifted display="R" />
-           <mod2    display="¨" action="xkeysym:dead_diaeresis"/>
+            <mod2    display="¸" action="xkeysym:dead_cedilla"/>
         </key>
         <key obey-caps="true">
             <default display="t" />
             <shifted display="T" />
-           <mod2    display="˜" action="xkeysym:dead_tilde"/>
         </key>
         <key obey-caps="true">
             <default display="y" />
             <shifted display="Y" />
-            <mod2    display="§" />
         </key>
         <key obey-caps="true">
             <default display="u" />
             <shifted display="U" />
-            <mod2    display="¤" />
         </key>
         <key obey-caps="true">
             <default display="i" />
@@ -62,8 +53,9 @@
             <shifted display="P" />
         </key>
         <key obey-caps="true">
-            <default display="å" />
-            <shifted display="Å" />
+            <default display="è" />
+            <shifted display="é" />
+            <mod2    display="ì" />
         </key>
 	<key width="1500">
             <default display="⇦" action="backspace" />
@@ -108,12 +100,12 @@
             <shifted display="L" />
         </key>
         <key obey-caps="true">
-            <default display="æ" />
-            <shifted display="Æ" />
+            <default display="ò" />
+            <shifted display="ç" />
         </key>
         <key obey-caps="true">
-            <default display="ø" />
-            <shifted display="Ø" />
+            <default display="à" />
+            <shifted display="ù" />
         </key>
         <key width="1500">
             <default display="⏎" action="return"/>
@@ -131,7 +123,6 @@
         <key obey-caps="true">
             <default display="z" />
             <shifted display="Z" />
-
         </key>
         <key obey-caps="true">
             <default display="x" />
@@ -161,5 +152,4 @@
             <default display=" " action="space" />
         </key>
     </row>
-</layout>
-</keyboard>
+</fragment>

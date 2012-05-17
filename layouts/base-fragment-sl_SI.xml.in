@@ -1,71 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<keyboard>
+<fragment>
 
 <!--
 
- Estonian ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+ Slovenian ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
 
 -->
-
-<options>
-<!-- not yet implemented -->
-</options>
-
-<layout id="LabQuest ALPHA:et_EE">
 
     <row>
         <key obey-caps="true">
             <default display="q" />
             <shifted display="Q" />
-            <mod2    display="˜" action="xkeysym:dead_tilde"/>
+            <mod2    display="¨" action="xkeysym:dead_diaeresis"/>
         </key>
         <key obey-caps="true">
             <default display="w" />
             <shifted display="W" />
-            <mod2    display="ˇ" action="xkeysym:dead_caron"/>
+            <mod2    display="¸" action="xkeysym:dead_cedilla"/>
         </key>
         <key obey-caps="true">
             <default display="e" />
             <shifted display="E" />
-            <mod2    display="ˋ" action="xkeysym:dead_grave"/>
+            <mod2    display="ˇ" action="xkeysym:dead_caron"/>
         </key>
         <key obey-caps="true">
             <default display="r" />
             <shifted display="R" />
-            <mod2    display="ˊ" action="xkeysym:dead_acute"/>
+            <mod2    display="˘" action="xkeysym:dead_breve"/>
         </key>
         <key obey-caps="true">
             <default display="t" />
             <shifted display="T" />
-            <mod2    display="ˆ" action="xkeysym:dead_circumflex"/>
+            <mod2    display="˚" action="xkeysym:dead_abovering"/>
         </key>
         <key obey-caps="true">
-            <default display="y" />
-            <shifted display="Y" />
+            <default display="z" />
+            <shifted display="Z" />
+            <mod2    display="˛" action="xkeysym:dead_ogonek"/>
         </key>
         <key obey-caps="true">
             <default display="u" />
             <shifted display="U" />
+            <mod2    display="ˋ" action="xkeysym:dead_grave"/>
         </key>
         <key obey-caps="true">
             <default display="i" />
             <shifted display="I" />
+            <mod2    display="˙" action="xkeysym:dead_abovedot"/>
         </key>
         <key obey-caps="true">
             <default display="o" />
             <shifted display="O" />
+            <mod2    display="ˊ" action="xkeysym:dead_acute"/>
         </key>
         <key obey-caps="true">
             <default display="p" />
             <shifted display="P" />
+            <mod2    display="˝" action="xkeysym:dead_doubleacute"/>
+         </key>
+        <key obey-caps="true">
+            <default display="š" />
+            <shifted display="Š" />
+            <mod2    display="ˆ" action="xkeysym:dead_circumflex"/>
         </key>
         <key obey-caps="true">
-            <default display="ü" />
-            <shifted display="Ü" />
-        </key>
-        <key obey-caps="true">
-            <default display="õ" />
-            <shifted display="Õ" />
+            <default display="đ" />
+            <shifted display="Ð" />
         </key>
 	<key width="1500">
             <default display="⇦" action="backspace" />
@@ -110,12 +110,17 @@
             <shifted display="L" />
         </key>
         <key obey-caps="true">
-            <default display="ö" />
-            <shifted display="Ö" />
+            <default display="č" />
+            <shifted display="Č" />
         </key>
         <key obey-caps="true">
-            <default display="ä" />
-            <shifted display="Ä" />
+            <default display="ć" />
+            <shifted display="Ć" />
+            <mod2    display="ß" />
+        </key>
+        <key obey-caps="true">
+            <default display="ž" />
+            <shifted display="Ž" />
         </key>
         <key width="1500">
             <default display="⏎" action="return"/>
@@ -131,8 +136,8 @@
             <default display="⇪" action="modifier:mod2"/>
         </key>
         <key obey-caps="true">
-            <default display="z" />
-            <shifted display="Z" />
+            <default display="y" />
+            <shifted display="Y" />
         </key>
         <key obey-caps="true">
             <default display="x" />
@@ -162,5 +167,4 @@
             <default display=" " action="space" />
         </key>
     </row>
-</layout>
-</keyboard>
+</fragment>

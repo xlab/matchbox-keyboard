@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<keyboard>
+<fragment>
 
 <!--
 
  Catalan ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
 
 -->
-
-<options>
-<!-- not yet implemented -->
-</options>
-
-<layout id="LabQuest ALPHA:ca_ES">
 
     <row>
         <key obey-caps="true">
@@ -163,5 +157,4 @@
             <default display=" " action="space" />
         </key>
     </row>
-</layout>
-</keyboard>
+</fragment>

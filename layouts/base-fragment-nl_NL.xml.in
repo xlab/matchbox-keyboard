@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<keyboard>
+<fragment>
 
 <!--
 
- French ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
+ Dutch ALPHA keyboard layout for Vernier LabQuest by ihonohan@vernier.com
 
 -->
-
-<options>
-<!-- not yet implemented -->
-</options>
-
-<layout id="LabQuest ALPHA:fr_FR">
 
     <row>
         <key obey-caps="true">
             <default display="a" />
             <shifted display="A" />
-            <mod2    display="˜" action="xkeysym:dead_tilde"/>
+            <mod2    display="¸" action="xkeysym:dead_cedilla"/>
         </key>
         <key obey-caps="true">
             <default display="z" />
@@ -42,7 +36,6 @@
         <key obey-caps="true">
             <default display="y" />
             <shifted display="Y" />
-            <mod2    display="¸" action="xkeysym:dead_cedilla"/>
         </key>
         <key obey-caps="true">
             <default display="u" />
@@ -73,6 +66,7 @@
         <key obey-caps="true">
             <default display="s" />
             <shifted display="S" />
+            <mod2    display="ß" />
         </key>
         <key obey-caps="true">
             <default display="d" />
@@ -105,10 +99,6 @@
         <key obey-caps="true">
             <default display="m" />
             <shifted display="M" />
-        </key>
-        <key obey-caps="true">
-            <default display="ù" />
-            <shifted display="ç" />
         </key>
         <key width="1500">
             <default display="⏎" action="return"/>
@@ -151,5 +141,4 @@
             <default display=" " action="space" />
         </key>
     </row>
-</layout>
-</keyboard>
+</fragment>

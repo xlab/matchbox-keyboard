@@ -18,12 +18,38 @@ IMGS  = arrow.png      arrows.png       \
         super_minus.png	sub_minus.png   \
         delta_cap.png	degree.png
 
-variant_in_files = keyboard.xml.in keyboard-lq1.xml.in keyboard-symbol.xml.in keyboard-numpad-extended.xml.in keyboard-numpad-small.xml.in    \
-                   keyboard-en_US.xml.in keyboard-ar_EG.xml.in keyboard-ca_ES.xml.in keyboard-es_ES.xml.in keyboard-ru_RU.xml.in \
-                   keyboard-cs_CZ.xml.in keyboard-da_DK.xml.in keyboard-de_DE.xml.in keyboard-el_GR.xml.in keyboard-et_EE.xml.in \
-                   keyboard-fi_FI.xml.in keyboard-fr_FR.xml.in keyboard-it_IT.xml.in keyboard-lv_LV.xml.in keyboard-nb_NO.xml.in \
-                   keyboard-nl_NL.xml.in keyboard-pl_PL.xml.in keyboard-pt_PT.xml.in keyboard-sk_SK.xml.in keyboard-sl_SI.xml.in \
-                   keyboard-sv_SE.xml.in keyboard-tr_TR.xml.in \
+fragment_in_files = \
+		base-fragment.xml.in	   \
+		base-fragment-en_US.xml.in \
+		base-fragment-ar_EG.xml.in \
+		base-fragment-ca_ES.xml.in \
+		base-fragment-es_ES.xml.in \
+		base-fragment-ru_RU.xml.in \
+		base-fragment-cs_CZ.xml.in \
+		base-fragment-da_DK.xml.in \
+		base-fragment-de_DE.xml.in \
+		base-fragment-el_GR.xml.in \
+		base-fragment-et_EE.xml.in \
+		base-fragment-fi_FI.xml.in \
+		base-fragment-fr_FR.xml.in \
+		base-fragment-it_IT.xml.in \
+		base-fragment-lv_LV.xml.in \
+		base-fragment-nb_NO.xml.in \
+		base-fragment-nl_NL.xml.in \
+		base-fragment-pl_PL.xml.in \
+		base-fragment-pt_PT.xml.in \
+		base-fragment-sk_SK.xml.in \
+		base-fragment-sl_SI.xml.in \
+		base-fragment-sv_SE.xml.in \
+		base-fragment-tr_TR.xml.in \
+		$(NULL)
+
+variant_in_files = $(fragment_in_files) \
+		keyboard.xml.in \
+		keyboard-lq1.xml.in \
+		keyboard-symbol.xml.in \
+		keyboard-numpad-extended.xml.in \
+		keyboard-numpad-small.xml.in    \
                   $(NULL)
 
 %.xml.tmp: %.xml.in
@@ -46,6 +72,6 @@ keyboards_DATA    = $(variant_DATA) $(IMGS)
 clean-local:
 	rm -fr oh-docbook-to-pdf
 
-EXTRA_DIST = $(IMGS) $(variant_in_files)
+EXTRA_DIST = $(IMGS) $(variant_in_files) $(fragment_in_files)
 
 CLEANFILES = $(variant_DATA) $(variant_tmp_files)
