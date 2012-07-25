@@ -2,8 +2,10 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *  Hacked by Maxim Kouprianov <me@kc.vc>
  *
  *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *  Modifications (c) 2009 Maxim Kouprianov - http://kc.vc
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,13 +24,23 @@
 static void
 mb_kbd_usage (char *progname)
 {
-  fprintf(stderr, "Usage:\n   %s [Options ] [ Layout Variant ]\n", progname);
-  fprintf(stderr, "\nOptions are;\n"
+  fprintf(stderr, "Usage:\n   %s [options] [layout]\n", progname);
+  fprintf(stderr, "\nSupported options are;\n"
 	  "   -xid,--xid            Print window ID to stdout ( for embedding )\n"
-	  "   -d,--daemon           Run in 'daemon' mode (for remote control)\n"
-	  "   -o,--orientation <portrait|landscape>\n"
-          "                         Use to limit visibility with screen orientation \n");
-  fprintf(stderr, "\nmatchbox-keyboard %s \nCopyright (C) 2007 OpenedHand Ltd.\n", VERSION);
+	  "   -d,--daemon      Run in 'daemon' mode (for remote control)\n"
+	  "   -t, --gestures	Enable gestures\n"
+	  "------------------------- UI Tweaks & Positioning --------------------\n"
+	  "   -p,--key-padding <px>  Key padding\n"
+	  "   -c,--col-spacing <px>	Space between columns\n"
+	  "   -r,--row-spacing <px>	Space between rows\n"
+	  "   -f,--font-family <name>	Font family (ex: sans, droidsans)\n"
+	  "   -s,--font-size <pt>	Font size\n"
+	  "   -b,--non-bold	Switch to normal weight\n"
+	  "   -v,--override	Absolute positioning on the screen\n"
+	  "   -i,--invert	Attach keyboard to the top instead of bottom\n"
+	  "   -g,--geometry <HxW.y.x>	Specify keyboard's geometry \n (ex: -g 200x800; -g 0x800.200.0; -g 0x0.0.50; zeroes mean \"by-default\")\n"
+);
+  fprintf(stderr, "\nmatchbox-keyboard 1.5 \nCopyright (C) 2007 OpenedHand Ltd.\nModifications (C) 2009 Maxim Kouprianov ( http://me@kc.vc )\nSpecial thanks to Paguro ( http://smartqmid.ru )\n\n");
 
   exit(-1);
 }
@@ -38,25 +50,100 @@ mb_kbd_new (int argc, char **argv)
 {
   MBKeyboard *kb = NULL;
   char       *variant = NULL; 
-  Bool        want_embedding = False, want_daemon = False;
-  int         i;
+  Bool        want_embedding = False, want_daemon = False, override=False,invert=False,gest=False;
+  int         i; 
+  FILE  *cfg;
+  char   cfg_path[1024];
+  char   gm[20];
+  char   vr[20];
+  int		iHeightPercent = MATCHBOX_KBD_DEF_HEIGHT_P;
+  char *geometry = "";
   MBKeyboardDisplayOrientation orientation = MBKeyboardDisplayAny;
 
   kb = util_malloc0(sizeof(MBKeyboard));
 
-  kb->key_border = 1;
-  kb->key_pad    = 2;
+  kb->key_border = 0;
+  kb->key_pad     = 2;
   kb->key_margin = 0;
 
-  kb->col_spacing = 5;
-  kb->row_spacing = 5;
+  kb->col_spacing = 2;
+  kb->row_spacing = 2;
 
-  kb->font_family  = strdup("sans");
-  kb->font_pt_size = 5;
+  kb->font_family  = strdup("droidsans");
+  kb->font_pt_size = 10;
   kb->font_variant = strdup("bold");
+
+  snprintf(cfg_path, 1024, "%s/.matchbox/kb_config", getenv("HOME"));
+ cfg=fopen(cfg_path,"r");
+ if(cfg){
+ fscanf(cfg,"%d %d %d %d %s %d",&want_daemon,&invert,&gest,&override,&gm,&kb->font_pt_size,&vr);
+ }
+geometry=gm;
+variant=vr;
 
   for (i = 1; i < argc; i++) 
     {
+
+//------ getting params --------
+if (streq ("-f", argv[i]) || streq ("--font-family", argv[i])) 
+	{
+		 if (++i>=argc) mb_kbd_usage (argv[0]);
+		kb->font_family  = strdup(argv[i]);
+		continue;
+	}
+if (streq ("-s", argv[i]) || streq ("--font-size", argv[i])) 
+	{
+		 if (++i>=argc) mb_kbd_usage (argv[0]);
+		kb->font_pt_size = atoi(argv[i]);
+		continue;
+	}
+if (streq ("-b", argv[i]) || streq ("--non-bold", argv[i])) 
+	{
+		kb->font_variant = strdup("regular");
+		continue;
+	}
+if (streq ("-p", argv[i]) || streq ("--key-padding", argv[i])) 
+	{
+		 if (++i>=argc) mb_kbd_usage (argv[0]);
+		kb->key_pad = atoi(argv[i]);
+		continue;
+	}
+if (streq ("-r", argv[i]) || streq ("--row-spacing", argv[i])) 
+	{
+		 if (++i>=argc) mb_kbd_usage (argv[0]);
+		 kb->row_spacing = atoi(argv[i]);
+		continue;
+	}
+if (streq ("-c", argv[i]) || streq ("--col-spacing", argv[i])) 
+	{
+		 if (++i>=argc) mb_kbd_usage (argv[0]);
+		kb->col_spacing = atoi(argv[i]);
+		continue;
+	}
+
+      if (streq ("-v", argv[i]) || streq ("--override", argv[i])) 
+	{
+	  override = True;
+	  continue;
+	}
+      if (streq ("-t", argv[i]) || streq ("--gestures", argv[i])) 
+	{
+	  gest= True;
+	  continue;
+	}
+      if (streq ("-i", argv[i]) || streq ("--invert", argv[i])) 
+	{
+	  invert = True;
+	  continue;
+	}
+	 if (streq ("-g", argv[i]) || streq ("--geometry", argv[i])) 
+	{
+	  if (++i>=argc) mb_kbd_usage (argv[0]);
+	  geometry = argv[i]; 
+	  continue;
+	}
+//--------------
+
       if (streq ("-xid", argv[i]) || streq ("--xid", argv[i])) 
 	{
 	  want_embedding = True;
@@ -67,6 +154,13 @@ mb_kbd_new (int argc, char **argv)
 	{
 	  want_daemon = True;
 	  continue;
+	}
+
+	if (streq ("-h", argv[i]) || streq ("--help", argv[i])) 
+	{
+		 if (++i>=argc) mb_kbd_usage (argv[0]);
+		iHeightPercent = atoi(argv[i]);
+		continue;
 	}
 
       if (streq ("-o", argv[i]) || streq ("--orientation", argv[i]))
@@ -90,7 +184,7 @@ mb_kbd_new (int argc, char **argv)
       if (i == (argc-1) && argv[i][0] != '-')
 	variant = argv[i];
       else
-	mb_kbd_usage(argv[0]);
+	if(variant==NULL){mb_kbd_usage(argv[0]);}
     }
 
   if (variant == NULL)
@@ -98,15 +192,11 @@ mb_kbd_new (int argc, char **argv)
 
   if (!mb_kbd_ui_init(kb))
     return NULL;
-
-  if (mb_kbd_ui_display_width(kb->ui) <= 320) 
-    {
-      kb->key_border   = 1;
-      kb->key_pad      = 0;
-      kb->col_spacing  = 0;
-      kb->row_spacing  = 0;
-      kb->font_pt_size = 8;
-    }
+  
+  //MBKeyboardUI* ui = kb->ui;
+  
+  mb_kbd_ui_set_height_percent(kb->ui, iHeightPercent);
+  
 
   if (!mb_kbd_config_load(kb, variant))
     return NULL;
@@ -116,6 +206,18 @@ mb_kbd_new (int argc, char **argv)
 
   if (want_embedding)
     mb_kbd_ui_set_embeded (kb->ui, True);
+
+  if (override)
+    mb_kbd_ui_set_override (kb->ui, True);
+
+  if (gest)
+    mb_kbd_ui_set_gestures (kb->ui, True);
+
+  if (geometry)
+    mb_kbd_ui_set_geometry (kb->ui, geometry);
+
+  if (invert)
+    mb_kbd_ui_set_invert (kb->ui, True);
 
   if (want_daemon)
     {
@@ -278,6 +380,38 @@ MBKeyboardLayout*
 mb_kbd_get_selected_layout(MBKeyboard *kb)
 {
   return kb->selected_layout;
+}
+
+/*!
+ * Advance to the next keyboard layout. If at the last layout, reset to the first.
+ * \param kb Keyboard.
+ * \param iIncr Amount of increment. +/-.
+ */
+void mb_kbd_incr_layout(MBKeyboard *kb, int iIncr)
+{
+	int idx 	= util_list_index_of(kb->layouts, kb->selected_layout);
+	int max 	= util_list_length(kb->layouts);
+	
+	idx += iIncr;					// Advance to next/prev profile.
+	if (idx >= max) 	idx = 0;		// Constrain to number of profiles.
+	if (idx < 0) 		idx = max - 1;	
+	
+	kb->selected_layout = util_list_get_nth_data(kb->layouts, idx);
+}
+
+/*!
+ * Advance to the next keyboard layout. If at the last layout, reset to the first.
+ * \param kb Keyboard.
+ */
+void mb_kbd_set__layout(MBKeyboard *kb)
+{
+	int idx 	= util_list_index_of(kb->layouts, kb->selected_layout);
+	int max 	= util_list_length(kb->layouts);
+	
+	idx++;					// Advance to next profile.
+	if (idx >= max) idx = 0;		// Constrain to number of profiles.
+	
+	kb->selected_layout = util_list_get_nth_data(kb->layouts, idx);
 }
 
 void

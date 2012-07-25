@@ -2,8 +2,10 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *  Hacked by Maxim Kouprianov <me@kc.vc>
  *
  *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *  Modifications (c) 2009 Maxim Kouprianov - http://kc.vc
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,15 +44,22 @@ struct MBKeyboardUI
 
   int                 dpy_width, dpy_height;
   int                 xwin_width, xwin_height;
-
+  int			kbd_width, kbd_height;		// The width and height of the keyboard window.
+  int			imyh;
+  int			imyw;
   int                 key_uwidth, key_uheight;
 
   int                 base_alloc_width, base_alloc_height;
   int                 base_font_pt_size;
-
+  int			height_percent;	
   Bool                want_embedding;
   Bool                is_daemon;
   Bool                visible;
+  Bool                override;
+  Bool                gest;
+  int			x_shift;
+  int			y_shift;
+  Bool                invert;
   FakeKey             *fakekey;
   MBKeyboardUIBackend *backend; 
   MBKeyboard          *kbd;
@@ -58,6 +67,9 @@ struct MBKeyboardUI
   MBKeyboardDisplayOrientation dpy_orientation;
   MBKeyboardDisplayOrientation valid_orientation;
 };
+
+x_shift=0;
+y_shift=0;
 
 static void
 mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height);
@@ -116,7 +128,6 @@ get_desktop_area(MBKeyboardUI *ui, int *x, int *y, int *width, int *height)
   int            result, format;
   unsigned long  nitems, bytes_after;
   int           *geometry = NULL;
-
   atom_area = XInternAtom (ui->xdpy, "_NET_WORKAREA", False);
 
   result = XGetWindowProperty (ui->xdpy, 
@@ -137,6 +148,8 @@ get_desktop_area(MBKeyboardUI *ui, int *x, int *y, int *width, int *height)
   if (width)  *width  = geometry[2];
   if (height) *height = geometry[3];
   
+
+
   XFree(geometry);
 
   return True;
@@ -153,8 +166,8 @@ update_display_size(MBKeyboardUI *ui)
 
   /* XXX should actually trap an X error here */
 
-  ui->dpy_width  = winattr.width;
-  ui->dpy_height = winattr.height;
+ui->dpy_width  = winattr.width;
+ ui->dpy_height = winattr.height;
 
   if (ui->dpy_width > ui->dpy_height)
     ui->dpy_orientation = MBKeyboardDisplayLandscape;
@@ -326,9 +339,11 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
 
   if (mb_kbd_key_get_req_uwidth(key) || mb_kbd_key_is_blank(key))
     {
-      *width = (ui->key_uwidth * mb_kbd_key_get_req_uwidth(key)) / 1000 ;
-      *height = ui->key_uheight;
-      return;
+	// DMR Set wdith in absolute pixels from XML file instead of this computation.
+	//*width = (ui->key_uwidth * mb_kbd_key_get_req_uwidth(key)) / 1000 ;
+	*width = mb_kbd_key_get_req_uwidth(key);
+	*height = ui->key_uheight;
+	return;
     }
 
   mb_kdb_key_foreach_state(key, state)
@@ -356,6 +371,38 @@ mb_kbd_ui_min_key_size(MBKeyboardUI  *ui,
 	}
     }
 }
+
+
+static void
+mb_apply_win_prop(MBKeyboardUI *ui) // Xlab: anti-decorate flags
+{
+
+  Atom
+     atom_NET_WM_STATE_SKIP_PAGER,
+     atom_NET_WM_STATE_SKIP_TASKBAR,
+     atom_NET_WM_STATE,
+     atom_OB_WM_STATE_UNDECORATED; // Xlab: openbox support
+
+  atom_NET_WM_STATE_SKIP_TASKBAR =
+    XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
+  
+  atom_OB_WM_STATE_UNDECORATED =
+    XInternAtom(ui->xdpy, "_OB_WM_STATE_UNDECORATED", False);
+
+  atom_NET_WM_STATE_SKIP_PAGER = 
+    XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_PAGER", False);
+
+  atom_NET_WM_STATE =
+    XInternAtom(ui->xdpy, "_NET_WM_STATE", False);
+
+Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, atom_NET_WM_STATE_SKIP_PAGER, atom_OB_WM_STATE_UNDECORATED};
+	  
+	  XChangeProperty(ui->xdpy, ui->xwin, 
+			  atom_NET_WM_STATE, XA_ATOM, 32, 
+			  PropModeReplace, 
+			  (unsigned char *)states, 3);
+}
+
 
 void
 mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
@@ -412,14 +459,18 @@ mb_kbd_ui_allocate_ui_layout(MBKeyboardUI *ui,
 
 	  key_y = 0;
 
-	  key_w += 2 * ( mb_kbd_keys_border(ui->kbd) 
-			 + mb_kbd_keys_margin(ui->kbd) 
-			 + mb_kbd_keys_pad(ui->kbd) );
-
+	 
+	if (!mb_kbd_key_is_blank(key))
+	  {	  
+		  key_w += 2 * ( mb_kbd_keys_border(ui->kbd) 
+				 + mb_kbd_keys_margin(ui->kbd) 
+				 + mb_kbd_keys_pad(ui->kbd) );
+	  }
+	  
 	  key_h += 2 * ( mb_kbd_keys_border(ui->kbd) 
 			 + mb_kbd_keys_margin(ui->kbd) 
 			 + mb_kbd_keys_pad(ui->kbd) );
-	  
+  
 	  if (key_h > max_row_key_height)
 	    max_row_key_height = key_h;
 
@@ -574,7 +625,7 @@ mb_kbd_ui_redraw(MBKeyboardUI  *ui)
 
       row_item = util_list_next(row_item);
     }
-
+  
   mb_kbd_ui_swap_buffers(ui);
 }
 
@@ -588,10 +639,14 @@ mb_kbd_ui_show(MBKeyboardUI  *ui)
       && ui->dpy_orientation != ui->valid_orientation)
     return;
 
+
+  mb_apply_win_prop(ui); // Xlab: apply window flags
   XMapWindow(ui->xdpy, ui->xwin);
   mb_kbd_ui_redraw (ui);
 
   ui->visible = True;
+
+
 }
 
 void
@@ -603,6 +658,35 @@ mb_kbd_ui_hide(MBKeyboardUI  *ui)
   XUnmapWindow(ui->xdpy, ui->xwin);
 
   ui->visible = False;
+}
+
+void
+mb_kbd_ui_set_override (MBKeyboardUI *ui, int override)
+{
+  // Xlab: keyboard's absolute positioning
+  ui->override = override;
+}
+
+void
+mb_kbd_ui_set_gestures (MBKeyboardUI *ui, int gest)
+{
+  // Xlab: enable gestures
+  ui->gest = gest;
+}
+
+void
+mb_kbd_ui_set_geometry (MBKeyboardUI *ui, char *geometry)
+{
+  // Xlab: set geometry
+  if(geometry != "") {
+   sscanf(geometry, "%dx%d.%d.%d", &ui->imyh, &ui->imyw, &ui->y_shift, &ui->x_shift); 
+  }
+}
+void
+mb_kbd_ui_set_invert (MBKeyboardUI *ui, int invert)
+{
+  // Xlab: place keyboard ontop
+  ui->invert = invert;
 }
 			  
 static int
@@ -631,13 +715,16 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
      atom_NET_WM_STATE_SKIP_PAGER,
      atom_NET_WM_STATE_SKIP_TASKBAR,
      atom_NET_WM_STATE,
-     atom_MOTIF_WM_HINTS;
+     atom_MOTIF_WM_HINTS,
+     atom_OB_WM_STATE_UNDECORATED;
   
 
   PropMotifWmHints    *mwm_hints;
   XSizeHints           size_hints;
   XWMHints            *wm_hints;
   XSetWindowAttributes win_attr;
+  XClassHint *class_hint;
+  
 
 
   char                *wm_name;
@@ -668,6 +755,9 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 
   atom_NET_WM_STATE_SKIP_TASKBAR =
     XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
+  
+  atom_OB_WM_STATE_UNDECORATED =
+    XInternAtom(ui->xdpy, "_OB_WM_STATE_UNDECORATED", False);
 
   atom_NET_WM_STATE_SKIP_PAGER = 
     XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_PAGER", False);
@@ -699,24 +789,49 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   if (wm_name && streq(wm_name, "matchbox"))
     have_matchbox_wm = True;
 
-  win_attr.override_redirect = False; /* Set to true for extreme case */
+  win_attr.override_redirect = ui->override; /* отвязка */
   win_attr.event_mask 
     = ButtonPressMask|ButtonReleaseMask|Button1MotionMask|StructureNotifyMask;
 
-  ui->xwin = XCreateWindow(ui->xdpy,
-			   ui->xwin_root,
-			   0, 0,
-			   ui->xwin_width, ui->xwin_height,
-			   0,
-			   CopyFromParent, CopyFromParent, CopyFromParent,
-			   CWOverrideRedirect|CWEventMask,
-			   &win_attr);
+  int  desk_height = 0,desk_y=0;
+  get_desktop_area(ui, NULL, &desk_y, NULL, &desk_height);
+
+// Xlab's fixes below
+
+//int shift=270 - smartq7
+//int shift=310 - n810
+
+//Auto:
+int shift;
+
+if(ui->imyh!=0){
+  shift = ui->dpy_height-ui->imyh; // Аццкое шаманство =8]
+} else {
+  shift = ui->dpy_height-160;
+}
+
+if(ui->invert)
+{
+  shift-=(ui->dpy_height-desk_height-desk_y);
+}
+
+
+
+
+ui->xwin = XCreateWindow(ui->xdpy,
+      ui->xwin_root,
+      ui->x_shift,(ui->y_shift!=0)?ui->y_shift:shift,  // Xlab shift's fix
+      ui->xwin_width, ui->xwin_height,
+      0,
+      CopyFromParent, CopyFromParent, CopyFromParent,
+      CWOverrideRedirect|CWEventMask,
+      &win_attr);
 
   XSelectInput (ui->xdpy,  ui->xwin_root, 
 		SubstructureNotifyMask|StructureNotifyMask);
 
   wm_hints = XAllocWMHints();
-
+  
   if (wm_hints)
     {
       DBG("setting no focus hint");
@@ -726,6 +841,16 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
       XFree(wm_hints);
     }
 
+  class_hint = XAllocClassHint();
+  
+    if (class_hint)
+    {
+      class_hint->res_name = "matchbox-keyboard";
+      class_hint->res_class = "matchbox-keyboard";
+      XSetClassHint(ui->xdpy, ui->xwin, class_hint );
+      XFree(class_hint);
+    }
+
   size_hints.flags = PPosition | PSize | PMinSize;
   size_hints.x = 0;
   size_hints.y = 0;
@@ -733,9 +858,13 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   size_hints.height     =  ui->xwin_height;
   size_hints.min_width  =  ui->xwin_width;
   size_hints.min_height =  ui->xwin_height;
-    
+ 
+
+
   XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard", 
 			 NULL, 0, NULL, 0, &size_hints);
+
+
 
   if (!ui->want_embedding)
     {
@@ -757,7 +886,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
       if (have_ewmh_wm)
 	{
 	  /* XXX Fix this for display size */
-	  int wm_struct_vals[] = { 0, /* left */			
+	  int wm_struct_vals[] = { 0, /* left */		// Xlab: variants of docking
 				   0, /* right */ 
 				   0, /* top */
 				   0, /* bottom */
@@ -768,15 +897,15 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 				   0, /* top_start_x */
 				   0, /* top_end_x */
 				   0, /* bottom_start_x */
-				   1399 }; /* bottom_end_x */
+				   0}; /* bottom_end_x */
 	  
-	  Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, atom_NET_WM_STATE_SKIP_PAGER };
+	  Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, atom_NET_WM_STATE_SKIP_PAGER, atom_OB_WM_STATE_UNDECORATED};
 	  int  desk_width = 0, desk_height = 0, desk_y = 0;
 	  
 	  XChangeProperty(ui->xdpy, ui->xwin, 
 			  atom_NET_WM_STATE, XA_ATOM, 32, 
 			  PropModeReplace, 
-			  (unsigned char *)states, 2);
+			  (unsigned char *)states, 3);
 	  
 	  if (get_desktop_area(ui, NULL, &desk_y, &desk_width, &desk_height))
 	    {
@@ -788,31 +917,47 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
 	       */
 	      if (desk_width > ui->xwin_width)
 		{
-		  mb_kbd_ui_resize(ui, 
-				   desk_width, 
-				   ( desk_width * ui->xwin_height ) / ui->xwin_width);
+			// Adjust the height of the keyboard to be some percent of the screen
+			// if a valid value for that override was given.
+			int iMyHeight = ( desk_width * ui->xwin_height ) / ui->xwin_width;
+			
+			if (ui->height_percent > 0 && ui->height_percent <= 100)
+			{
+				iMyHeight = desk_height * (ui->height_percent / 100.0f);
+			}
+			mb_kbd_ui_resize(ui, desk_width,  iMyHeight);
+			
+			
 		}
-	      
-	      wm_struct_vals[2]  = desk_y + desk_height - ui->xwin_height;
+	      if(ui->imyh!=0){
+	      wm_struct_vals[3]  = ui->imyh; // Xlab: WHOAAA!!!
+		}else{
+		wm_struct_vals[3]  = 160;
+		} 
+if(ui->invert)
+{
+wm_struct_vals[3]+=(ui->dpy_height-desk_height);
+}
+
 	      wm_struct_vals[11] = desk_width;
 	      
 	      XChangeProperty(ui->xdpy, ui->xwin, 
 			      atom_NET_WM_STRUT_PARTIAL, XA_CARDINAL, 32, 
 			      PropModeReplace, 
 			      (unsigned char *)wm_struct_vals , 12);
-	      
+
 	      DBG("desk width: %i, desk height: %i xwin_height :%i",
 		  desk_width, desk_height, ui->xwin_height);
 	      
 	    }
 	  
 	  if (have_matchbox_wm)
-	    {
+	    {/*
 	      XChangeProperty(ui->xdpy, ui->xwin, 
 			      atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
 			      PropModeReplace, 
 			      (unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
-	    }
+	    */}
 	  else
 	    {
 	      /*
@@ -847,6 +992,7 @@ mb_kbd_ui_resources_create(MBKeyboardUI  *ui)
   return 1;
 }
 
+
 static void
 mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height) 
 {
@@ -859,10 +1005,30 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
   MARK();
 
-  /* Don't scale beyond a sensible height on wide screens */
-  if (height > (ui->dpy_height / 3))
-    height = ui->dpy_height / 3;
+  // Don't scale beyond a sensible height on wide screens.
+  // DMR - Removed  in portiat to allow manually setting any size.
 
+	if (ui->dpy_orientation == MBKeyboardDisplayLandscape)
+	{
+		if (height > (ui->dpy_height / 3))
+		height = ui->dpy_height / 3;
+	}
+
+if(ui->imyw!=0){
+width=ui->imyw;
+}else{
+ui->imyw=width;
+}
+
+if(ui->imyh!=0){
+height=ui->imyh;
+}else{
+ui->imyh=height;
+}
+
+  // Store requested width and height for later use.
+  ui->kbd_width 	= width;
+  ui->kbd_height    = height;
   width_diff  = width  - ui->base_alloc_width; 
   height_diff = height - ui->base_alloc_height; 
 
@@ -897,7 +1063,7 @@ mb_kbd_ui_resize(MBKeyboardUI *ui, int width, int height)
 
   extra_key_height = (height_diff / n_rows);
 
-  DBG("****** extra height is %i ******", extra_key_height);
+  //DBG("****** extra height is %i ******", extra_key_height);
 
   next_row_y = mb_kbd_row_spacing(ui->kbd);
 
@@ -1091,100 +1257,156 @@ mb_kbd_ui_handle_configure(MBKeyboardUI *ui,
 
 }
 
+/*!
+ * Reconfigure the layout based on the current layout and current
+ * width and height.
+ * \param ui Keyboard UI.
+ */
+void mb_kbd_ui_handle_reconfigure(MBKeyboardUI *ui)
+{
+	mb_kbd_ui_allocate_ui_layout(ui, &ui->base_alloc_width, &ui->base_alloc_height);
+	mb_kbd_ui_resize(ui, ui->kbd_width, ui->kbd_height); 
+}
+
 void
 mb_kbd_ui_event_loop(MBKeyboardUI *ui)
 {
-  MBKeyboardKey *key = NULL;
-  struct timeval tvt;
+	MBKeyboardKey *key = NULL;
+	struct timeval tvt;
 
-  /* Key repeat - values for standard xorg install ( xset q) */
-  int repeat_delay = 100 * 10000;
-  int repeat_rate  = 30  * 1000;
-  int hide_delay = 100 * 1000;
-  int to_hide = 0;
+	/* Key repeat - values for standard xorg install ( xset q) */
+	int repeat_delay 	= 550 * 1000;
+	int repeat_rate  =    105 * 1000;
+	int hide_delay		= 100 * 1000;
+	int to_hide 		= 0;
 
-  int press_x = 0, press_y = 0; 
+	int press_x 		= 0; 
+	int press_y 		= 0; 
 
-  tvt.tv_sec  = 0;
-  tvt.tv_usec = repeat_delay;
+	tvt.tv_sec  		= 0;
+	tvt.tv_usec 		= repeat_delay;
 
-  while (True)
-      {
+	while (True)
+	{
 	XEvent xev;
 
 	if (get_xevent_timed(ui->xdpy, &xev, &tvt))
-	  {
-	    switch (xev.type) 
-	      {
-	      case ButtonPress:
-		press_x = xev.xbutton.x; press_y = xev.xbutton.y;
-		DBG("got button bress at %i,%i", xev.xbutton.x, xev.xbutton.y);
-		key = mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
-		if (key)
-		  {
-		    /* Hack if we never get a release event */
-		    if (key != mb_kbd_get_held_key(ui->kbd))
-		      {
-			mb_kbd_key_release(ui->kbd);
-			tvt.tv_usec = repeat_delay;   
-		      }
-		    else
-		      tvt.tv_usec = repeat_rate;
+	{			
+		  
+		switch (xev.type) 
+		{
+			case ButtonPress:
+			{
+				press_x = xev.xbutton.x; 
+				press_y = xev.xbutton.y;
+				
+				//DBG("got button press at %i,%i", xev.xbutton.x, xev.xbutton.y);
+				
+				key 			= mb_kbd_locate_key(ui->kbd, xev.xbutton.x, xev.xbutton.y);
+		
+				if (key)
+				{
+					// Hack if we never get a release event .
+					if (key != mb_kbd_get_held_key(ui->kbd))
+					{
+						mb_kbd_key_release_send(ui->kbd, 0);
+						tvt.tv_usec = repeat_delay;   
+					}
 
-		    DBG("found key for press");
-		    mb_kbd_key_press(key);
-
-		  }
-		break;
-	      case ButtonRelease:
-		if (mb_kbd_get_held_key(ui->kbd) != NULL)
-		  {
-		    mb_kbd_key_release(ui->kbd);	 
-		    tvt.tv_usec = repeat_delay;
-
-		    /* Gestures */
-#if 0
-		    /* FIXME: check time first */
-		    if ( (press_x - xev.xbutton.x) > ui->key_uwidth )
-		      {
-			/* <-- slide back ...backspace */
+					mb_kbd_key_press(key);
+				}
+	      
+				break;
+			}
+					
+			//
+			// Follow the user's finger as they move, highlighting the key under the touch.
+			//
+			case MotionNotify:
+			{
+				
+				MBKeyboardKey *pNewKey = mb_kbd_locate_key(ui->kbd, xev.xmotion.x, xev.xmotion.y);
+			
+				if (!pNewKey || pNewKey == key){
+					break;
+				} /*else{
+					mb_kbd_key_release_send(ui->kbd, 0);
+					key = NULL;
+				}*/
+				break;
+			}
+		  
+case ButtonRelease:
+{	
+	if(ui->gest==True)
+	{
+		if ( (press_x - xev.xbutton.x - 20) > ui->key_uwidth )
+		{
+			mb_kbd_key_release_send(ui->kbd, 0);			
 			fakekey_press_keysym(ui->fakekey, XK_BackSpace, 0);
-			fakekey_repeat(ui->fakekey);
 			fakekey_release(ui->fakekey);
-			/* FIXME: add <-- --> <-- --> support */
-		      }
-		    else if ( (xev.xbutton.y - press_y) > ui->key_uheight )
-		      {
-			/* V slide down ...return  */
-			fakekey_press_keysym(ui->fakekey, XK_BackSpace, 0);
+		}
+		else if ( (xev.xbutton.x - press_x - 30) > ui->key_uwidth )
+		{
+			mb_kbd_key_release_send(ui->kbd, 0);			
+			fakekey_press_keysym(ui->fakekey, XK_space, 0);
+			fakekey_release(ui->fakekey);			
+		}
+		else if ( (xev.xbutton.y - press_y - 20) > ui->key_uheight )
+		{	
+			mb_kbd_key_release_send(ui->kbd, 0);
+			fakekey_press_keysym(ui->fakekey, XK_KP_Enter, 0);
 			fakekey_release(ui->fakekey);
-			fakekey_press_keysym(ui->fakekey, XK_Return, 0);
-			fakekey_release(ui->fakekey);
-		      }
-#endif
-		    /* TODO ^ caps support */
+		}
+		else if ( (press_y - xev.xbutton.y - 20) > ui->key_uheight )
+		{
+			const char *key_char;
+			key_char = mb_kbd_key_get_char_action(key, 1);
+			
+			if (key_char)
+			{
+				mb_kbd_ui_send_press(ui,key_char, 0);
+				mb_kbd_key_release_send(ui->kbd, 0);
+			}
+		}
+		else
+		{
+			mb_kbd_key_release_send(ui->kbd, 1);
+		} 
+	}
+	else
+	{
+		if (key && mb_kbd_get_held_key(ui->kbd) != NULL)
+		{
+			mb_kbd_key_release_send(ui->kbd, 1);	 
+		}
+	}
 
-		  }
-		break;
-	      case ConfigureNotify:
-		if (xev.xconfigure.window == ui->xwin 
-		    &&  (xev.xconfigure.width != ui->xwin_width
-			 || xev.xconfigure.height != ui->xwin_height))
-		  {
-		    mb_kbd_ui_handle_configure(ui,
-					       xev.xconfigure.width,
-					       xev.xconfigure.height);
-		  }
-		if (xev.xconfigure.window == ui->xwin_root)		    
-		    update_display_size(ui);
-		break;
-	      case MappingNotify: 
-		fakekey_reload_keysyms(ui->fakekey);
-		XRefreshKeyboardMapping(&xev.xmapping);
-		break;
-	      default:
-		break;
+break;
+}
+			  
+			case ConfigureNotify:
+				if (xev.xconfigure.window == ui->xwin 
+					&&  (xev.xconfigure.width != ui->xwin_width
+					|| xev.xconfigure.height != ui->xwin_height))
+				{
+					mb_kbd_ui_handle_configure(ui, xev.xconfigure.width, xev.xconfigure.height);
+				}
+				if (xev.xconfigure.window == ui->xwin_root)		    
+				{
+				    update_display_size(ui);
+				}
+				break;
+				
+			case MappingNotify: 
+				fakekey_reload_keysyms(ui->fakekey);
+				XRefreshKeyboardMapping(&xev.xmapping);
+				break;
+
+			default:
+				break;
 	      }
+	      
 	    if (ui->want_embedding)
 	      mb_kbd_xembed_process_xevents (ui, &xev);
 
@@ -1234,9 +1456,23 @@ mb_kbd_ui_event_loop(MBKeyboardUI *ui)
       }
 
 	    /* Keyrepeat */
-	    if (mb_kbd_get_held_key(ui->kbd) != NULL)
+	     if (mb_kbd_get_held_key(ui->kbd) != NULL)
 	      {
-		fakekey_repeat(ui->fakekey);
+
+MBKeyboardKeyStateType state 	= mb_kbd_keys_current_state(ui->kbd);
+
+const char *key_char;
+key_char = mb_kbd_key_get_char_action(key, state);
+
+if (key_char){
+		mb_kbd_ui_send_press(ui,key_char, 0);
+		mb_kbd_ui_send_release(ui);
+}else{
+KeySym ks_char;
+ks_char = mb_kbd_key_get_keysym_action(key, state);
+					mb_kbd_ui_send_keysym_press(ui, ks_char, 0);
+					mb_kbd_ui_send_release(ui);
+				}
 		tvt.tv_usec = repeat_rate;
 	      }
 	  }
@@ -1333,8 +1569,7 @@ mb_kbd_ui_realize(MBKeyboardUI *ui)
   /* 
    * figure out how small this keyboard can be..
   */
-  mb_kbd_ui_allocate_ui_layout(ui, 
-			       &ui->base_alloc_width, &ui->base_alloc_height);
+  mb_kbd_ui_allocate_ui_layout(ui, &ui->base_alloc_width, &ui->base_alloc_height);
 
   ui->xwin_width  = ui->base_alloc_width;
   ui->xwin_height = ui->base_alloc_height;
@@ -1385,6 +1620,8 @@ mb_kbd_ui_init(MBKeyboard *kbd)
   return 1;
 }
 
+
+
 /* Embedding */
 
 void
@@ -1419,4 +1656,13 @@ mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui,
 			     MBKeyboardDisplayOrientation orientation)
 {
   ui->valid_orientation = orientation;
+}
+
+/*!
+ * Set to have the height of the keyboard be some percentage of the screen height.
+ * \param iHeightPercent Percent of screen height to set keyboard.
+ */
+void mb_kbd_ui_set_height_percent(MBKeyboardUI *ui, int iHeightPercent)
+{
+	ui->height_percent = iHeightPercent;
 }

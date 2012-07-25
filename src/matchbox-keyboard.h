@@ -2,8 +2,10 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *  Hacked by Maxim Kouprianov <me@kc.vc>
  *
  *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *  Modifications (c) 2009 Maxim Kouprianov - http://kc.vc
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,6 +61,12 @@
 
 #define MARK() DBG("mark")
 
+// Xlab: gesture presets are tweaked
+#define MATCHBOX_KBD_GESTURE_TIME	250 * 10000	//!< Time in which we must have moved threshold to be considered a gesture (usec).
+#define MATCHBOX_KBD_ISMOVE_DELTA	15			//!< Amount of delta to be considered a move.
+#define MATCHBOX_KBD_SWIPE_DELTA	100			//!< Minimum delta in swipe direction to be considered a swipe.
+#define MATCHBOX_KBD_DEF_HEIGHT_P	40			//!< Default percent of total screen height to occupy.
+
 typedef void*         pointer;
 typedef unsigned char uchar ;
 typedef Bool          boolean ;
@@ -101,7 +109,8 @@ typedef enum
   MBKeyboardKeyModCaps,
   MBKeyboardKeyModControl,
   MBKeyboardKeyModAlt,
-  MBKeyboardKeyModLayout
+  MBKeyboardKeyModLayout,
+  MBKeyboardKeyModMin
 
 } MBKeyboardKeyModType;
 
@@ -184,6 +193,12 @@ mb_kbd_ui_init(MBKeyboard *kbd);
 void
 mb_kbd_ui_limit_orientation (MBKeyboardUI                *ui, 
 			     MBKeyboardDisplayOrientation orientation);
+
+/*!
+ * Set to have the height of the keyboard be some percentage of the screen height.
+ * \param iHeightPercent Percent of screen height to set keyboard.
+ */
+void mb_kbd_ui_set_height_percent(MBKeyboardUI *ui, int iHeightPercent);
 
 int
 mb_kbd_ui_realize(MBKeyboardUI  *ui);
@@ -340,6 +355,15 @@ mb_kbd_add_layout(MBKeyboard *kb, MBKeyboardLayout *layout);
 
 MBKeyboardLayout*
 mb_kbd_get_selected_layout(MBKeyboard *kb);
+
+/*!
+ * Advance to the next keyboard layout. If at the last layout, reset to the first.
+ * \param kb Keyboard.
+ * \param iIncr Amount of increment. +/-.
+ */
+void mb_kbd_incr_layout(MBKeyboard *kb, int iIncr);
+
+
 
 MBKeyboardKey*
 mb_kbd_locate_key(MBKeyboard *kb, int x, int y);
@@ -542,6 +566,9 @@ void
 mb_kbd_key_release(MBKeyboard *kbd);
 
 void
+mb_kbd_key_release_send(MBKeyboard *kbd, Bool bSendKey);
+
+void
 mb_kbd_key_dump_key(MBKeyboardKey *key);
 
 #define mb_kdb_key_foreach_state(k,s)                     \
@@ -589,6 +616,9 @@ util_list_alloc_item(void);
 
 int
 util_list_length(List *list);
+
+int
+util_list_index_of(List* list, void *item);
 
 List*
 util_list_get_last(List *list);

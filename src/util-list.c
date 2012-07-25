@@ -19,6 +19,21 @@ util_list_length(List *list)
   return result;
 }
 
+int
+util_list_index_of(List* list, void *item)
+{
+	int idx = 0;
+	list = util_list_get_first(list);
+	
+	do
+	{
+		if (list->data == item) return idx;
+		idx++;
+	} while ((list = util_list_next(list)) != NULL);
+	
+	return -1;
+}
+
 List*
 util_list_get_last(List *list)
 {

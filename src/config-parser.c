@@ -2,8 +2,10 @@
  *  Matchbox Keyboard - A lightweight software keyboard.
  *
  *  Authored By Matthew Allum <mallum@o-hand.com>
+ *  Hacked by Maxim Kouprianov <me@kc.vc>
  *
  *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
+ *  Modifications (c) 2009 Maxim Kouprianov - http://kc.vc
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +42,7 @@
 	     display="image:" 
 	     action="utf8char"     // optional, action defaults to this    
 	     action="string"       // from lookup below
-	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps"
+	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps|layout"
 	     action="xkeysym:XK_BLAH"
 	  <shifted 
 	     ...... >
@@ -75,6 +77,7 @@ MBKeyboardKeysymLookup[] =
  { XK_Escape,      "escape" },	
  { XK_Delete,      "delete" },	
  { XK_Home,        "home" },
+ { XK_Insert,        "insert" },
  { XK_Left,        "left" },
  { XK_Up,          "up"   },
  { XK_Right,       "right" },
@@ -97,7 +100,17 @@ MBKeyboardKeysymLookup[] =
  { XK_F9,          "f9" },
  { XK_F10,         "f10" },
  { XK_F11,         "f11" },
- { XK_F12,         "f12" }
+
+ // Xlab: Additional F-keys
+ { XK_F12,         "f12" },
+ { XK_F13,         "f13" },
+ { XK_F14,         "f14" },
+ { XK_F15,         "f15" },
+ { XK_F16,         "f16" },
+ { XK_F17,         "f17" },
+ { XK_F18,         "f18" },
+ { XK_F19,         "f19" },
+ { XK_F20,         "f20" }
 };
 
 struct _modlookup
@@ -113,7 +126,13 @@ ModLookup[] =
   { "mod1",    MBKeyboardKeyModMod1 },
   { "mod2",    MBKeyboardKeyModMod2 },
   { "mod3",    MBKeyboardKeyModMod3 },
-  { "caps",    MBKeyboardKeyModCaps }
+  { "caps",    MBKeyboardKeyModCaps },
+  
+  // Xlab: Layout switch support
+  { "layout",    MBKeyboardKeyModLayout },
+
+  // Xlab: Hide keyboard key support
+  { "min",    MBKeyboardKeyModMin }
 };
 
 typedef struct MBKeyboardConfigState
@@ -388,7 +407,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
     {
       /*
 	     action="utf8char"     // optional, action defulats to this    
-	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps"
+	     action="modifier:Shift|Alt|ctrl|mod1|mod2|mod3|caps|layout"
 	     action="xkeysym:XK_BLAH"
 	     action="control:">    // return etc - not needed use lookup 
       */
