@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Modded by 123456 for http://smartqmid.ru
+v1.1
+Please check http://kc.vc/projects/matchbox-keyboard.html
+-->
+<keyboard>
+    <options></options>
+    <layout id="en">
+        <row>
+            <key width="15">
+                <default display="esc" action="escape" />
+            </key>
+            <key width="25">
+                <mod1 display="1" />
+                <default display="q" />
+                <shifted display="Q" />
+            </key>
+            <key width="25">
+                <mod1 display="2" />
+                <default display="w" />
+                <shifted display="W" />
+            </key>
+            <key width="25">
+                <mod1 display="3" />
+                <default display="e" />
+                <shifted display="E" />
+            </key>
+            <key width="25">
+                <mod1 display="4" />
+                <default display="r" />
+                <shifted display="R" />
+            </key>
+            <key width="25">
+                <mod1 display="5" />
+                <default display="t" />
+                <shifted display="T" />
+            </key>
+            <key width="25">
+                <mod1 display="6" />
+                <default display="y" />
+                <shifted display="Y" />
+            </key>
+            <key width="25">
+                <mod1 display="7" />
+                <default display="u" />
+                <shifted display="U" />
+            </key>
+            <key width="25">
+                <mod1 display="8" />
+                <default display="i" />
+                <shifted display="I" />
+            </key>
+            <key width="25">
+                <mod1 display="9" />
+                <default display="o" />
+                <shifted display="O" />
+            </key>
+            <key width="25">
+                <mod1 display="0" />
+                <default display="p" />
+                <shifted display="P" />
+            </key>
+            <key width="25">
+                <mod1 display="|" />
+                <default display="?" />
+                <shifted display="~" />
+            </key>
+            <key fill="true">
+                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+            </key>
+        </row>
+        <row>
+            <key width="15">
+                <default display="Æ" action="modifier:shift" />
+            </key>
+            <key width="25">
+                <mod1 display="!" />
+                <default display="a" />
+                <shifted display="A" />
+            </key>
+            <key width="25">
+                <mod1 display="@" />
+                <default display="s" />
+                <shifted display="S" />
+            </key>
+            <key width="25">
+                <mod1 display="#" />
+                <default display="d" />
+                <shifted display="D" />
+            </key>
+            <key width="25">
+                <mod1 display="$" />
+                <default display="f" />
+                <shifted display="F" />
+            </key>
+            <key width="25">
+                <mod1 display="%" />
+                <default display="g" />
+                <shifted display="G" />
+            </key>
+            <key width="25">
+                <mod1 display="^" />
+                <default display="h" />
+                <shifted display="H" />
+            </key>
+            <key width="25">
+                <mod1 display="&amp;" />
+                <default display="j" />
+                <shifted display="J" />
+            </key>
+            <key width="25">
+                <mod1 display="*" />
+                <default display="k" />
+                <shifted display="K" />
+            </key>
+            <key width="25">
+                <mod1 display="(" />
+                <default display="l" />
+                <shifted display="L" />
+            </key>
+            <key width="25">
+                <mod1 display=")" />
+                <default display="-" />
+                <shifted display="_" />
+            </key>
+            <key width="25">
+                <mod1 display="\" />
+                <default display="=" />
+                <shifted display="+" />
+            </key>
+            <key fill="true">
+                <default display="¶" action="return" />
+            </key>
+        </row>
+        <row>
+            <key width="15">
+                <default display="ru" action="modifier:layout" />
+            </key>
+            <key width="25">
+                <default display="sp" action="modifier:mod1" />
+            </key>
+            <key width="25">
+                <mod1 display="{" />
+                <default display="z" />
+                <shifted display="Z" />
+            </key>
+            <key width="25">
+                <mod1 display="}" />
+                <default display="x" />
+                <shifted display="X" />
+            </key>
+            <key width="25">
+                <mod1 display="/" />
+                <default display="c" />
+                <shifted display="C" />
+            </key>
+            <key width="25">
+                <mod1 display="`" />
+                <default display="v" />
+                <shifted display="V" />
+            </key>
+            <key width="25">
+                <mod1 display=":" />
+                <default display="b" />
+                <shifted display="B" />
+            </key>
+            <key width="25">
+                <mod1 display=";" />
+                <default display="n" />
+                <shifted display="N" />
+            </key>
+            <key width="25">
+                <mod1 display="&quot;" />
+                <default display="m" />
+                <shifted display="M" />
+            </key>
+            <key width="25">
+                <mod1 display="'" />
+                <default display="," />
+                <shifted display="&lt;" />
+            </key>
+            <key width="25">
+                <default display="." />
+                <shifted display="&gt;" />
+            </key>
+            <key width="25">
+                <default display=" " action="space" />
+            </key>
+            <key fill="true">
+                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+            </key>
+        </row>
+    </layout>
+    <layout id="ru">
+        <row>
+            <key width="15">
+                <default display="esc" action="escape" />
+            </key>
+            <key width="25">
+                <mod1 display="1" />
+                <default display="й" />
+                <shifted display="Й" />
+            </key>
+            <key width="25">
+                <mod1 display="2" />
+                <default display="ц" />
+                <shifted display="Ц" />
+            </key>
+            <key width="25">
+                <mod1 display="3" />
+                <default display="у" />
+                <shifted display="У" />
+            </key>
+            <key width="25">
+                <mod1 display="4" />
+                <default display="к" />
+                <shifted display="К" />
+            </key>
+            <key width="25">
+                <mod1 display="5" />
+                <default display="е" />
+                <shifted display="Е" />
+            </key>
+            <key width="25">
+                <mod1 display="6" />
+                <default display="н" />
+                <shifted display="Н" />
+            </key>
+            <key width="25">
+                <mod1 display="7" />
+                <default display="г" />
+                <shifted display="Г" />
+            </key>
+            <key width="25">
+                <mod1 display="8" />
+                <default display="ш" />
+                <shifted display="Ш" />
+            </key>
+            <key width="25">
+                <mod1 display="9" />
+                <default display="щ" />
+                <shifted display="Щ" />
+            </key>
+            <key width="25">
+                <mod1 display="0" />
+                <default display="з" />
+                <shifted display="З" />
+            </key>
+            <key width="25">
+                <mod1 display="|" />
+                <default display="х" />
+                <shifted display="Х" />
+            </key>
+            <key fill="true">
+                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+            </key>
+        </row>
+        <row>
+            <key width="15">
+                <default display="Æ" action="modifier:shift" />
+            </key>
+            <key width="25">
+                <mod1 display="!" />
+                <default display="ф" />
+                <shifted display="Ф" />
+            </key>
+            <key width="25">
+                <mod1 display="@" />
+                <default display="ы" />
+                <shifted display="Ы" />
+            </key>
+            <key width="25">
+                <mod1 display="#" />
+                <default display="в" />
+                <shifted display="В" />
+            </key>
+            <key width="25">
+                <mod1 display="$" />
+                <default display="а" />
+                <shifted display="А" />
+            </key>
+            <key width="25">
+                <mod1 display="%" />
+                <default display="п" />
+                <shifted display="П" />
+            </key>
+            <key width="25">
+                <mod1 display="^" />
+                <default display="р" />
+                <shifted display="Р" />
+            </key>
+            <key width="25">
+                <mod1 display="&amp;" />
+                <default display="о" />
+                <shifted display="О" />
+            </key>
+            <key width="25">
+                <mod1 display="*" />
+                <default display="л" />
+                <shifted display="Л" />
+            </key>
+            <key width="25">
+                <mod1 display="(" />
+                <default display="д" />
+                <shifted display="Д" />
+            </key>
+            <key width="25">
+                <mod1 display=")" />
+                <default display="ж" />
+                <shifted display="Ж" />
+            </key>
+            <key width="25">
+                <mod1 display="\" />
+                <default display="э" />
+                <shifted display="Э" />
+            </key>
+            <key fill="true">
+                <default display="¶" action="return" />
+            </key>
+        </row>
+        <row>
+            <key width="15">
+                <default display="en" action="modifier:layout" />
+            </key>
+            <key width="25">
+                <default display="sp" action="modifier:mod1" />
+            </key>
+            <key width="25">
+                <mod1 display="{" />
+                <default display="я" />
+                <shifted display="Я" />
+            </key>
+            <key width="25">
+                <mod1 display="}" />
+                <default display="ч" />
+                <shifted display="Ч" />
+            </key>
+            <key width="25">
+                <mod1 display="/" />
+                <default display="с" />
+                <shifted display="С" />
+            </key>
+            <key width="25">
+                <mod1 display="`" />
+                <default display="м" />
+                <shifted display="М" />
+            </key>
+            <key width="25">
+                <mod1 display=":" />
+                <default display="и" />
+                <shifted display="И" />
+            </key>
+            <key width="25">
+                <mod1 display=";" />
+                <default display="т" />
+                <shifted display="Т" />
+            </key>
+            <key width="25">
+                <mod1 display="&quot;" />
+                <default display="ь" />
+                <shifted display="Ь" />
+            </key>
+            <key width="25">
+                <mod1 display="'" />
+                <default display="б" />
+                <shifted display="Б" />
+            </key>
+            <key width="25">
+                <mod1 display="." />
+                <default display="ю" />
+                <shifted display="Ю" />
+            </key>
+            <key width="25">
+                <default display=" " action="space" />
+            </key>
+            <key fill="true">
+                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+            </key>
+        </row>
+    </layout>
+</keyboard>

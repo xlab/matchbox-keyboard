@@ -5,7 +5,7 @@
  *  Hacked by Maxim Kouprianov <me@kc.vc>
  *
  *  Copyright (c) 2005 OpenedHand Ltd - http://o-hand.com
- *  Modifications (c) 2009 Maxim Kouprianov - http://kc.vc
+ *  Modifications (c) 2009 Maxim Kouprianov - http://kc.vc/projects/matchbox-keyboard.html
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
