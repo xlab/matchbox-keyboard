@@ -34,10 +34,10 @@ Special thanks to Paguro ( http://smartqmid.ru )
 * Three great layouts:
   - `keyboard` -- Original layout, EN-RU
   - `keyboard-full` -- Full keyboard layout, by 123456 and SeNS, EN-RU
-  - `keyboard-finger` -- Minimalistic keybord to tap by fingers, by 123456, EN-RU
-* UI tweaks (made your perfect ui)
+  - `keyboard-finger` -- Minimalistic keybord for fingers, by 123456, EN-RU
+* UI tweaks (you may adjust spacings)
 * Improved keyboard positioning in matchbox, openbox, etc
-* Keyboard now can shrink neighbour windows - perferct!
+* Keyboard now can shrink neighbour windows - perfect!
 * Custom geometry - scale as you want
 * Performance tweaks...
 
