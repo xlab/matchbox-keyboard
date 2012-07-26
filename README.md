@@ -1,9 +1,49 @@
 # MATCHBOX KEYBOARD 1.5 FORK
 
-Please see http://kc.vc/projects/matchbox-keyboard.html
+```
+Usage:
+   matchbox-keyboard [options] [layout]
+
+Supported options are;
+   -xid,--xid               rint window ID to stdout ( for embedding )
+   -d,--daemon              Run in 'daemon' mode (for remote control)
+   -t, --gestures           Enable gestures
+
+------------------------- UI Tweaks & Positioning --------------------
+
+   -p,--key-padding <px>    Key padding
+   -c,--col-spacing <px>    Space between columns
+   -r,--row-spacing <px>    Space between rows
+   -f,--font-family <name>  Font family (ex: sans, droidsans)
+   -s,--font-size <pt>      Font size
+   -b,--non-bold            Switch to normal weight
+   -v,--override            Absolute positioning on the screen
+   -i,--invert              Attach keyboard to the top of the screen
+   -g,--geometry <HxW.y.x>  Specify keyboard's geometry 
+  (ex: -g 200x800; -g 0x800.200.0; -g 0x0.0.50; zeroes mean "by-default")
+
+matchbox-keyboard 1.5 
+Copyright (C) 2007 OpenedHand Ltd.
+Modifications (C) 2009 Maxim Kouprianov ( http://me@kc.vc )
+Special thanks to Paguro ( http://smartqmid.ru )
+```
+
+**New features:**
+* Gestures x4
+* Language switching
+* Three great layouts:
+  - `keyboard` -- Original layout, EN-RU
+  - `keyboard-full` -- Full keyboard layout, by 123456 and SeNS, EN-RU
+  - `keyboard-finger` -- Minimalistic keybord to tap by fingers, by 123456, EN-RU
+* UI tweaks (made your perfect ui)
+* Improved keyboard positioning in matchbox, openbox, etc
+* Keyboard now can shrink neighbour windows - perferct!
+* Custom geometry - scale as you want
+* Performance tweaks...
+
+Please see the http://kc.vc/projects/matchbox-keyboard.html
 
 ![mbk](http://linux.kc.vc/mb_2.png)
-
 
 ## Matchbox-Keyboard README
 
