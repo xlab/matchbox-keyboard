@@ -24,7 +24,7 @@ Supported options are;
 
 matchbox-keyboard 1.5 
 Copyright (C) 2007 OpenedHand Ltd.
-Modifications (C) 2009 Maxim Kouprianov ( http://me@kc.vc )
+Modifications (C) 2009 Maxim Kouprianov ( http://kouprianov.com )
 Special thanks to Paguro ( http://smartqmid.ru )
 ```
 
@@ -41,9 +41,7 @@ Special thanks to Paguro ( http://smartqmid.ru )
 * Custom geometry - scale as you want
 * Performance tweaks...
 
-Please see the http://kc.vc/projects/matchbox-keyboard.html
-
-![mbk](http://linux.kc.vc/mb_2.png)
+![mbk](https://kouprianov.com/files/linux/mb_2.png)
 
 ## Matchbox-Keyboard README
 
