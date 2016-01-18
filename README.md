@@ -5,7 +5,7 @@ Usage:
    matchbox-keyboard [options] [layout]
 
 Supported options are;
-   -xid,--xid               rint window ID to stdout ( for embedding )
+   -xid,--xid               Print window ID to stdout ( for embedding )
    -d,--daemon              Run in 'daemon' mode (for remote control)
    -t, --gestures           Enable gestures
 
@@ -76,7 +76,7 @@ building from SVN you'll need to run ./autogen.sh before this).
 matchbox-keyboard needs xlibs, xft, libfakekey and expat to build -
 The configure script will detect these. Also optionally there is
 experimental cairo support for rendering the keys and example
-embeddeding code.
+embedded code.
 
 
 ### Running
@@ -86,7 +86,7 @@ Do;
 `matchbox-keyboard [Options..] [optional variant name]`
 
 and start typing. The config file will be selected based on locale
-setting and supplied variant name. The onlu current option is -xid,
+setting and supplied variant name. The only current option is -xid,
 used for embedding ( see below ).
 
 The following Environmental Variables are also used, if set;
@@ -234,11 +234,11 @@ example setups.
  window manager gives it focus ( matchbox-keyboard requests the 
  w-m doesn't ), it wont work. 
 
-* It shouldn't't be too hard to make the keyboard use GTK or another toolkit
+* It shouldn't be too hard to make the keyboard use GTK or another toolkit
  ( possibly even Non X11 ) just by hacking matchbox-keyboard-ui.c . 
  ( If you do either of these, please send patches ). 
 
-* There is an applet and experiemental GTK-IM module included in the source
+* There is an applet and experimental GTK-IM module included in the source
  for launching the keyboard. The IM module allows for the keyboard to
  automatically mapped / unmapped on 'demand'. For this to work;
 
@@ -252,7 +252,7 @@ example setups.
 ### Todo
 
 * Fix layout engine on small on displays.
-* Themeing.
+* Theming.
 
  Needs thought... 
 
