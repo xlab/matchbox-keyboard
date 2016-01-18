@@ -192,7 +192,7 @@ There are two possible attributes for each of these state tags;
 
   Prefixing the string with 'image:' and then a filename to a valid
   PNG image will cause that image to be used on that key face. The
-  filename can be abosolute or relative to
+  filename can be absolute or relative to
   `$PREFIX/share/matchbox-keyboard` or `~/.matchbox`.
 
 * action=action string.
