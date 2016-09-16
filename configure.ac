@@ -72,8 +72,8 @@ fi
 if test x$enable_cairo = xno; then
 PKG_CHECK_MODULES(XFT, xft,,
 	         AC_MSG_ERROR([*** Required Xft Library not found ***]))
-XFT_LIBS+=`$PKG_CONFIG --libs xrender`
-XFT_CFLAGS+=`$PKG_CONFIG --cflags xrender`
+XFT_LIBS+=" `$PKG_CONFIG --libs xrender`"
+XFT_CFLAGS+=" `$PKG_CONFIG --cflags xrender`"
 fi
 
 AM_CONDITIONAL(WANT_CAIRO, test x$enable_cairo = xyes)
