@@ -41,9 +41,9 @@ Special thanks to Paguro ( http://smartqmid.ru )
 * Custom geometry - scale as you want
 * Performance tweaks...
 
-![mbk2](https://dl.xlab.is/old/matchbox/Screenshot-2.png)
+![mbk2](https://dl.kc.vc/old/matchbox/Screenshot-2.png)
 
-![mbk](https://dl.xlab.is/old/matchbox/mb_2.png)
+![mbk](https://dl.kc.vc/old/matchbox/mb_2.png)
 
 ## Matchbox-Keyboard README
 
