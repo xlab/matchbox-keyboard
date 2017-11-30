@@ -88,7 +88,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <mod3 display="±" />
             </key>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+                <default display="image:key-backspace.png" action="backspace" />
             </key>
             <space width="1" />
             <key width="15">
@@ -98,7 +98,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <default display="" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+                <default display="image:key-min.png" action="modifier:min" />
             </key>
         </row>
         <row>
@@ -255,7 +255,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <mod3 display="є" />
             </key>
             <key width="38">
-                <default display="image:/usr/share/matchbox-keyboard/key-enter.png" action="return" />
+                <default display="image:key-enter.png" action="return" />
             </key>
             <space width="1" />
             <key width="15">
@@ -343,7 +343,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <mod3 display="F11" action="f11" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-up.png" action="up" />
+                <default display="image:key-up.png" action="up" />
             </key>
             <key width="15">
                 <default display="" />
@@ -375,13 +375,13 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
             </key>
             <space width="1" />
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-left.png" action="left" />
+                <default display="image:key-left.png" action="left" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-down.png" action="down" />
+                <default display="image:key-down.png" action="down" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-right.png" action="right" />
+                <default display="image:key-right.png" action="right" />
             </key>
         </row>
     </layout>
@@ -463,7 +463,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <mod3 display="±" />
             </key>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+                <default display="image:key-backspace.png" action="backspace" />
             </key>
             <space width="1" />
             <key width="15">
@@ -473,7 +473,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <default display="" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+                <default display="image:key-min.png" action="modifier:min" />
             </key>
         </row>
         <row>
@@ -630,7 +630,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <mod3 display="є" />
             </key>
             <key width="38">
-                <default display="image:/usr/share/matchbox-keyboard/key-enter.png" action="return" />
+                <default display="image:key-enter.png" action="return" />
             </key>
             <space width="1" />
             <key width="15">
@@ -718,7 +718,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <mod3 display="F11" action="f11" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-up.png" action="up" />
+                <default display="image:key-up.png" action="up" />
             </key>
             <key width="15">
                 <default display="" />
@@ -750,13 +750,13 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
             </key>
             <space width="1" />
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-left.png" action="left" />
+                <default display="image:key-left.png" action="left" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-down.png" action="down" />
+                <default display="image:key-down.png" action="down" />
             </key>
             <key width="15">
-                <default display="image:/usr/share/matchbox-keyboard/key-right.png" action="right" />
+                <default display="image:key-right.png" action="right" />
             </key>
         </row>
     </layout>

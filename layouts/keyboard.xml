@@ -62,7 +62,7 @@
                 <shifted display="+" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+                <default display="image:key-backspace.png" action="backspace" />
             </key>
             <key width="40" extended="false">
                 <default display="Del" action="delete" />
@@ -70,7 +70,7 @@
         </row>
         <row>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-tab.png" action="tab" />
+                <default display="image:key-tab.png" action="tab" />
             </key>
             <key width="20" extended="false" obey-caps="true">
                 <default display="q" />
@@ -177,7 +177,7 @@
                 <shifted display="&quot;" />
             </key>
             <key width="59" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-enter.png" action="xkeysym:KP_Enter" />
+                <default display="image:key-enter.png" action="xkeysym:KP_Enter" />
             </key>
             <key width="40" extended="false">
                 <default display="PgUp" action="pageup" />
@@ -252,19 +252,19 @@
                 <shifted display="'" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-up.png" action="up" />
+                <default display="image:key-up.png" action="up" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-down.png" action="down" />
+                <default display="image:key-down.png" action="down" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-left.png" action="left" />
+                <default display="image:key-left.png" action="left" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-right.png" action="right" />
+                <default display="image:key-right.png" action="right" />
             </key>
             <key width="40" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+                <default display="image:key-min.png" action="modifier:min" />
             </key>
         </row>
     </layout>
@@ -326,7 +326,7 @@
                 <shifted display="+" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+                <default display="image:key-backspace.png" action="backspace" />
             </key>
             <key width="40" extended="false">
                 <default display="Del" action="delete" />
@@ -334,7 +334,7 @@
         </row>
         <row>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-tab.png" action="tab" />
+                <default display="image:key-tab.png" action="tab" />
             </key>
             <key width="20" extended="false" obey-caps="true">
                 <default display="й" />
@@ -441,7 +441,7 @@
                 <shifted display="Э" />
             </key>
             <key width="59" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-enter.png" action="return" />
+                <default display="image:key-enter.png" action="return" />
             </key>
             <key width="40" extended="false">
                 <default display="PgUp" action="pageup" />
@@ -516,19 +516,19 @@
                 <shifted display=";" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-up.png" action="up" />
+                <default display="image:key-up.png" action="up" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-down.png" action="down" />
+                <default display="image:key-down.png" action="down" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-left.png" action="left" />
+                <default display="image:key-left.png" action="left" />
             </key>
             <key width="20" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-right.png" action="right" />
+                <default display="image:key-right.png" action="right" />
             </key>
             <key width="40" extended="false">
-                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+                <default display="image:key-min.png" action="modifier:min" />
             </key>
         </row>
     </layout>

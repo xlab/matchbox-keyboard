@@ -187,6 +187,11 @@ config_str_to_modtype(const char* str)
   return 0;
 }
 
+static char*
+get_assets_dir() {
+  char* assets_dir = getenv("MB_KBD_ASSETS_DIR");
+  return assets_dir ? assets_dir : PKGDATADIR;
+}
 
 static char* 
 config_load_file(MBKeyboard *kbd, char *variant_in)
@@ -199,6 +204,7 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
   char          *lang     = NULL;
   int            n = 0, i = 0;
   char           path[1024]; 	/* XXX MAXPATHLEN */
+  char* assets_dir = get_assets_dir();
 
   /* keyboard[-country][-variant].xml */
 
@@ -255,8 +261,9 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
     }
 
   /* Hmmm :/ */
- 
-  snprintf(path, 1024, PKGDATADIR "/keyboard%s%s.xml",
+
+  snprintf(path, 1024, "%s/keyboard%s%s.xml",
+	   assets_dir,
 	   country == NULL ? "" : country,
 	   variant == NULL ? "" : variant);
 
@@ -265,7 +272,8 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
   if (util_file_readable(path))
     goto load;
 
-  snprintf(path, 1024, PKGDATADIR "/keyboard%s.xml",
+  snprintf(path, 1024, "%s/keyboard%s.xml",
+	   assets_dir,
 	   variant == NULL ? "" : variant);
 
   DBG("checking %s\n", path);
@@ -273,7 +281,8 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
   if (util_file_readable(path))
     goto load;
 
-  snprintf(path, 1024, PKGDATADIR "/keyboard%s.xml",
+  snprintf(path, 1024, "%s/keyboard%s.xml",
+	   assets_dir,
 	   country == NULL ? "" : country);
 
   DBG("checking %s\n", path);
@@ -281,7 +290,7 @@ config_load_file(MBKeyboard *kbd, char *variant_in)
   if (util_file_readable(path))
     goto load;
 
-  snprintf(path, 1024, PKGDATADIR "/keyboard.xml");
+  snprintf(path, 1024, "%s/keyboard.xml", assets_dir);
   
   DBG("checking %s\n", path);
 
@@ -335,6 +344,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
   MBKeyboardKeyStateType keystate;
   const char            *val;
   KeySym                 found_keysym;
+  char* assets_dir = get_assets_dir();
 
   /* TODO: Fix below with a lookup table 
    */
@@ -379,7 +389,7 @@ config_handle_key_subtag(MBKeyboardConfigState *state,
 	{
 	  /* Relative, rather than absolute path, try pkddatadir and home */
 	  char buf[512];
-	  snprintf(buf, 512, "%s/%s", PKGDATADIR, &val[6]);
+	  snprintf(buf, 512, "%s/%s", assets_dir, &val[6]);
 
 	  if (!util_file_readable(buf))
 	    snprintf(buf, 512, "%s/.matchbox/%s", getenv("HOME"), &val[6]);
