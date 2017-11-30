@@ -67,7 +67,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <shifted display="~" />
             </key>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+                <default display="image:key-backspace.png" action="backspace" />
             </key>
         </row>
         <row>
@@ -188,7 +188,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <default display=" " action="space" />
             </key>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+                <default display="image:key-min.png" action="modifier:min" />
             </key>
         </row>
     </layout>
@@ -253,7 +253,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <shifted display="Х" />
             </key>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-backspace.png" action="backspace" />
+                <default display="image:key-backspace.png" action="backspace" />
             </key>
         </row>
         <row>
@@ -375,7 +375,7 @@ Please check http://kc.vc/projects/matchbox-keyboard.html
                 <default display=" " action="space" />
             </key>
             <key fill="true">
-                <default display="image:/usr/share/matchbox-keyboard/key-min.png" action="modifier:min" />
+                <default display="image:key-min.png" action="modifier:min" />
             </key>
         </row>
     </layout>
