@@ -177,7 +177,7 @@
                 <shifted display="&quot;" />
             </key>
             <key width="59" extended="false">
-                <default display="image:key-enter.png" action="xkeysym:KP_Enter" />
+                <default display="image:key-enter.png" action="return" />
             </key>
             <key width="40" extended="false">
                 <default display="PgUp" action="pageup" />
